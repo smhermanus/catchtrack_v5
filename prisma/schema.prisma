@@ -1,0 +1,530 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 Int                @id @default(autoincrement())
+  username           String             @unique
+  passwordHash       String
+  role               UserRole
+  userCode           String             @unique
+  email              String             @unique
+  firstName          String
+  lastName           String
+  companyname        String
+  rsaId              String             @unique
+  cellNumber         String
+  physicalAddress    String
+  profilePictureUrl  String?
+  isVerified         Boolean            @default(false)
+  isActive           Boolean            @default(true)
+  status             UserStatus         @default(PENDING)
+  approvedBy         Int?
+  approvedAt         DateTime?
+  rejectedBy         Int?
+  rejectedAt         DateTime?
+  rejectionReason    String?
+  documents          UserDocument[]     @relation("UserDocuments")
+  lastLogin          DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  twoFactorEnabled   Boolean            @default(false)
+  twoFactorSecret    String?
+  auditLogs          AuditLog[]
+  keys               Key[]
+  monitor            Monitor?
+  createdQuotas      Quota[]            @relation("QuotaCreator")
+  updatedQuotas      Quota[]            @relation("QuotaUpdater")
+  rightsholder       Rightsholder?
+  sessions           Session[]
+  skipper            Skipper?
+  preferences        UserPreferences?
+  approver           User?              @relation("UserApprovals", fields: [approvedBy], references: [id])
+  approvedUsers      User[]             @relation("UserApprovals")
+  rejecter           User?              @relation("UserRejections", fields: [rejectedBy], references: [id])
+  rejectedUsers      User[]             @relation("UserRejections")
+  verifiedDocuments  UserDocument[]     @relation("DocumentVerifier")
+  resolvedAlerts     QuotaAlert[]
+  approvedTransfers  QuotaTransfer[]
+  reportedCompliance ComplianceRecord[] @relation("ComplianceReporter")
+  resolvedCompliance ComplianceRecord[] @relation("ComplianceResolver")
+
+  @@map("users")
+}
+
+model UserDocument {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  type       String
+  fileUrl    String
+  status     DocStatus @default(PENDING)
+  verifiedAt DateTime?
+  verifiedBy Int?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  user       User      @relation("UserDocuments", fields: [userId], references: [id])
+  verifier   User?     @relation("DocumentVerifier", fields: [verifiedBy], references: [id])
+
+  @@map("user_documents")
+}
+
+model Species {
+  id             Int            @id @default(autoincrement())
+  commonName     String
+  scientificName String
+  speciesCode    String         @unique
+  minimumSize    Decimal?
+  maximumSize    Decimal?
+  createdAt      DateTime       @default(now())
+  quotas         QuotaSpecies[]
+
+  @@map("species")
+}
+
+model CatchArea {
+  id          Int      @id @default(autoincrement())
+  areaCode    String   @unique
+  areaName    String
+  coordinates Json?
+  description String?
+  createdAt   DateTime @default(now())
+
+  @@map("catch_areas")
+}
+
+model LandingSite {
+  id                  Int                @id @default(autoincrement())
+  siteName            String
+  locationCoordinates Json
+  address             String
+  contactPerson       String?
+  contactNumber       String?
+  isActive            Boolean            @default(true)
+  zone                String
+  area                String
+  subarea             String?
+  createdAt           DateTime           @default(now())
+  catchRecords        CatchRecord[]
+  quotas              QuotaLandingSite[]
+
+  @@map("landing_sites")
+}
+
+model Quota {
+  id                   Int                 @id @default(autoincrement())
+  quotaCode            String              @unique
+  quotaAllocation      Decimal
+  overcatch20232024    Decimal             @default(0)
+  finalQuotaAllocation Decimal
+  quotaUsed            Decimal             @default(0)
+  quotaBalance         Decimal?
+  startDate            DateTime
+  endDate              DateTime
+  status               QuotaStatus
+  season               String
+  marineResources      String[]
+  productType          String
+  sectorName           String
+  catchArea3_4         Boolean             @default(false)
+  catchArea7           Boolean             @default(false)
+  catchArea8           Boolean             @default(false)
+  catchArea11          Boolean             @default(false)
+  zone                 String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  createdBy            Int
+  lastUpdatedBy        Int?
+  warningThreshold     Decimal             @default(20)
+  criticalThreshold    Decimal             @default(10)
+  seasonalRestrictions Json? // Array of seasonal restrictions
+  notes                String?
+  catchRecords         CatchRecord[]
+  quotaAllocations     QuotaAllocation[]
+  landingSites         QuotaLandingSite[]
+  species              QuotaSpecies[]
+  createdByUser        User                @relation("QuotaCreator", fields: [createdBy], references: [id])
+  lastUpdatedByUser    User?               @relation("QuotaUpdater", fields: [lastUpdatedBy], references: [id])
+  rightsholders        RightsholderQuota[]
+  tripNotifications    TripNotification[]
+  alerts               QuotaAlert[]
+  transfers            QuotaTransfer[]     @relation("SourceQuota")
+  transfersReceived    QuotaTransfer[]     @relation("DestinationQuota")
+  complianceRecords    ComplianceRecord[]
+
+  @@map("quotas")
+}
+
+model QuotaLandingSite {
+  quotaId     Int
+  siteId      Int
+  quota       Quota       @relation(fields: [quotaId], references: [id])
+  landingSite LandingSite @relation(fields: [siteId], references: [id])
+
+  @@id([quotaId, siteId])
+  @@map("quota_landing_sites")
+}
+
+model QuotaSpecies {
+  quotaId      Int
+  speciesId    Int
+  catchLimit   Decimal?
+  minimumSize  Decimal?
+  maximumSize  Decimal?
+  seasonStart  DateTime?
+  seasonEnd    DateTime?
+  restrictions Json?
+  quota        Quota     @relation(fields: [quotaId], references: [id])
+  species      Species   @relation(fields: [speciesId], references: [id])
+
+  @@id([quotaId, speciesId])
+  @@map("quota_species")
+}
+
+model QuotaAlert {
+  id         Int       @id @default(autoincrement())
+  quotaId    Int
+  alertType  AlertType
+  message    String
+  isRead     Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+  resolvedBy Int?
+  quota      Quota     @relation(fields: [quotaId], references: [id])
+  resolver   User?     @relation(fields: [resolvedBy], references: [id])
+
+  @@map("quota_alerts")
+}
+
+model QuotaTransfer {
+  id                 Int            @id @default(autoincrement())
+  sourceQuotaId      Int
+  destinationQuotaId Int
+  amount             Decimal
+  reason             String
+  status             TransferStatus @default(PENDING)
+  requestedAt        DateTime       @default(now())
+  approvedAt         DateTime?
+  approvedBy         Int?
+  sourceQuota        Quota          @relation("SourceQuota", fields: [sourceQuotaId], references: [id])
+  destinationQuota   Quota          @relation("DestinationQuota", fields: [destinationQuotaId], references: [id])
+  approver           User?          @relation(fields: [approvedBy], references: [id])
+
+  @@map("quota_transfers")
+}
+
+model ComplianceRecord {
+  id            Int              @id @default(autoincrement())
+  quotaId       Int
+  violationType String
+  description   String
+  reportedAt    DateTime         @default(now())
+  reportedBy    Int
+  status        ComplianceStatus @default(PENDING)
+  resolvedAt    DateTime?
+  resolvedBy    Int?
+  resolution    String?
+  quota         Quota            @relation(fields: [quotaId], references: [id])
+  reporter      User             @relation("ComplianceReporter", fields: [reportedBy], references: [id])
+  resolver      User?            @relation("ComplianceResolver", fields: [resolvedBy], references: [id])
+
+  @@map("compliance_records")
+}
+
+model Rightsholder {
+  id                 Int                 @id @default(autoincrement())
+  userId             Int                 @unique
+  companyName        String
+  registrationNumber String              @unique
+  permitNumber       String              @unique
+  contactAddress     String
+  rightsholderCode   String              @unique
+  createdAt          DateTime            @default(now())
+  catchRecords       CatchRecord[]
+  factories          Factory[]
+  quotas             RightsholderQuota[]
+  user               User                @relation(fields: [userId], references: [id])
+  skippers           Skipper[]
+  vessels            Vessel[]
+
+  @@map("rightsholders")
+}
+
+model RightsholderQuota {
+  rightsholderId Int
+  quotaId        Int
+  quota          Quota        @relation(fields: [quotaId], references: [id])
+  rightsholder   Rightsholder @relation(fields: [rightsholderId], references: [id])
+
+  @@id([rightsholderId, quotaId])
+  @@map("rightsholder_quotas")
+}
+
+model Factory {
+  id             Int          @id @default(autoincrement())
+  rightsholderId Int
+  factoryOwner   String
+  factoryName    String
+  factoryAddress String
+  createdAt      DateTime     @default(now())
+  rightsholder   Rightsholder @relation(fields: [rightsholderId], references: [id])
+
+  @@map("factories")
+}
+
+model Vessel {
+  id                 Int                @id @default(autoincrement())
+  rightsholderId     Int
+  registrationNumber String             @unique
+  createdAt          DateTime           @default(now())
+  createdBy          Int?
+  name               String
+  status             String
+  type               String
+  lastStatusUpdate   DateTime?
+  catchRecords       CatchRecord[]
+  quotaAllocations   QuotaAllocation[]
+  skippers           Skipper[]
+  tripNotifications  TripNotification[]
+  rightsholder       Rightsholder       @relation(fields: [rightsholderId], references: [id])
+
+  @@map("vessels")
+}
+
+model Skipper {
+  id                Int                @id @default(autoincrement())
+  userId            Int                @unique
+  rightsholderId    Int
+  vesselId          Int
+  skipperCode       String             @unique
+  createdAt         DateTime           @default(now())
+  rightsholder      Rightsholder       @relation(fields: [rightsholderId], references: [id])
+  user              User               @relation(fields: [userId], references: [id])
+  vessel            Vessel             @relation(fields: [vesselId], references: [id])
+  tripNotifications TripNotification[]
+
+  @@map("skippers")
+}
+
+model Monitor {
+  id            Int           @id @default(autoincrement())
+  userId        Int           @unique
+  monitorCode   String        @unique
+  statisticBook String?
+  receiptNumber String?
+  receiptAmount Decimal?
+  createdAt     DateTime      @default(now())
+  catchRecords  CatchRecord[]
+  user          User          @relation(fields: [userId], references: [id])
+
+  @@map("monitors")
+}
+
+model TripNotification {
+  id               Int                @id @default(autoincrement())
+  skipperId        Int
+  quotaId          Int
+  vesselId         Int
+  plannedDeparture DateTime
+  expectedReturn   DateTime
+  status           NotificationStatus
+  cellphoneNr      String
+  sessionId        String?
+  email            String
+  createdAt        DateTime           @default(now())
+  quota            Quota              @relation(fields: [quotaId], references: [id])
+  skipper          Skipper            @relation(fields: [skipperId], references: [id])
+  vessel           Vessel             @relation(fields: [vesselId], references: [id])
+
+  @@map("trip_notifications")
+}
+
+model CatchRecord {
+  id                     Int          @id @default(autoincrement())
+  quotaId                Int
+  monitorId              Int
+  rightsholderId         Int
+  vesselId               Int
+  siteId                 Int
+  grossRegisteredTonnage Decimal?
+  locationCoordinates    Json?
+  trapsSet               Int?
+  trapsPulled            Int?
+  binsAnimals            Int?
+  totalCatchMass         Decimal
+  numberOfCatches        Int
+  departureDate          DateTime
+  landingDate            DateTime
+  notes                  String?
+  uploadImageUrl         String?
+  createdAt              DateTime     @default(now())
+  monitor                Monitor      @relation(fields: [monitorId], references: [id])
+  quota                  Quota        @relation(fields: [quotaId], references: [id])
+  rightsholder           Rightsholder @relation(fields: [rightsholderId], references: [id])
+  landingSite            LandingSite  @relation(fields: [siteId], references: [id])
+  vessel                 Vessel       @relation(fields: [vesselId], references: [id])
+
+  @@map("catch_records")
+}
+
+model QuotaAllocation {
+  id       Int     @id @default(autoincrement())
+  vesselId Int
+  quotaId  Int
+  amount   Decimal
+  quota    Quota   @relation(fields: [quotaId], references: [id])
+  vessel   Vessel  @relation(fields: [vesselId], references: [id])
+
+  @@map("quota_allocations")
+}
+
+model AuditLog {
+  id         Int         @id @default(autoincrement())
+  userId     Int
+  action     AuditAction
+  actionType String
+  tableName  String
+  recordId   Int
+  changes    Json
+  createdAt  DateTime    @default(now())
+  user       User        @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model UserPreferences {
+  id                      Int      @id @default(autoincrement())
+  userId                  Int      @unique
+  quotaWarningThreshold   Int      @default(20)
+  quotaCriticalThreshold  Int      @default(10)
+  daysBeforeExpiryWarning Int      @default(30)
+  emailNotifications      Boolean  @default(true)
+  dailyDigest             Boolean  @default(false)
+  weeklyReport            Boolean  @default(false)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  user                    User     @relation(fields: [userId], references: [id])
+
+  @@map("user_preferences")
+}
+
+model Session {
+  id        String   @id
+  userId    Int
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Key {
+  id             String  @id
+  hashedPassword String?
+  userId         Int
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("keys")
+}
+
+enum UserRole {
+  USER
+  SYSTEMADMINISTRATOR
+  SECURITYADMINISTRATOR
+  PERMITADMINISTRATOR
+  PERMITHOLDER
+  RIGHTSHOLDER
+  SKIPPER
+  INSPECTOR
+  MONITOR
+  DRIVER
+  FACTORYSTOCKCONTROLLER
+  LOCALOUTLETCONTROLLER
+  EXPORTCONTROLLER
+  ADMIN
+}
+
+enum NotificationStatus {
+  PENDING
+  APPROVED
+  DENIED
+}
+
+enum QuotaStatus {
+  VALID
+  INVALID
+  EXPIRED
+  PENDING
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REJECTED
+}
+
+enum DocStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum AuditAction {
+  USER_CREATED
+  USER_UPDATED
+  USER_DELETED
+  USER_APPROVED
+  USER_REJECTED
+  USER_SUSPENDED
+  USER_ACTIVATED
+  DOCUMENT_VERIFIED
+  DOCUMENT_REJECTED
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGOUT
+  PASSWORD_CHANGED
+  ROLE_CHANGED
+  SETTINGS_CHANGED
+  QUOTA_CREATED
+  QUOTA_UPDATED
+  QUOTA_DELETED
+  TRANSFER_REQUESTED
+  TRANSFER_APPROVED
+  TRANSFER_REJECTED
+  TRANSFER_CANCELLED
+  COMPLIANCE_REPORTED
+  COMPLIANCE_UPDATED
+  COMPLIANCE_RESOLVED
+  COMPLIANCE_DISMISSED
+}
+
+enum AlertType {
+  QUOTA_NEAR_DEPLETION
+  QUOTA_DEPLETED
+  SEASONAL_CLOSURE_APPROACHING
+  SEASONAL_CLOSURE_ACTIVE
+  COMPLIANCE_VIOLATION
+  TRANSFER_REQUEST
+  TRANSFER_APPROVED
+  TRANSFER_REJECTED
+}
+
+enum TransferStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ComplianceStatus {
+  PENDING
+  INVESTIGATING
+  RESOLVED
+  DISMISSED
+}
