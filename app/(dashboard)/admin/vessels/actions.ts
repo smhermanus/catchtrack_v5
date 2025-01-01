@@ -18,7 +18,7 @@ export async function getVessels() {
   try {
     const { user } = await validateRequest();
 
-  if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
+    if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 

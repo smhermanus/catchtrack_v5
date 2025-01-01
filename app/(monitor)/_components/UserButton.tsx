@@ -70,7 +70,10 @@ export default function UserButton({ className }: UserButtonProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Logged in as {user.displayName || user.email || 'User'}</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          Logged in as
+          {user.displayName || user.email || 'User'}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <Link href={'/customer'}>
           <DropdownMenuItem>

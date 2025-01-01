@@ -143,7 +143,7 @@ export async function getActiveVesselsCount() {
   try {
     const { user } = await validateRequest();
 
-    if (!user || (user.role !== 'SYSTEMADMINISTRATOR')) {
+    if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
@@ -164,7 +164,7 @@ export async function getPendingNotifications() {
   try {
     const { user } = await validateRequest();
 
-    if (!user || (user.role !== 'SYSTEMADMINISTRATOR')) {
+    if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
@@ -185,7 +185,7 @@ export async function getCatchVsQuota() {
   try {
     const { user } = await validateRequest();
 
-    if (!user || (user.role !== 'SYSTEMADMINISTRATOR')) {
+    if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
@@ -214,7 +214,7 @@ export async function getVesselTrends() {
   try {
     const { user } = await validateRequest();
 
-    if (!user || (user.role !== 'SYSTEMADMINISTRATOR')) {
+    if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
@@ -281,7 +281,7 @@ export async function getActiveAlerts() {
   try {
     const { user } = await validateRequest();
 
-    if (!user || (user.role !== 'SYSTEMADMINISTRATOR')) {
+    if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
