@@ -7,30 +7,27 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useSession } from '@/app/(skipper)/SessionProvider';
 import { redirect } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function WelcomePage() {
-  let session;
-  try {
-    session = useSession();
-  } catch {
-    session = null;
-  }
+  const { user } = useSession();
 
-  if (session) {
-    // Redirect to dashboard based on user role
-    switch (session.user.role) {
-      case 'SYSTEMADMINISTRATOR':
-        redirect('/admin');
-      case 'MONITOR':
-        redirect('/monitor');
-      case 'SKIPPER':
-        redirect('/skipper');
-      case 'RIGHTSHOLDER':
-        redirect('/rightsholder');
-      default:
-        redirect('/dashboard');
+  useEffect(() => {
+    if (user !== null && user !== undefined) {
+      switch (user.role) {
+        case 'SYSTEMADMINISTRATOR':
+          redirect('/admin');
+        case 'MONITOR':
+          redirect('/monitor');
+        case 'SKIPPER':
+          redirect('/skipper');
+        case 'RIGHTSHOLDER':
+          redirect('/rightsholder');
+        default:
+          redirect('/dashboard');
+      }
     }
-  }
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-background flex">

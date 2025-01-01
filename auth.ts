@@ -53,11 +53,16 @@ export const lucia = new Lucia(adapter, {
   },
   getUserAttributes: (attributes) => {
     return {
-      ...attributes,
-      id: Number(attributes.id), // Convert string ID to number
-      displayName: attributes.firstName && attributes.lastName 
-        ? `${attributes.firstName} ${attributes.lastName}` 
-        : attributes.firstName || attributes.lastName || attributes.username,
+      id: attributes.id,
+      username: attributes.username,
+      email: attributes.email,
+      firstName: attributes.firstName,
+      lastName: attributes.lastName,
+      role: attributes.role,
+      displayName:
+        attributes.firstName && attributes.lastName
+          ? `${attributes.firstName} ${attributes.lastName}`
+          : attributes.firstName || attributes.lastName || attributes.username,
       avatarUrl: attributes.profilePictureUrl || null,
     };
   },
@@ -106,7 +111,10 @@ declare module 'lucia' {
     avatarUrl?: string | null;
   }
 
-  interface DatabaseSessionAttributes {}
+  interface DatabaseSessionAttributes {
+    // Add any session-specific attributes if needed
+    id?: string;
+  }
 }
 
 export const google = new Google(

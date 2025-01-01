@@ -4,25 +4,27 @@ import { Session, User } from 'lucia';
 import React, { createContext, useContext } from 'react';
 
 interface SessionContext {
-  user: User & {
-    role:
-      | 'USER'
-      | 'SYSTEMADMINISTRATOR'
-      | 'SECURITYADMINISTRATOR'
-      | 'PERMITADMINISTRATOR'
-      | 'PERMITHOLDER'
-      | 'RIGHTSHOLDER'
-      | 'SKIPPER'
-      | 'INSPECTOR'
-      | 'MONITOR'
-      | 'DRIVER'
-      | 'FACTORYSTOCKCONTROLLER'
-      | 'LOCALOUTLETCONTROLLER'
-      | 'EXPORTCONTROLLER';
-    displayName?: string | null;
-    avatarUrl?: string | null;
-  };
-  session: Session;
+  user:
+    | (User & {
+        role:
+          | 'USER'
+          | 'SYSTEMADMINISTRATOR'
+          | 'SECURITYADMINISTRATOR'
+          | 'PERMITADMINISTRATOR'
+          | 'PERMITHOLDER'
+          | 'RIGHTSHOLDER'
+          | 'SKIPPER'
+          | 'INSPECTOR'
+          | 'MONITOR'
+          | 'DRIVER'
+          | 'FACTORYSTOCKCONTROLLER'
+          | 'LOCALOUTLETCONTROLLER'
+          | 'EXPORTCONTROLLER';
+        displayName?: string | null;
+        avatarUrl?: string | null;
+      })
+    | null;
+  session: Session | null;
 }
 
 const SessionContext = createContext<SessionContext | null>(null);
