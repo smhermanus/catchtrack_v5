@@ -60,17 +60,20 @@ export default function UserButton({ className }: UserButtonProps) {
             'data-[state=open]:bg-transparent',
             className
           )}
-          aria-label={`User menu for ${user.displayName}`}
+          aria-label={`User menu for ${user ? user.displayName || user.email || 'User' : 'Guest'}`}
         >
           <UserAvatar
-            avatarUrl={user.avatarUrl}
+            avatarUrl={user?.avatarUrl}
             size={40}
             className="hover:opacity-80 transition-opacity"
           />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Logged in as {user.displayName}</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          Logged in as{''}
+          {user ? user.displayName || user.email || 'User' : 'Guest'}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <Link href={'/customer'}>
           <DropdownMenuItem>
