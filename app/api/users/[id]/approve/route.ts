@@ -4,10 +4,7 @@ import { db } from '@/lib/db';
 import { UserStatus, AuditAction } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
     const { user } = await validateRequest();
 

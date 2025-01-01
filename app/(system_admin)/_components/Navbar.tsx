@@ -1,15 +1,15 @@
-"use client";
-import Link from "next/link";
-import Image from "next/image";
-import { GoHomeFill } from "react-icons/go";
-import { TbCategoryFilled } from "react-icons/tb";
-import { FaHeart } from "react-icons/fa";
-import { MdAccountCircle } from "react-icons/md";
-import { RxDividerVertical } from "react-icons/rx";
-import { useSession } from "../SessionProvider";
-import UserButton from "./UserButton";
-import SearchField from "./SearchField";
-import logo from "../assets/logo.png";
+'use client';
+import Link from 'next/link';
+import Image from 'next/image';
+import { GoHomeFill } from 'react-icons/go';
+import { TbCategoryFilled } from 'react-icons/tb';
+import { FaHeart } from 'react-icons/fa';
+import { MdAccountCircle } from 'react-icons/md';
+import { RxDividerVertical } from 'react-icons/rx';
+import { useSession } from '../SessionProvider';
+import UserButton from './UserButton';
+import SearchField from './SearchField';
+import logo from '../assets/logo.png';
 
 const Navbar = () => {
   const session = useSession();
@@ -63,10 +63,7 @@ const Navbar = () => {
               {session?.user ? (
                 <UserButton />
               ) : (
-                <Link
-                  href="/login"
-                  className="font-bold text-lg hover:text-gray-300"
-                >
+                <Link href="/login" className="font-bold text-lg hover:text-gray-300">
                   Login
                 </Link>
               )}
@@ -88,10 +85,7 @@ const Navbar = () => {
       {/* Mobile bottom Nav */}
       <div className="md:hidden fixed inset-x-0 bottom-0 bg-white shadow-xl shadow-gray-400 border-t-2 border-t-gray-400 border-2 mx-5 mb-2 z-50 rounded-xl">
         <div className="flex justify-around text-gray-500">
-          <Link
-            href="/"
-            className="flex flex-col items-center py-2 hover:text-red-500"
-          >
+          <Link href="/" className="flex flex-col items-center py-2 hover:text-red-500">
             <GoHomeFill size={20} />
             <div className="text-xs mt-1">Home</div>
           </Link>
@@ -110,7 +104,7 @@ const Navbar = () => {
             <div className="text-xs mt-1">Favourites</div>
           </Link>
           <Link
-            href={session?.user ? `/users/${session.user.username}` : "/Login"}
+            href={session?.user ? `/users/${session.user.username}` : '/Login'}
             className="flex flex-col items-center py-2 hover:text-red-500"
           >
             <MdAccountCircle size={20} />

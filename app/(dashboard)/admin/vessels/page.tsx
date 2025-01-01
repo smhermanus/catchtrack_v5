@@ -1,20 +1,20 @@
-import { Metadata } from "next";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import { DataTable } from "@/components/shared/data-table";
-import { columns } from "./columns";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import Link from "next/link";
-import { getVessels } from "./actions";
-import { Suspense } from "react";
-import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Metadata } from 'next';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { DataTable } from '@/components/shared/data-table';
+import { columns } from './columns';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import Link from 'next/link';
+import { getVessels } from './actions';
+import { Suspense } from 'react';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const metadata: Metadata = {
-  title: "Vessel Management | CatchTrack",
-  description: "Manage fishing vessels and their operations",
+  title: 'Vessel Management | CatchTrack',
+  description: 'Manage fishing vessels and their operations',
 };
 
 function TableSkeleton() {
@@ -50,8 +50,8 @@ async function VesselTable() {
 export default async function VesselsPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "ADMIN") {
-    redirect("/");
+  if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
+    redirect('/');
   }
 
   return (
@@ -59,9 +59,7 @@ export default async function VesselsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Vessels</h2>
-          <p className="text-muted-foreground">
-            Manage and monitor fishing vessels
-          </p>
+          <p className="text-muted-foreground">Manage and monitor fishing vessels</p>
         </div>
         <Button asChild>
           <Link href="/admin/vessels/new">

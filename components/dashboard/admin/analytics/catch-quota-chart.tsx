@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useTheme } from "next-themes";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTheme } from 'next-themes';
 import {
   Bar,
   BarChart,
@@ -9,7 +9,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
+} from 'recharts';
 
 interface CatchData {
   species: string;
@@ -26,10 +26,10 @@ export function CatchQuotaChart({ data }: CatchQuotaChartProps) {
   const { theme } = useTheme();
 
   const chartColors = {
-    catch: theme === "dark" ? "#60a5fa" : "#2563eb",
-    quota: theme === "dark" ? "#6b7280" : "#9ca3af",
-    grid: theme === "dark" ? "#374151" : "#e5e7eb",
-    text: theme === "dark" ? "#9ca3af" : "#6b7280",
+    catch: theme === 'dark' ? '#60a5fa' : '#2563eb',
+    quota: theme === 'dark' ? '#6b7280' : '#9ca3af',
+    grid: theme === 'dark' ? '#374151' : '#e5e7eb',
+    text: theme === 'dark' ? '#9ca3af' : '#6b7280',
   };
 
   return (
@@ -54,15 +54,15 @@ export function CatchQuotaChart({ data }: CatchQuotaChartProps) {
                 stroke={chartColors.text}
                 tick={{ fill: chartColors.text }}
                 label={{
-                  value: "Volume (tons)",
+                  value: 'Volume (tons)',
                   angle: -90,
-                  position: "insideLeft",
+                  position: 'insideLeft',
                   fill: chartColors.text,
                 }}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: theme === "dark" ? "#1f2937" : "#ffffff",
+                  backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
                   borderColor: chartColors.grid,
                 }}
               />

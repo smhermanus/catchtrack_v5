@@ -1,5 +1,5 @@
-import { AlertTriangle, Fish, Scale, Ship } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertTriangle, Fish, Scale, Ship } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface KPICardsProps {
   activeVessels: number;
@@ -23,9 +23,7 @@ export function KPICards({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{activeVessels}</div>
-          <p className="text-xs text-muted-foreground">
-            Currently at sea
-          </p>
+          <p className="text-xs text-muted-foreground">Currently at sea</p>
         </CardContent>
       </Card>
       <Card>
@@ -35,9 +33,7 @@ export function KPICards({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{pendingNotifications}</div>
-          <p className="text-xs text-muted-foreground">
-            Pending alerts
-          </p>
+          <p className="text-xs text-muted-foreground">Pending alerts</p>
         </CardContent>
       </Card>
       <Card>
@@ -47,9 +43,7 @@ export function KPICards({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{totalCatches}</div>
-          <p className="text-xs text-muted-foreground">
-            Recorded today
-          </p>
+          <p className="text-xs text-muted-foreground">Recorded today</p>
         </CardContent>
       </Card>
       <Card>
@@ -59,9 +53,7 @@ export function KPICards({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{activeQuotas}</div>
-          <p className="text-xs text-muted-foreground">
-            Currently allocated
-          </p>
+          <p className="text-xs text-muted-foreground">Currently allocated</p>
         </CardContent>
       </Card>
     </div>

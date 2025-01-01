@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import {
   Form,
   FormControl,
@@ -13,19 +13,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   registerWithQuotaSchema,
   userRoles,
   type RegisterWithQuotaFormValues,
   UserRole,
-} from "./validation";
-import { signUpWithQuota, validateQuota } from "./actions";
-import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+} from './validation';
+import { signUpWithQuota, validateQuota } from './actions';
+import { toast } from 'sonner';
+import { ArrowLeft } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const RegisterForm = () => {
   const router = useRouter();
@@ -44,20 +44,20 @@ const RegisterForm = () => {
   const form = useForm<RegisterWithQuotaFormValues>({
     resolver: zodResolver(registerWithQuotaSchema),
     defaultValues: {
-      quotaCode: "",
-      rightsholderCode: "",
-      username: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      firstName: "",
-      lastName: "",
-      companyName: "",
+      quotaCode: '',
+      rightsholderCode: '',
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      firstName: '',
+      lastName: '',
+      companyName: '',
       role: UserRole.USER,
-      status: "",
-      rsaId: "",
-      cellNumber: "",
-      physicalAddress: "",
+      status: '',
+      rsaId: '',
+      cellNumber: '',
+      physicalAddress: '',
     },
   });
 
@@ -71,19 +71,16 @@ const RegisterForm = () => {
         return;
       }
 
-      toast.success("Registration successful!");
-      router.push("/register-pending-message");
+      toast.success('Registration successful!');
+      router.push('/register-pending-message');
     } catch (error) {
-      toast.error("Something went wrong. Please try again.");
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setIsPending(false);
     }
   };
 
-  const validateQuotaDetails = async (
-    quotaCode: string,
-    rightsholderCode: string
-  ) => {
+  const validateQuotaDetails = async (quotaCode: string, rightsholderCode: string) => {
     if (!quotaCode || !rightsholderCode) return;
 
     try {
@@ -96,14 +93,14 @@ const RegisterForm = () => {
 
       if (result.success && result.data) {
         setQuotaDetails(result.data);
-        form.setValue("role", result.data.role || UserRole.USER);
-        form.setValue("status", result.data.status);
+        form.setValue('role', result.data.role || UserRole.USER);
+        form.setValue('status', result.data.status);
         if (result.data.companyName) {
-          form.setValue("companyName", result.data.companyName);
+          form.setValue('companyName', result.data.companyName);
         }
       }
     } catch (error) {
-      toast.error("Failed to validate quota details");
+      toast.error('Failed to validate quota details');
     }
   };
 
@@ -173,9 +170,7 @@ const RegisterForm = () => {
               </div>
 
               <div className="space-y-2 text-center mb-8">
-                <h1 className="text-2xl font-semibold tracking-tight">
-                  Create an account
-                </h1>
+                <h1 className="text-2xl font-semibold tracking-tight">Create an account</h1>
                 <p className="text-sm text-muted-foreground">
                   Enter your quota details to register for CatchTrack
                 </p>
@@ -199,7 +194,7 @@ const RegisterForm = () => {
                                 field.onChange(e);
                                 validateQuotaDetails(
                                   e.target.value,
-                                  form.getValues("rightsholderCode")
+                                  form.getValues('rightsholderCode')
                                 );
                               }}
                             />
@@ -222,10 +217,7 @@ const RegisterForm = () => {
                               disabled={isPending}
                               onChange={(e) => {
                                 field.onChange(e);
-                                validateQuotaDetails(
-                                  form.getValues("quotaCode"),
-                                  e.target.value
-                                );
+                                validateQuotaDetails(form.getValues('quotaCode'), e.target.value);
                               }}
                             />
                           </FormControl>
@@ -246,10 +238,7 @@ const RegisterForm = () => {
                               <FormItem>
                                 <FormLabel>Company Name</FormLabel>
                                 <FormControl>
-                                  <Input
-                                    {...field}
-                                    disabled={true}
-                                  />
+                                  <Input {...field} disabled={true} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -381,11 +370,7 @@ const RegisterForm = () => {
                             <FormItem>
                               <FormLabel>RSA ID</FormLabel>
                               <FormControl>
-                                <Input
-                                  {...field}
-                                  placeholder="Enter RSA ID"
-                                  disabled={isPending}
-                                />
+                                <Input {...field} placeholder="Enter RSA ID" disabled={isPending} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -437,19 +422,14 @@ const RegisterForm = () => {
                     className="w-full bg-[#1C72BD] text-primary-foreground hover:bg-[#1C72BD]/90"
                     disabled={isPending || !quotaDetails}
                   >
-                    {isPending ? "Creating account..." : "Create account"}
+                    {isPending ? 'Creating account...' : 'Create account'}
                   </Button>
                 </form>
               </Form>
 
               <div className="text-center text-sm">
-                <span className="text-muted-foreground">
-                  Already have an account?{" "}
-                </span>
-                <Link
-                  href="/login"
-                  className="text-primary hover:underline font-medium"
-                >
+                <span className="text-muted-foreground">Already have an account? </span>
+                <Link href="/login" className="text-primary hover:underline font-medium">
                   Sign in
                 </Link>
               </div>

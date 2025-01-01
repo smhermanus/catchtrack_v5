@@ -1,4 +1,11 @@
-import { Quota, QuotaAlert, QuotaTransfer, ComplianceRecord, CatchRecord, TransferStatus } from "@prisma/client";
+import {
+  Quota,
+  QuotaAlert,
+  QuotaTransfer,
+  ComplianceRecord,
+  CatchRecord,
+  TransferStatus,
+} from '@prisma/client';
 
 export interface QuotaWithRelations extends Quota {
   species: {

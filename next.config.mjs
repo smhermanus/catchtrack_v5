@@ -5,21 +5,21 @@ const nextConfig = {
       enabled: true,
     },
     // If you need to use external packages in edge runtime
-    serverComponentsExternalPackages: ["@node-rs/argon2"],
+    serverComponentsExternalPackages: ['@node-rs/argon2'],
   },
   images: {
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "unsplash.com",
+        protocol: 'https',
+        hostname: 'unsplash.com',
       },
       {
-        protocol: "https",
-        hostname: "*.public.blob.vercel-storage.com",
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
       },
     ],
   },
-  pageExtensions: ["tsx", "ts", "jsx", "js"],
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
 };
 
 export default nextConfig;

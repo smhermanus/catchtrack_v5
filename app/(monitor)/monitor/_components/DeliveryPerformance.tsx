@@ -1,14 +1,12 @@
 // components/DeliveryPerformance.tsx
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Package } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Package } from 'lucide-react';
 
 const DeliveryPerformance = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-medium">
-          Delivery Performance
-        </CardTitle>
+        <CardTitle className="text-lg font-medium">Delivery Performance</CardTitle>
         <p className="text-sm text-gray-500">12% increase in this month</p>
       </CardHeader>
       <CardContent>

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Dialog,
@@ -6,8 +6,8 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { QuotaForm } from "./quota-form";
+} from '@/components/ui/dialog';
+import { QuotaForm } from './quota-form';
 
 interface QuotaModalProps {
   isOpen: boolean;
@@ -20,19 +20,12 @@ export function QuotaModal({ isOpen, onClose, initialData }: QuotaModalProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[900px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {initialData ? "Edit Quota" : "Create New Quota"}
-          </DialogTitle>
+          <DialogTitle>{initialData ? 'Edit Quota' : 'Create New Quota'}</DialogTitle>
           <DialogDescription>
-            {initialData
-              ? "Make changes to the existing quota"
-              : "Create a new quota allocation"}
+            {initialData ? 'Make changes to the existing quota' : 'Create a new quota allocation'}
           </DialogDescription>
         </DialogHeader>
-        <QuotaForm
-          initialData={initialData}
-          onSuccess={onClose}
-        />
+        <QuotaForm initialData={initialData} onSuccess={onClose} />
       </DialogContent>
     </Dialog>
   );

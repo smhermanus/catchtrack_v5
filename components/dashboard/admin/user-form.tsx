@@ -38,10 +38,7 @@ const userFormSchema = z.object({
     .string()
     .min(2, { message: 'Last name must be at least 2 characters.' })
     .max(30, { message: 'Last name must not be longer than 30 characters.' }),
-  email: z
-    .string()
-    .min(1, { message: 'Email is required.' })
-    .email('This is not a valid email.'),
+  email: z.string().min(1, { message: 'Email is required.' }).email('This is not a valid email.'),
   password: z
     .string()
     .min(8, { message: 'Password must be at least 8 characters.' })
@@ -123,9 +120,7 @@ export function UserForm({ onSubmit, initialData }: UserFormProps) {
               <FormControl>
                 <Input placeholder="Username" {...field} />
               </FormControl>
-              <FormDescription>
-                This is the user&apos;s username.
-              </FormDescription>
+              <FormDescription>This is the user&apos;s username.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -139,9 +134,7 @@ export function UserForm({ onSubmit, initialData }: UserFormProps) {
               <FormControl>
                 <Input placeholder="First Name" {...field} />
               </FormControl>
-              <FormDescription>
-                This is the user&apos;s first name.
-              </FormDescription>
+              <FormDescription>This is the user&apos;s first name.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -155,9 +148,7 @@ export function UserForm({ onSubmit, initialData }: UserFormProps) {
               <FormControl>
                 <Input placeholder="Last Name" {...field} />
               </FormControl>
-              <FormDescription>
-                This is the user&apos;s last name.
-              </FormDescription>
+              <FormDescription>This is the user&apos;s last name.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -171,9 +162,7 @@ export function UserForm({ onSubmit, initialData }: UserFormProps) {
               <FormControl>
                 <Input placeholder="john@example.com" type="email" {...field} />
               </FormControl>
-              <FormDescription>
-                This will be used for login and notifications.
-              </FormDescription>
+              <FormDescription>This will be used for login and notifications.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -203,9 +192,7 @@ export function UserForm({ onSubmit, initialData }: UserFormProps) {
               <FormControl>
                 <Input placeholder="RSA ID" {...field} />
               </FormControl>
-              <FormDescription>
-                This is the user&apos;s RSA ID.
-              </FormDescription>
+              <FormDescription>This is the user&apos;s RSA ID.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -219,9 +206,7 @@ export function UserForm({ onSubmit, initialData }: UserFormProps) {
               <FormControl>
                 <Input placeholder="Cell Number" {...field} />
               </FormControl>
-              <FormDescription>
-                This is the user&apos;s cell number.
-              </FormDescription>
+              <FormDescription>This is the user&apos;s cell number.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -235,9 +220,7 @@ export function UserForm({ onSubmit, initialData }: UserFormProps) {
               <FormControl>
                 <Input placeholder="Physical Address" {...field} />
               </FormControl>
-              <FormDescription>
-                This is the user&apos;s physical address.
-              </FormDescription>
+              <FormDescription>This is the user&apos;s physical address.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -248,10 +231,7 @@ export function UserForm({ onSubmit, initialData }: UserFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Role</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                defaultValue={field.value}
-              >
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a role" />
@@ -263,13 +243,19 @@ export function UserForm({ onSubmit, initialData }: UserFormProps) {
                   <SelectItem value={UserRole.SKIPPER}>Skipper</SelectItem>
                   <SelectItem value={UserRole.RIGHTSHOLDER}>Rights Holder</SelectItem>
                   <SelectItem value={UserRole.SYSTEMADMINISTRATOR}>System Administrator</SelectItem>
-                  <SelectItem value={UserRole.SECURITYADMINISTRATOR}>Security Administrator</SelectItem>
+                  <SelectItem value={UserRole.SECURITYADMINISTRATOR}>
+                    Security Administrator
+                  </SelectItem>
                   <SelectItem value={UserRole.PERMITADMINISTRATOR}>Permit Administrator</SelectItem>
                   <SelectItem value={UserRole.PERMITHOLDER}>Permit Holder</SelectItem>
                   <SelectItem value={UserRole.INSPECTOR}>Inspector</SelectItem>
                   <SelectItem value={UserRole.DRIVER}>Driver</SelectItem>
-                  <SelectItem value={UserRole.FACTORYSTOCKCONTROLLER}>Factory Stock Controller</SelectItem>
-                  <SelectItem value={UserRole.LOCALOUTLETCONTROLLER}>Local Outlet Controller</SelectItem>
+                  <SelectItem value={UserRole.FACTORYSTOCKCONTROLLER}>
+                    Factory Stock Controller
+                  </SelectItem>
+                  <SelectItem value={UserRole.LOCALOUTLETCONTROLLER}>
+                    Local Outlet Controller
+                  </SelectItem>
                   <SelectItem value={UserRole.EXPORTCONTROLLER}>Export Controller</SelectItem>
                 </SelectContent>
               </Select>

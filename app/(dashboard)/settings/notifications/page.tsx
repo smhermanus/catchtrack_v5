@@ -1,18 +1,18 @@
-import { Metadata } from "next";
-import { validateRequest } from "@/auth";
-import { redirect } from "next/navigation";
-import { NotificationPreferences } from "@/components/dashboard/settings/notification-preferences";
+import { Metadata } from 'next';
+import { validateRequest } from '@/auth';
+import { redirect } from 'next/navigation';
+import { NotificationPreferences } from '@/components/dashboard/settings/notification-preferences';
 
 export const metadata: Metadata = {
-  title: "Notification Settings | CatchTrack",
-  description: "Manage your notification preferences",
+  title: 'Notification Settings | CatchTrack',
+  description: 'Manage your notification preferences',
 };
 
 export default async function NotificationSettingsPage() {
   const { user } = await validateRequest();
 
   if (!user) {
-    redirect("/");
+    redirect('/');
   }
 
   return (

@@ -28,7 +28,7 @@ interface CreateUserFormData {
 
 export default async function NewUserPage() {
   const { user } = await validateRequest();
-  
+
   if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
     redirect('/');
   }

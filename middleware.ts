@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
     if (request.nextUrl.search) {
       callbackUrl += request.nextUrl.search;
     }
-    
+
     const encodedCallbackUrl = encodeURIComponent(callbackUrl);
     return NextResponse.redirect(
       new URL(`/auth/login?callbackUrl=${encodedCallbackUrl}`, request.url)

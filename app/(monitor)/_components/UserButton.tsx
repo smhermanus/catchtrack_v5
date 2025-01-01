@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { cn } from "@/lib/utils";
-import { Check, LogOutIcon, Monitor, Moon, Sun, UserIcon } from "lucide-react";
-import { useTheme } from "next-themes";
-import Link from "next/link";
-import { useState } from "react";
-import UserAvatar from "./UserAvatar";
-import { useSession } from "../SessionProvider";
-import { logout } from "@/app/(auth)/actions";
+import { cn } from '@/lib/utils';
+import { Check, LogOutIcon, Monitor, Moon, Sun, UserIcon } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import Link from 'next/link';
+import { useState } from 'react';
+import UserAvatar from './UserAvatar';
+import { useSession } from '../SessionProvider';
+import { logout } from '@/app/(auth)/actions';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,9 +19,9 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/dropdown-menu';
+import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface UserButtonProps {
   className?: string;
@@ -41,7 +41,7 @@ export default function UserButton({ className }: UserButtonProps) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       await logout();
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error('Logout failed:', error);
       setIsLoggingOut(false);
       setIsOpen(false);
     }
@@ -55,24 +55,24 @@ export default function UserButton({ className }: UserButtonProps) {
           variant="ghost"
           size="icon"
           className={cn(
-            "p-0 h-auto w-auto",
-            "hover:bg-transparent focus:bg-transparent active:bg-transparent",
-            "data-[state=open]:bg-transparent",
+            'p-0 h-auto w-auto',
+            'hover:bg-transparent focus:bg-transparent active:bg-transparent',
+            'data-[state=open]:bg-transparent',
             className
           )}
-          aria-label={`User menu for ${user.displayName}`}
+          aria-label={`User menu for ${user.displayName || user.email || 'User'}`}
         >
           <UserAvatar
-            avatarUrl={user.avatarUrl}
+            avatarUrl={user.avatarUrl || ''}
             size={40}
             className="hover:opacity-80 transition-opacity"
           />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Logged in as {user.displayName}</DropdownMenuLabel>
+        <DropdownMenuLabel>Logged in as {user.displayName || user.email || 'User'}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <Link href={`/customer`}>
+        <Link href={'/customer'}>
           <DropdownMenuItem>
             <UserIcon className="mr-2 size-4" />
             <span>My Account</span>
@@ -85,20 +85,20 @@ export default function UserButton({ className }: UserButtonProps) {
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
             <DropdownMenuSubContent>
-              <DropdownMenuItem onClick={() => setTheme("system")}>
+              <DropdownMenuItem onClick={() => setTheme('system')}>
                 <Monitor className="mr-2 size-4" />
                 <span>System default</span>
-                {theme === "system" && <Check className="ms-2 size-4" />}
+                {theme === 'system' && <Check className="ms-2 size-4" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("light")}>
+              <DropdownMenuItem onClick={() => setTheme('light')}>
                 <Sun className="mr-2 size-4" />
                 <span>Light</span>
-                {theme === "light" && <Check className="ms-2 size-4" />}
+                {theme === 'light' && <Check className="ms-2 size-4" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("dark")}>
+              <DropdownMenuItem onClick={() => setTheme('dark')}>
                 <Moon className="mr-2 size-4" />
                 <span>Dark</span>
-                {theme === "dark" && <Check className="ms-2 size-4" />}
+                {theme === 'dark' && <Check className="ms-2 size-4" />}
               </DropdownMenuItem>
             </DropdownMenuSubContent>
           </DropdownMenuPortal>
@@ -108,8 +108,8 @@ export default function UserButton({ className }: UserButtonProps) {
           onClick={handleLogout}
           disabled={isLoggingOut}
           className={cn(
-            "flex items-center justify-between",
-            isLoggingOut && "cursor-not-allowed opacity-50"
+            'flex items-center justify-between',
+            isLoggingOut && 'cursor-not-allowed opacity-50'
           )}
         >
           <div className="flex items-center">

@@ -92,9 +92,7 @@ export function QuotaForm({ onSubmit, initialData, vessels }: QuotaFormProps) {
                   ))}
                 </select>
               </FormControl>
-              <FormDescription>
-                Select the vessel for this quota
-              </FormDescription>
+              <FormDescription>Select the vessel for this quota</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -106,15 +104,9 @@ export function QuotaForm({ onSubmit, initialData, vessels }: QuotaFormProps) {
             <FormItem>
               <FormLabel>Amount (tons)</FormLabel>
               <FormControl>
-                <Input 
-                  type="number" 
-                  placeholder="Enter quota amount" 
-                  {...field}
-                />
+                <Input type="number" placeholder="Enter quota amount" {...field} />
               </FormControl>
-              <FormDescription>
-                Maximum allowed catch in tons
-              </FormDescription>
+              <FormDescription>Maximum allowed catch in tons</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -131,15 +123,11 @@ export function QuotaForm({ onSubmit, initialData, vessels }: QuotaFormProps) {
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
+                        'w-[240px] pl-3 text-left font-normal',
+                        !field.value && 'text-muted-foreground'
                       )}
                     >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
+                      {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>
@@ -149,16 +137,12 @@ export function QuotaForm({ onSubmit, initialData, vessels }: QuotaFormProps) {
                     mode="single"
                     selected={field.value}
                     onSelect={(date: Date | undefined) => field.onChange(date)}
-                    disabled={(date: Date) =>
-                      date < new Date()
-                    }
+                    disabled={(date: Date) => date < new Date()}
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
-              <FormDescription>
-                When the quota period starts
-              </FormDescription>
+              <FormDescription>When the quota period starts</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -175,15 +159,11 @@ export function QuotaForm({ onSubmit, initialData, vessels }: QuotaFormProps) {
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
+                        'w-[240px] pl-3 text-left font-normal',
+                        !field.value && 'text-muted-foreground'
                       )}
                     >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
+                      {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>
@@ -193,16 +173,12 @@ export function QuotaForm({ onSubmit, initialData, vessels }: QuotaFormProps) {
                     mode="single"
                     selected={field.value}
                     onSelect={(date: Date | undefined) => field.onChange(date)}
-                    disabled={(date: Date) =>
-                      date < form.getValues("startDate")
-                    }
+                    disabled={(date: Date) => date < form.getValues('startDate')}
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
-              <FormDescription>
-                When the quota period ends
-              </FormDescription>
+              <FormDescription>When the quota period ends</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -221,9 +197,7 @@ export function QuotaForm({ onSubmit, initialData, vessels }: QuotaFormProps) {
                   {...field}
                 />
               </FormControl>
-              <FormDescription>
-                Optional notes about this quota
-              </FormDescription>
+              <FormDescription>Optional notes about this quota</FormDescription>
               <FormMessage />
             </FormItem>
           )}

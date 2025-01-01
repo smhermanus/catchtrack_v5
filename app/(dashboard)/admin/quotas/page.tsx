@@ -1,26 +1,26 @@
-import { Metadata } from "next";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import { DataTable } from "@/components/shared/data-table";
-import { columns } from "./columns";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import Link from "next/link";
-import { getQuotas } from "./actions";
-import { Suspense } from "react";
-import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { QuotaAnalytics } from "@/components/dashboard/quotas/quota-analytics";
-import { QuotaAlerts } from "@/components/dashboard/quotas/quota-alerts";
-import { getQuotaAnalytics, getQuotaAlerts } from "./actions";
-import { QuotaDetailedAnalytics } from "@/components/dashboard/quotas/quota-detailed-analytics";
-import { getQuotaTrends, exportQuotaReport } from "./actions";
-import { format } from "date-fns";
+import { Metadata } from 'next';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { DataTable } from '@/components/shared/data-table';
+import { columns } from './columns';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import Link from 'next/link';
+import { getQuotas } from './actions';
+import { Suspense } from 'react';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { QuotaAnalytics } from '@/components/dashboard/quotas/quota-analytics';
+import { QuotaAlerts } from '@/components/dashboard/quotas/quota-alerts';
+import { getQuotaAnalytics, getQuotaAlerts } from './actions';
+import { QuotaDetailedAnalytics } from '@/components/dashboard/quotas/quota-detailed-analytics';
+import { getQuotaTrends, exportQuotaReport } from './actions';
+import { format } from 'date-fns';
 
 export const metadata: Metadata = {
-  title: "Quota Management | CatchTrack",
-  description: "Manage fishing quotas and allocations",
+  title: 'Quota Management | CatchTrack',
+  description: 'Manage fishing quotas and allocations',
 };
 
 function TableSkeleton() {
@@ -43,13 +43,7 @@ function TableSkeleton() {
 async function QuotaTable() {
   const quotas = await getQuotas();
 
-  return (
-    <DataTable
-      columns={columns}
-      data={quotas}
-      searchKey="vesselId"
-    />
-  );
+  return <DataTable columns={columns} data={quotas} searchKey="vesselId" />;
 }
 
 async function QuotaAnalyticsSection() {
@@ -78,19 +72,14 @@ async function QuotaDetailedAnalyticsSection() {
     });
   };
 
-  return (
-    <QuotaDetailedAnalytics
-      trends={trends}
-      onExport={handleExport}
-    />
-  );
+  return <QuotaDetailedAnalytics trends={trends} onExport={handleExport} />;
 }
 
 export default async function QuotasPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "SYSTEMADMINISTRATOR") {
-    redirect("/");
+  if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
+    redirect('/');
   }
 
   return (
@@ -98,9 +87,7 @@ export default async function QuotasPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Quotas</h2>
-          <p className="text-muted-foreground">
-            Manage fishing quotas and allocations
-          </p>
+          <p className="text-muted-foreground">Manage fishing quotas and allocations</p>
         </div>
         <Button asChild>
           <Link href="/admin/quotas/new">

@@ -42,11 +42,7 @@ const columns: ColumnDef<Quota>[] = [
       return (
         <Badge
           variant={
-            status === 'active'
-              ? 'success'
-              : status === 'pending'
-              ? 'secondary'
-              : 'destructive'
+            status === 'active' ? 'success' : status === 'pending' ? 'secondary' : 'destructive'
           }
         >
           {status}

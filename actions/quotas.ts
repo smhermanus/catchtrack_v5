@@ -52,6 +52,7 @@ export async function createQuota({
   catchArea8,
   catchArea11,
   zone,
+  createdByUser,
 }: {
   quotaCode: string;
   quotaAllocation: number;
@@ -67,6 +68,7 @@ export async function createQuota({
   catchArea8?: boolean;
   catchArea11?: boolean;
   zone?: string;
+  createdByUser: string;
 }) {
   try {
     const exists = await db.quota.findUnique({
@@ -96,6 +98,9 @@ export async function createQuota({
         catchArea8: catchArea8 ?? false,
         catchArea11: catchArea11 ?? false,
         zone,
+        createdByUser: {
+          connect: { id: parseInt(createdByUser) },
+        },
       },
     });
 

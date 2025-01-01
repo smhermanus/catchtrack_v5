@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ColumnDef } from '@tanstack/react-table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+} from '@/components/ui/dropdown-menu';
+import { MoreHorizontal } from 'lucide-react';
 
 export type FormattedCatchRecord = {
   id: string;
@@ -26,59 +26,55 @@ export type FormattedCatchRecord = {
 
 export const columns: ColumnDef<FormattedCatchRecord>[] = [
   {
-    accessorKey: "date",
-    header: "Date",
+    accessorKey: 'date',
+    header: 'Date',
   },
   {
-    accessorKey: "landingSite",
-    header: "Landing Site",
+    accessorKey: 'landingSite',
+    header: 'Landing Site',
   },
   {
-    accessorKey: "rightsholder",
-    header: "Rightsholder",
+    accessorKey: 'rightsholder',
+    header: 'Rightsholder',
   },
   {
-    accessorKey: "species",
-    header: "Species",
+    accessorKey: 'species',
+    header: 'Species',
   },
   {
-    accessorKey: "weight",
-    header: "Weight (kg)",
+    accessorKey: 'weight',
+    header: 'Weight (kg)',
     cell: ({ row }) => {
-      const weight = row.getValue("weight") as number;
+      const weight = row.getValue('weight') as number;
       return weight.toLocaleString();
     },
   },
   {
-    accessorKey: "grade",
-    header: "Grade",
+    accessorKey: 'grade',
+    header: 'Grade',
     cell: ({ row }) => {
-      const grade = row.getValue("grade") as string;
-      return (
-        <Badge variant="outline">
-          {grade}
-        </Badge>
-      );
+      const grade = row.getValue('grade') as string;
+      return <Badge variant="outline">{grade}</Badge>;
     },
   },
   {
-    accessorKey: "temperature",
-    header: "Temp (°C)",
+    accessorKey: 'temperature',
+    header: 'Temp (°C)',
     cell: ({ row }) => {
-      const temp = row.getValue("temperature") as number | null;
-      return temp ? `${temp}°C` : "-";
+      const temp = row.getValue('temperature') as number | null;
+      return temp ? `${temp}°C` : '-';
     },
   },
   {
-    accessorKey: "inspector",
-    header: "Inspector",
+    accessorKey: 'inspector',
+    header: 'Inspector',
   },
   {
-    accessorKey: "notes",
-    header: "Notes",
+    accessorKey: 'notes',
+    header: 'Notes',
   },
   {
-    id: "actions",
+    id: 'actions',
     cell: ({ row }) => {
       return (
         <DropdownMenu>

@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, Plus, X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { format } from 'date-fns';
+import { Calendar as CalendarIcon, Plus, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -16,58 +16,60 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "@/components/ui/command";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-import { useCreateQuota, useUpdateQuota } from "../_hooks/use-quotas";
+} from '@/components/ui/command';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
+import { useCreateQuota, useUpdateQuota } from '../_hooks/use-quotas';
 
 const formSchema = z.object({
-  quotaCode: z.string().min(1, "Quota code is required"),
-  quotaAllocation: z.number().positive("Allocation must be positive"),
+  quotaCode: z.string().min(1, 'Quota code is required'),
+  quotaAllocation: z.number().positive('Allocation must be positive'),
   startDate: z.date(),
   endDate: z.date(),
-  marineResources: z.array(z.string()).min(1, "At least one resource is required"),
-  productType: z.string().min(1, "Product type is required"),
-  sectorName: z.string().min(1, "Sector is required"),
-  species: z.array(z.object({
-    id: z.number(),
-    catchLimit: z.number().optional(),
-    minimumSize: z.number().optional(),
-    maximumSize: z.number().optional(),
-    seasonStart: z.date().optional(),
-    seasonEnd: z.date().optional(),
-  })),
+  marineResources: z.array(z.string()).min(1, 'At least one resource is required'),
+  productType: z.string().min(1, 'Product type is required'),
+  sectorName: z.string().min(1, 'Sector is required'),
+  species: z.array(
+    z.object({
+      id: z.number(),
+      catchLimit: z.number().optional(),
+      minimumSize: z.number().optional(),
+      maximumSize: z.number().optional(),
+      seasonStart: z.date().optional(),
+      seasonEnd: z.date().optional(),
+    })
+  ),
   landingSites: z.array(z.number()),
   rightsholders: z.array(z.number()),
   warningThreshold: z.number().min(0).max(100),
   criticalThreshold: z.number().min(0).max(100),
-  seasonalRestrictions: z.array(z.object({
-    startDate: z.date(),
-    endDate: z.date(),
-    reason: z.string(),
-  })).optional(),
+  seasonalRestrictions: z
+    .array(
+      z.object({
+        startDate: z.date(),
+        endDate: z.date(),
+        reason: z.string(),
+      })
+    )
+    .optional(),
   notes: z.string().optional(),
 });
 
@@ -87,20 +89,20 @@ export function QuotaForm({ initialData, onSuccess }: QuotaFormProps) {
   const form = useForm<QuotaFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
-      quotaCode: "",
+      quotaCode: '',
       quotaAllocation: 0,
       startDate: new Date(),
       endDate: new Date(),
       marineResources: [],
-      productType: "",
-      sectorName: "",
+      productType: '',
+      sectorName: '',
       species: [],
       landingSites: [],
       rightsholders: [],
       warningThreshold: 20,
       criticalThreshold: 10,
       seasonalRestrictions: [],
-      notes: "",
+      notes: '',
     },
   });
 
@@ -114,23 +116,23 @@ export function QuotaForm({ initialData, onSuccess }: QuotaFormProps) {
           id: initialData.id,
           data: values,
         });
-        toast.success("Quota updated successfully");
+        toast.success('Quota updated successfully');
       } else {
         await createQuota.mutateAsync(values);
-        toast.success("Quota created successfully");
+        toast.success('Quota created successfully');
       }
       onSuccess?.();
     } catch (error) {
-      toast.error("Something went wrong");
+      toast.error('Something went wrong');
     }
   };
 
   const resources = [
-    "West Coast Rock Lobster",
-    "South Coast Rock Lobster",
-    "Hake",
-    "Small Pelagics",
-    "Line Fish",
+    'West Coast Rock Lobster',
+    'South Coast Rock Lobster',
+    'Hake',
+    'Small Pelagics',
+    'Line Fish',
   ];
 
   return (
@@ -180,17 +182,13 @@ export function QuotaForm({ initialData, onSuccess }: QuotaFormProps) {
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
-                        variant={"outline"}
+                        variant={'outline'}
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
+                          'w-full pl-3 text-left font-normal',
+                          !field.value && 'text-muted-foreground'
                         )}
                       >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
+                        {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </FormControl>
@@ -200,9 +198,7 @@ export function QuotaForm({ initialData, onSuccess }: QuotaFormProps) {
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < new Date() || date > form.getValues("endDate")
-                      }
+                      disabled={(date) => date < new Date() || date > form.getValues('endDate')}
                       initialFocus
                     />
                   </PopoverContent>
@@ -222,17 +218,13 @@ export function QuotaForm({ initialData, onSuccess }: QuotaFormProps) {
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
-                        variant={"outline"}
+                        variant={'outline'}
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
+                          'w-full pl-3 text-left font-normal',
+                          !field.value && 'text-muted-foreground'
                         )}
                       >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
+                        {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </FormControl>
@@ -242,9 +234,7 @@ export function QuotaForm({ initialData, onSuccess }: QuotaFormProps) {
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < form.getValues("startDate")
-                      }
+                      disabled={(date) => date < form.getValues('startDate')}
                       initialFocus
                     />
                   </PopoverContent>
@@ -267,8 +257,8 @@ export function QuotaForm({ initialData, onSuccess }: QuotaFormProps) {
                         variant="outline"
                         role="combobox"
                         className={cn(
-                          "w-full justify-between",
-                          !field.value && "text-muted-foreground"
+                          'w-full justify-between',
+                          !field.value && 'text-muted-foreground'
                         )}
                       >
                         Select resources
@@ -302,18 +292,12 @@ export function QuotaForm({ initialData, onSuccess }: QuotaFormProps) {
                 </Popover>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {selectedResources.map((resource) => (
-                    <Badge
-                      key={resource}
-                      variant="secondary"
-                      className="flex items-center gap-1"
-                    >
+                    <Badge key={resource} variant="secondary" className="flex items-center gap-1">
                       {resource}
                       <X
                         className="h-3 w-3 cursor-pointer"
                         onClick={() => {
-                          const newResources = selectedResources.filter(
-                            (x) => x !== resource
-                          );
+                          const newResources = selectedResources.filter((x) => x !== resource);
                           setSelectedResources(newResources);
                           field.onChange(newResources);
                         }}
@@ -387,9 +371,7 @@ export function QuotaForm({ initialData, onSuccess }: QuotaFormProps) {
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
-                <FormDescription>
-                  Alert when quota usage reaches this percentage
-                </FormDescription>
+                <FormDescription>Alert when quota usage reaches this percentage</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -425,10 +407,7 @@ export function QuotaForm({ initialData, onSuccess }: QuotaFormProps) {
             <FormItem>
               <FormLabel>Notes</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Add any additional notes or comments..."
-                  {...field}
-                />
+                <Textarea placeholder="Add any additional notes or comments..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -436,18 +415,11 @@ export function QuotaForm({ initialData, onSuccess }: QuotaFormProps) {
         />
 
         <div className="flex justify-end space-x-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onSuccess?.()}
-          >
+          <Button type="button" variant="outline" onClick={() => onSuccess?.()}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            disabled={createQuota.isPending || updateQuota.isPending}
-          >
-            {initialData ? "Update" : "Create"} Quota
+          <Button type="submit" disabled={createQuota.isPending || updateQuota.isPending}>
+            {initialData ? 'Update' : 'Create'} Quota
           </Button>
         </div>
       </form>

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -12,21 +12,21 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useCreateTransfer } from "../../_hooks/use-transfers";
-import { toast } from "sonner";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useCreateTransfer } from '../../_hooks/use-transfers';
+import { toast } from 'sonner';
 
 const formSchema = z.object({
   destinationQuotaId: z.string({
-    required_error: "Please enter the destination quota ID",
+    required_error: 'Please enter the destination quota ID',
   }),
   amount: z.coerce
     .number()
-    .min(0.01, "Amount must be greater than 0")
-    .max(1000000, "Amount cannot exceed 1,000,000"),
-  reason: z.string().min(1, "Reason is required"),
+    .min(0.01, 'Amount must be greater than 0')
+    .max(1000000, 'Amount cannot exceed 1,000,000'),
+  reason: z.string().min(1, 'Reason is required'),
 });
 
 interface TransferFormProps {
@@ -42,7 +42,7 @@ export function TransferForm({ quotaId, onSuccess }: TransferFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       amount: 0,
-      reason: "",
+      reason: '',
     },
   });
 
@@ -53,10 +53,10 @@ export function TransferForm({ quotaId, onSuccess }: TransferFormProps) {
         quotaId,
         data: values,
       });
-      toast.success("Transfer request created successfully");
+      toast.success('Transfer request created successfully');
       onSuccess();
     } catch (error) {
-      toast.error("Failed to create transfer request");
+      toast.error('Failed to create transfer request');
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -122,12 +122,7 @@ export function TransferForm({ quotaId, onSuccess }: TransferFormProps) {
         />
 
         <div className="flex justify-end gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onSuccess}
-            disabled={isLoading}
-          >
+          <Button type="button" variant="outline" onClick={onSuccess} disabled={isLoading}>
             Cancel
           </Button>
           <Button type="submit" disabled={isLoading}>

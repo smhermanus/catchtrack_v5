@@ -1,5 +1,5 @@
-import { Loader2 } from "lucide-react";
-import React from "react";
+import { Loader2 } from 'lucide-react';
+import React from 'react';
 
 export const LoadingSpinner = React.memo(() => (
   <div className="flex justify-center items-center">
@@ -7,4 +7,4 @@ export const LoadingSpinner = React.memo(() => (
   </div>
 ));
 
-LoadingSpinner.displayName = "LoadingSpinner";
+LoadingSpinner.displayName = 'LoadingSpinner';

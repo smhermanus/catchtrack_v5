@@ -41,7 +41,7 @@ export class ScreenShare extends EventEmitter {
       this.displaySurface = displaySurface;
       const constraints = this.getConstraints();
       this.mediaStream = await navigator.mediaDevices.getDisplayMedia(constraints);
-      
+
       // Handle stream ending (user stops sharing)
       this.mediaStream.getVideoTracks()[0].onended = () => {
         this.stopSharing();
@@ -98,16 +98,18 @@ export class ScreenShare extends EventEmitter {
 
     return {
       video: videoConstraints,
-      audio: this.options.audio ? {
-        echoCancellation: true,
-        noiseSuppression: true,
-      } : false,
+      audio: this.options.audio
+        ? {
+            echoCancellation: true,
+            noiseSuppression: true,
+          }
+        : false,
     };
   }
 
   private async publishTracks() {
     const localParticipant = this.options.room.localParticipant;
-    
+
     if (this.videoTrack) {
       await localParticipant.publishTrack(this.videoTrack, {
         name: 'screen_share',
@@ -133,7 +135,7 @@ export class ScreenShare extends EventEmitter {
     };
 
     this.mediaRecorder = new MediaRecorder(this.mediaStream, options);
-    
+
     this.mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
         this.recordedChunks.push(event.data);
@@ -147,8 +149,8 @@ export class ScreenShare extends EventEmitter {
     if (!this.isSharing) return;
 
     // Stop tracks
-    this.mediaStream?.getTracks().forEach(track => track.stop());
-    
+    this.mediaStream?.getTracks().forEach((track) => track.stop());
+
     // Stop recording
     if (this.mediaRecorder?.state !== 'inactive') {
       this.mediaRecorder?.stop();
@@ -218,14 +220,14 @@ export class ScreenShare extends EventEmitter {
     const videoTrack = this.mediaStream.getVideoTracks()[0];
     const imageCapture = new ImageCapture(videoTrack);
     const bitmap = await imageCapture.grabFrame();
-    
+
     const canvas = document.createElement('canvas');
     canvas.width = bitmap.width;
     canvas.height = bitmap.height;
-    
+
     const context = canvas.getContext('2d');
     context?.drawImage(bitmap, 0, 0);
-    
+
     return new Promise((resolve) => {
       canvas.toBlob((blob) => {
         resolve(blob!);

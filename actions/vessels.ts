@@ -63,10 +63,7 @@ export async function createVessel({
   try {
     const exists = await db.vessel.findFirst({
       where: {
-        OR: [
-          { name },
-          { registrationNumber },
-        ],
+        OR: [{ name }, { registrationNumber }],
       },
     });
 

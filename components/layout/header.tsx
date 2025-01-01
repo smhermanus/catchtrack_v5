@@ -31,25 +31,14 @@ export function Header({ user }: HeaderProps) {
         </div>
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <nav className="flex items-center space-x-2">
-            <div className="mr-4 text-sm text-muted-foreground">
-              {user.email}
-            </div>
+            <div className="mr-4 text-sm text-muted-foreground">{user.email}</div>
             <ModeToggle />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-muted-foreground"
-            >
+            <Button variant="ghost" size="icon" className="text-muted-foreground">
               <Settings className="h-[1.2rem] w-[1.2rem]" />
               <span className="sr-only">Settings</span>
             </Button>
             <form action={logout}>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-muted-foreground"
-                type="submit"
-              >
+              <Button variant="ghost" size="icon" className="text-muted-foreground" type="submit">
                 <LogOut className="h-[1.2rem] w-[1.2rem]" />
                 <span className="sr-only">Log out</span>
               </Button>

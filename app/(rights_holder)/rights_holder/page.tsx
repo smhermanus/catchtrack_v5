@@ -1,5 +1,5 @@
-import React from "react";
-import RightsHolder from "./_components/RightsHolderPage";
+import React from 'react';
+import RightsHolder from './_components/RightsHolderPage';
 
 const RightsHolderPage = () => {
   return (

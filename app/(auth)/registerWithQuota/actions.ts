@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import { db } from "@/lib/db";
-import { hash } from "bcrypt";
-import { RegisterWithQuotaFormValues } from "./validation";
+import { db } from '@/lib/db';
+import { hash } from 'bcrypt';
+import { RegisterWithQuotaFormValues } from './validation';
 
 export async function validateQuota(quotaCode: string, rightsholderCode: string) {
   try {
@@ -15,24 +15,24 @@ export async function validateQuota(quotaCode: string, rightsholderCode: string)
           include: {
             rightsholder: {
               include: {
-                user: true
-              }
-            }
-          }
-        }
-      }
+                user: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!quota) {
-      return { error: "Invalid quota code" };
+      return { error: 'Invalid quota code' };
     }
 
     const rightsholderQuota = quota.rightsholders.find(
-      rq => rq.rightsholder.registrationNumber === rightsholderCode
+      (rq) => rq.rightsholder.registrationNumber === rightsholderCode
     );
 
     if (!rightsholderQuota) {
-      return { error: "Invalid rightsholder code" };
+      return { error: 'Invalid rightsholder code' };
     }
 
     return {
@@ -40,12 +40,12 @@ export async function validateQuota(quotaCode: string, rightsholderCode: string)
       data: {
         companyName: rightsholderQuota.rightsholder.companyName || null,
         role: rightsholderQuota.rightsholder.user?.role || null,
-        status: quota.status
-      }
+        status: quota.status,
+      },
     };
   } catch (error) {
-    console.error("Error validating quota:", error);
-    return { error: "Failed to validate quota" };
+    console.error('Error validating quota:', error);
+    return { error: 'Failed to validate quota' };
   }
 }
 
@@ -58,36 +58,32 @@ export async function signUpWithQuota(values: RegisterWithQuotaFormValues) {
       include: {
         rightsholders: {
           include: {
-            rightsholder: true
-          }
-        }
-      }
+            rightsholder: true,
+          },
+        },
+      },
     });
 
     if (!quota) {
-      return { error: "Invalid quota code" };
+      return { error: 'Invalid quota code' };
     }
 
     const rightsholderQuota = quota.rightsholders.find(
-      rq => rq.rightsholder.registrationNumber === values.rightsholderCode
+      (rq) => rq.rightsholder.registrationNumber === values.rightsholderCode
     );
 
     if (!rightsholderQuota) {
-      return { error: "Invalid rightsholder code" };
+      return { error: 'Invalid rightsholder code' };
     }
 
     const existingUser = await db.user.findFirst({
       where: {
-        OR: [
-          { email: values.email },
-          { username: values.username },
-          { rsaId: values.rsaId }
-        ]
-      }
+        OR: [{ email: values.email }, { username: values.username }, { rsaId: values.rsaId }],
+      },
     });
 
     if (existingUser) {
-      return { error: "User already exists" };
+      return { error: 'User already exists' };
     }
 
     const hashedPassword = await hash(values.password, 10);
@@ -98,30 +94,31 @@ export async function signUpWithQuota(values: RegisterWithQuotaFormValues) {
         email: values.email,
         passwordHash: hashedPassword,
         role: values.role,
-        firstName: values.firstName || "",
-        lastName: values.lastName || "",
+        firstName: values.firstName || '',
+        lastName: values.lastName || '',
         rsaId: values.rsaId,
         cellNumber: values.cellNumber,
         physicalAddress: values.physicalAddress,
-        status: "PENDING",
-        userCode: `USER${Math.floor(Math.random() * 1000000)}`,
-      }
+        status: 'PENDING',
+        userCode: values.username,
+        companyname: values.companyName || 'Unspecified Company',
+      },
     });
 
     if (values.companyName) {
       await db.rightsholder.update({
         where: {
-          id: rightsholderQuota.rightsholderId
+          id: rightsholderQuota.rightsholderId,
         },
         data: {
-          userId: user.id
-        }
+          userId: user.id,
+        },
       });
     }
 
     return { success: true };
   } catch (error) {
-    console.error("Error during registration:", error);
-    return { error: "Failed to create user" };
+    console.error('Error during registration:', error);
+    return { error: 'Failed to create user' };
   }
 }

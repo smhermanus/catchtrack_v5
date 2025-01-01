@@ -91,52 +91,63 @@ export const columns: ColumnDef<Vessel>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => {
-              navigator.clipboard.writeText(vessel.id);
-              toast.success('Vessel ID copied to clipboard');
-            }}>
+            <DropdownMenuItem
+              onClick={() => {
+                navigator.clipboard.writeText(vessel.id.toString());
+                toast.success('Vessel ID copied to clipboard');
+              }}
+            >
               Copy vessel ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={async () => {
-              try {
-                await updateVesselStatus(vessel.id, 'ACTIVE');
-                toast.success('Vessel activated successfully');
-              } catch (error) {
-                toast.error('Failed to activate vessel');
-              }
-            }}>
+            <DropdownMenuItem
+              onClick={async () => {
+                try {
+                  await updateVesselStatus(vessel.id.toString(), 'ACTIVE');
+                  toast.success('Vessel activated successfully');
+                } catch (error) {
+                  toast.error('Failed to activate vessel');
+                }
+              }}
+            >
               Set as Active
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={async () => {
-              try {
-                await updateVesselStatus(vessel.id, 'MAINTENANCE');
-                toast.success('Vessel set to maintenance');
-              } catch (error) {
-                toast.error('Failed to update vessel status');
-              }
-            }}>
+            <DropdownMenuItem
+              onClick={async () => {
+                try {
+                  await updateVesselStatus(vessel.id.toString(), 'MAINTENANCE');
+                  toast.success('Vessel set to maintenance');
+                } catch (error) {
+                  toast.error('Failed to update vessel status');
+                }
+              }}
+            >
               Set to Maintenance
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={async () => {
-              try {
-                await updateVesselStatus(vessel.id, 'DOCKED');
-                toast.success('Vessel set as docked');
-              } catch (error) {
-                toast.error('Failed to update vessel status');
-              }
-            }}>
+            <DropdownMenuItem
+              onClick={async () => {
+                try {
+                  await updateVesselStatus(vessel.id.toString(), 'DOCKED');
+                  toast.success('Vessel set as docked');
+                } catch (error) {
+                  toast.error('Failed to update vessel status');
+                }
+              }}
+            >
               Set as Docked
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive" onClick={async () => {
-              try {
-                await deleteVessel(vessel.id);
-                toast.success('Vessel deleted successfully');
-              } catch (error) {
-                toast.error('Failed to delete vessel');
-              }
-            }}>
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={async () => {
+                try {
+                  await deleteVessel(vessel.id.toString());
+                  toast.success('Vessel deleted successfully');
+                } catch (error) {
+                  toast.error('Failed to delete vessel');
+                }
+              }}
+            >
               Delete vessel
             </DropdownMenuItem>
           </DropdownMenuContent>

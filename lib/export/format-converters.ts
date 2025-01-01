@@ -81,7 +81,7 @@ export class FormatConverter {
 
   public static getSupportedConversions(): string[] {
     return Object.entries(this.converters).flatMap(([from, to]) =>
-      Object.keys(to).map(format => `${from} -> ${format}`)
+      Object.keys(to).map((format) => `${from} -> ${format}`)
     );
   }
 }
@@ -110,10 +110,7 @@ async function convertWordToPDF(content: Buffer, options?: any): Promise<Buffer>
 
 async function convertMarkdownToLatex(content: string, options?: any): Promise<Buffer> {
   // Implementation using unified and remark-latex
-  const result = await unified()
-    .use(markdown)
-    .use(latex)
-    .process(content);
+  const result = await unified().use(markdown).use(latex).process(content);
   return Buffer.from(String(result));
 }
 

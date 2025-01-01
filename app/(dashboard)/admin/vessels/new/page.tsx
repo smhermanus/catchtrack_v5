@@ -15,8 +15,8 @@ export const metadata: Metadata = {
 
 export default async function NewVesselPage() {
   const { user } = await validateRequest();
-  
-  if (!user || user.role !== 'ADMIN') {
+
+  if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
     redirect('/');
   }
 
@@ -38,9 +38,7 @@ export default async function NewVesselPage() {
       <Card>
         <CardHeader>
           <CardTitle>New Vessel Registration</CardTitle>
-          <CardDescription>
-            Register a new fishing vessel in the system
-          </CardDescription>
+          <CardDescription>Register a new fishing vessel in the system</CardDescription>
         </CardHeader>
         <CardContent>
           <VesselForm onSubmit={createVessel} />

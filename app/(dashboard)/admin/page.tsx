@@ -55,21 +55,15 @@ function ChartSkeleton() {
 }
 
 async function DashboardContent() {
-  const [
-    activeVessels,
-    pendingNotifications,
-    stats,
-    catchVsQuota,
-    vesselTrends,
-    alerts,
-  ] = await Promise.all([
-    getActiveVesselsCount(),
-    getPendingNotifications(),
-    getDashboardStats(),
-    getCatchVsQuota(),
-    getVesselTrends(),
-    getActiveAlerts(),
-  ]);
+  const [activeVessels, pendingNotifications, stats, catchVsQuota, vesselTrends, alerts] =
+    await Promise.all([
+      getActiveVesselsCount(),
+      getPendingNotifications(),
+      getDashboardStats(),
+      getCatchVsQuota(),
+      getVesselTrends(),
+      getActiveAlerts(),
+    ]);
 
   return (
     <div className="space-y-4">
@@ -95,7 +89,7 @@ export default async function AdminDashboardPage() {
     redirect('/login');
   }
 
-  if (user.role !== 'SYSTEMADMINISTRATOR' && user.role !== 'ADMIN') {
+  if (user.role !== 'SYSTEMADMINISTRATOR') {
     redirect('/');
   }
 
@@ -104,16 +98,18 @@ export default async function AdminDashboardPage() {
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
       </div>
-      <Suspense fallback={
-        <div className="space-y-4">
-          <StatsSkeleton />
-          <div className="grid gap-4 md:grid-cols-2">
-            <ChartSkeleton />
+      <Suspense
+        fallback={
+          <div className="space-y-4">
+            <StatsSkeleton />
+            <div className="grid gap-4 md:grid-cols-2">
+              <ChartSkeleton />
+              <ChartSkeleton />
+            </div>
             <ChartSkeleton />
           </div>
-          <ChartSkeleton />
-        </div>
-      }>
+        }
+      >
         <DashboardContent />
       </Suspense>
     </div>

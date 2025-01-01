@@ -22,13 +22,9 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
     redirect('/login');
   }
 
-  if (user.role !== 'SYSTEMADMINISTRATOR' && user.role !== 'ADMIN') {
+  if (user.role !== 'SYSTEMADMINISTRATOR') {
     redirect('/');
   }
 
-  return (
-    <AdminLayoutClient user={user}>
-      {children}
-    </AdminLayoutClient>
-  );
+  return <AdminLayoutClient user={user}>{children}</AdminLayoutClient>;
 }

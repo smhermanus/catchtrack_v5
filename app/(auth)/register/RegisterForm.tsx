@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import {
   Form,
   FormControl,
@@ -13,26 +13,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  registerSchema,
-  userRoles,
-  type RegisterFormValues,
-} from "./validation";
-import { signUp } from "./actions";
-import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { registerSchema, userRoles, type RegisterFormValues } from './validation';
+import { signUp } from './actions';
+import { toast } from 'sonner';
+import { ArrowLeft } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const RegisterForm = () => {
   const router = useRouter();
@@ -46,16 +42,16 @@ const RegisterForm = () => {
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      username: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      firstName: "",
-      lastName: "",
-      cellphone: "",
-      rsaId: "",
-      physicalAddress: "",
-      roleApplication: "USER",
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      firstName: '',
+      lastName: '',
+      cellphone: '',
+      rsaId: '',
+      physicalAddress: '',
+      roleApplication: 'USER',
       agreeTerms: false,
     },
   });
@@ -71,11 +67,11 @@ const RegisterForm = () => {
         return;
       }
 
-      toast.success("Registration successful!");
-      router.push("/register-pending-message");
+      toast.success('Registration successful!');
+      router.push('/register-pending-message');
       router.refresh();
     } catch (error) {
-      toast.error("Something went wrong. Please try again.");
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setIsPending(false);
     }
@@ -151,9 +147,7 @@ const RegisterForm = () => {
               </div>
 
               <div className="space-y-2 text-center mb-8">
-                <h1 className="text-2xl font-semibold tracking-tight">
-                  Create an account
-                </h1>
+                <h1 className="text-2xl font-semibold tracking-tight">Create an account</h1>
                 <p className="text-sm text-muted-foreground">
                   Enter your details to register for CatchTrack
                 </p>
@@ -380,11 +374,8 @@ const RegisterForm = () => {
                         </FormControl>
                         <div className="space-y-1 leading-none">
                           <FormLabel className="text-sm font-normal">
-                            I agree to the{" "}
-                            <Link
-                              href="/terms"
-                              className="text-primary hover:underline"
-                            >
+                            I agree to the{' '}
+                            <Link href="/terms" className="text-primary hover:underline">
                               terms and conditions
                             </Link>
                           </FormLabel>
@@ -398,19 +389,14 @@ const RegisterForm = () => {
                     className="w-full bg-[#1C72BD] text-primary-foreground hover:bg-[#1C72BD]/90"
                     disabled={isPending}
                   >
-                    {isPending ? "Creating account..." : "Create account"}
+                    {isPending ? 'Creating account...' : 'Create account'}
                   </Button>
                 </form>
               </Form>
 
               <div className="text-center text-sm">
-                <span className="text-muted-foreground">
-                  Already have an account?{" "}
-                </span>
-                <Link
-                  href="/login"
-                  className="text-primary hover:underline font-medium"
-                >
+                <span className="text-muted-foreground">Already have an account? </span>
+                <Link href="/login" className="text-primary hover:underline font-medium">
                   Sign in
                 </Link>
               </div>

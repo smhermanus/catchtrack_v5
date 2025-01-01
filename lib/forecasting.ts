@@ -9,7 +9,7 @@ interface ForecastOptions {
 
 export function generateQuotaForecast(quota: QuotaWithRelations, options: ForecastOptions) {
   const historicalData = getHistoricalData(quota, options.historicalDays);
-  
+
   switch (options.model) {
     case 'exponential':
       return exponentialSmoothing(historicalData, options.daysToForecast);
@@ -27,11 +27,9 @@ function getHistoricalData(quota: QuotaWithRelations, days: number) {
   for (let i = 0; i <= days; i++) {
     const date = addDays(startDate, i);
     const formattedDate = format(date, 'yyyy-MM-dd');
-    
-    const daysCatches = quota.catches.filter(
-      (c) => format(c.date, 'yyyy-MM-dd') === formattedDate
-    );
-    
+
+    const daysCatches = quota.catches.filter((c) => format(c.date, 'yyyy-MM-dd') === formattedDate);
+
     const usage = daysCatches.reduce((sum, c) => sum + c.weight, 0);
     dailyUsage.push({ date: formattedDate, usage });
   }
@@ -45,7 +43,7 @@ function linearRegression(
 ) {
   const n = historicalData.length;
   const x = Array.from({ length: n }, (_, i) => i);
-  const y = historicalData.map(d => d.usage);
+  const y = historicalData.map((d) => d.usage);
 
   // Calculate coefficients
   const sumX = x.reduce((a, b) => a + b, 0);
@@ -77,7 +75,7 @@ function exponentialSmoothing(
   daysToForecast: number,
   alpha = 0.3
 ) {
-  const y = historicalData.map(d => d.usage);
+  const y = historicalData.map((d) => d.usage);
   let lastSmoothed = y[0];
   const smoothed = [lastSmoothed];
 
@@ -107,7 +105,7 @@ function movingAverage(
   daysToForecast: number,
   windowSize = 7
 ) {
-  const y = historicalData.map(d => d.usage);
+  const y = historicalData.map((d) => d.usage);
   const ma = [];
 
   // Calculate moving average

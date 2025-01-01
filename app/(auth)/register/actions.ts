@@ -1,15 +1,13 @@
-"use server";
+'use server';
 
-import prisma from "@/lib/prisma";
-import { hash } from "@node-rs/argon2";
-import { generateId } from "lucia";
-import { isRedirectError } from "next/dist/client/components/redirect";
-import { redirect } from "next/navigation";
-import { RegisterFormValues, registerSchema } from "./validation";
+import prisma from '@/lib/prisma';
+import { hash } from '@node-rs/argon2';
+import { generateId } from 'lucia';
+import { isRedirectError } from 'next/dist/client/components/redirect';
+import { redirect } from 'next/navigation';
+import { RegisterFormValues, registerSchema } from './validation';
 
-export async function signUp(
-  formData: RegisterFormValues
-): Promise<{ error?: string } | never> {
+export async function signUp(formData: RegisterFormValues): Promise<{ error?: string } | never> {
   try {
     // Validate the form data
     const validatedData = registerSchema.parse(formData);
@@ -30,14 +28,14 @@ export async function signUp(
       where: {
         username: {
           equals: validatedData.username,
-          mode: "insensitive",
+          mode: 'insensitive',
         },
       },
     });
 
     if (existingUsername) {
       return {
-        error: "Username already taken",
+        error: 'Username already taken',
       };
     }
 
@@ -46,14 +44,14 @@ export async function signUp(
       where: {
         email: {
           equals: validatedData.email,
-          mode: "insensitive",
+          mode: 'insensitive',
         },
       },
     });
 
     if (existingEmail) {
       return {
-        error: "Email already taken",
+        error: 'Email already taken',
       };
     }
 
@@ -65,28 +63,29 @@ export async function signUp(
           email: validatedData.email,
           passwordHash,
           userCode,
-          firstName: validatedData.firstName || "", // These will be collected later
-          lastName: validatedData.lastName || "",
+          firstName: validatedData.firstName || '', // These will be collected later
+          lastName: validatedData.lastName || '',
           rsaId: validatedData.rsaId || `TEMP${generateId(6)}`, // Temporary RSA ID
-          cellNumber: validatedData.cellphone || "", // Use cellphone from form
-          physicalAddress: validatedData.physicalAddress || "", // Use provided address or empty string
+          cellNumber: validatedData.cellphone || '', // Use cellphone from form
+          physicalAddress: validatedData.physicalAddress || '', // Use provided address or empty string
           role: validatedData.roleApplication, // Use the roleApplication value directly for the role field
           isVerified: false,
           isActive: true,
           profilePictureUrl: null,
+          companyname: validatedData.companyName || 'Default Company', // Add companyname
         },
       });
     });
 
     // Redirect to success page or pending approval page
-    redirect("/register-pending-message");
+    redirect('/register-pending-message');
   } catch (error) {
     if (isRedirectError(error)) throw error;
 
-    console.error("Registration error:", error);
+    console.error('Registration error:', error);
 
     return {
-      error: "Something went wrong. Please try again.",
+      error: 'Something went wrong. Please try again.',
     };
   }
 }

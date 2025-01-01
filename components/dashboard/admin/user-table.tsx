@@ -39,23 +39,23 @@ export function UserTable({ users }: { users: User[] }) {
   const sortedUsers = [...users].sort((a, b) => {
     const aValue = a[sortColumn];
     const bValue = b[sortColumn];
-    
+
     // Handle undefined/null values
     if (!aValue && !bValue) return 0;
     if (!aValue) return sortDirection === 'asc' ? -1 : 1;
     if (!bValue) return sortDirection === 'asc' ? 1 : -1;
-    
+
     // Handle date comparison
     if (aValue instanceof Date && bValue instanceof Date) {
-        return sortDirection === 'asc' 
-            ? aValue.getTime() - bValue.getTime()
-            : bValue.getTime() - aValue.getTime();
+      return sortDirection === 'asc'
+        ? aValue.getTime() - bValue.getTime()
+        : bValue.getTime() - aValue.getTime();
     }
-    
+
     // Regular comparison
     return sortDirection === 'asc'
-        ? String(aValue).localeCompare(String(bValue))
-        : String(bValue).localeCompare(String(aValue));
+      ? String(aValue).localeCompare(String(bValue))
+      : String(bValue).localeCompare(String(aValue));
   });
 
   const handleSort = (column: keyof User) => {
@@ -106,28 +106,16 @@ export function UserTable({ users }: { users: User[] }) {
         <TableHeader>
           <TableRow>
             <TableHead className="w-[100px]">User</TableHead>
-            <TableHead 
-              className="cursor-pointer"
-              onClick={() => handleSort('email')}
-            >
+            <TableHead className="cursor-pointer" onClick={() => handleSort('email')}>
               Email
             </TableHead>
-            <TableHead 
-              className="cursor-pointer"
-              onClick={() => handleSort('role')}
-            >
+            <TableHead className="cursor-pointer" onClick={() => handleSort('role')}>
               Role
             </TableHead>
-            <TableHead 
-              className="cursor-pointer"
-              onClick={() => handleSort('status')}
-            >
+            <TableHead className="cursor-pointer" onClick={() => handleSort('status')}>
               Status
             </TableHead>
-            <TableHead 
-              className="cursor-pointer"
-              onClick={() => handleSort('lastLogin')}
-            >
+            <TableHead className="cursor-pointer" onClick={() => handleSort('lastLogin')}>
               Last Login
             </TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -141,7 +129,10 @@ export function UserTable({ users }: { users: User[] }) {
                   <Avatar>
                     <AvatarImage src={user.image} />
                     <AvatarFallback>
-                      {user.name.split(' ').map(n => n[0]).join('')}
+                      {user.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')}
                     </AvatarFallback>
                   </Avatar>
                   <span>{user.name}</span>
@@ -149,14 +140,10 @@ export function UserTable({ users }: { users: User[] }) {
               </TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>
-                <Badge className={getRoleBadgeColor(user.role)}>
-                  {user.role}
-                </Badge>
+                <Badge className={getRoleBadgeColor(user.role)}>{user.role}</Badge>
               </TableCell>
               <TableCell>
-                <Badge 
-                  variant={user.status === 'active' ? 'default' : 'secondary'}
-                >
+                <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
                   {user.status}
                 </Badge>
               </TableCell>

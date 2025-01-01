@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { useTheme } from 'next-themes';
 
@@ -15,10 +15,10 @@ interface VesselStatusProps {
   description?: string;
 }
 
-export function VesselStatus({ 
-  data, 
-  title = "Vessel Status", 
-  description = "Current vessel activity status" 
+export function VesselStatus({
+  data,
+  title = 'Vessel Status',
+  description = 'Current vessel activity status',
 }: VesselStatusProps) {
   const { theme } = useTheme();
 
@@ -50,14 +50,11 @@ export function VesselStatus({
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
               >
                 {data.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={COLORS[entry.status as keyof typeof COLORS]} 
-                  />
+                  <Cell key={`cell-${index}`} fill={COLORS[entry.status as keyof typeof COLORS]} />
                 ))}
               </Pie>
-              <Tooltip 
-                contentStyle={{ 
+              <Tooltip
+                contentStyle={{
                   backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
                   borderColor: theme === 'dark' ? '#374151' : '#e5e7eb',
                   color: theme === 'dark' ? '#9ca3af' : '#6b7280',

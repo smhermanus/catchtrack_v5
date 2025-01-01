@@ -5,15 +5,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
-import {
-  Users,
-  Settings,
-  Ship,
-  Scale,
-  FileText,
-  BarChart3,
-  Home,
-} from 'lucide-react';
+import { Users, Settings, Ship, Scale, FileText, BarChart3, Home } from 'lucide-react';
 
 interface SidebarProps {
   className?: string;
@@ -32,7 +24,11 @@ export function Sidebar({ className }: SidebarProps) {
     ],
     MONITOR: [
       { href: '/monitor', title: 'Overview', icon: <Home className="mr-2 h-4 w-4" /> },
-      { href: '/monitor/catch-records', title: 'Catch Records', icon: <FileText className="mr-2 h-4 w-4" /> },
+      {
+        href: '/monitor/catch-records',
+        title: 'Catch Records',
+        icon: <FileText className="mr-2 h-4 w-4" />,
+      },
       { href: '/monitor/reports', title: 'Reports', icon: <BarChart3 className="mr-2 h-4 w-4" /> },
     ],
     SKIPPER: [
@@ -47,14 +43,13 @@ export function Sidebar({ className }: SidebarProps) {
     ],
   };
 
-  const items = session?.user?.role ? roleBasedItems[session.user.role as keyof typeof roleBasedItems] : [];
+  const items = session?.user?.role
+    ? roleBasedItems[session.user.role as keyof typeof roleBasedItems]
+    : [];
 
   return (
     <nav
-      className={cn(
-        'flex flex-col space-x-0 space-y-1 p-4 pt-0 w-64 border-r h-screen',
-        className
-      )}
+      className={cn('flex flex-col space-x-0 space-y-1 p-4 pt-0 w-64 border-r h-screen', className)}
     >
       <div className="flex h-16 items-center border-b px-4">
         <Link href="/" className="flex items-center space-x-2">

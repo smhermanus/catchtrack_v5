@@ -83,7 +83,7 @@ export const columns: ColumnDef<ExtendedUser>[] = [
     cell: ({ row }) => {
       const isActive = row.getValue('isActive') as boolean;
       return (
-        <Badge variant={isActive ? "default" : "destructive"}>
+        <Badge variant={isActive ? 'default' : 'destructive'}>
           {isActive ? 'Active' : 'Inactive'}
         </Badge>
       );

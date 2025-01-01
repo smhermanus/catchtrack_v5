@@ -1,7 +1,7 @@
 // components/BoatsOverview.tsx
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Ship, Download, Upload, Clock } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Ship, Download, Upload, Clock } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface StatusItem {
   label: string;
@@ -13,47 +13,41 @@ interface StatusItem {
 
 const statuses: StatusItem[] = [
   {
-    label: "On the way",
-    time: "2hr 10min",
+    label: 'On the way',
+    time: '2hr 10min',
     percentage: 39.7,
     icon: Ship,
-    colorClass: "bg-[hsl(var(--chart-1))]",
+    colorClass: 'bg-[hsl(var(--chart-1))]',
   },
   {
-    label: "Unloading",
-    time: "3hr 15min",
+    label: 'Unloading',
+    time: '3hr 15min',
     percentage: 28.3,
     icon: Download,
-    colorClass: "bg-[hsl(var(--chart-2))]",
+    colorClass: 'bg-[hsl(var(--chart-2))]',
   },
   {
-    label: "Loading",
-    time: "1hr 24min",
+    label: 'Loading',
+    time: '1hr 24min',
     percentage: 17.4,
     icon: Upload,
-    colorClass: "bg-[hsl(var(--chart-3))]",
+    colorClass: 'bg-[hsl(var(--chart-3))]',
   },
   {
-    label: "Waiting",
-    time: "5hr 19min",
+    label: 'Waiting',
+    time: '5hr 19min',
     percentage: 14.6,
     icon: Clock,
-    colorClass: "bg-[hsl(var(--chart-4))]",
+    colorClass: 'bg-[hsl(var(--chart-4))]',
   },
 ];
 
-const ProgressSegment = ({
-  percentage,
-  className,
-}: {
-  percentage: number;
-  className: string;
-}) => {
+const ProgressSegment = ({ percentage, className }: { percentage: number; className: string }) => {
   const widthClass = {
-    "39.7": "w-[39.7%]",
-    "28.3": "w-[28.3%]",
-    "17.4": "w-[17.4%]",
-    "14.6": "w-[14.6%]",
+    '39.7': 'w-[39.7%]',
+    '28.3': 'w-[28.3%]',
+    '17.4': 'w-[17.4%]',
+    '14.6': 'w-[14.6%]',
   }[percentage.toString()];
 
   return <div className={cn(widthClass, className)} />;
@@ -82,10 +76,7 @@ const BoatsOverview = () => {
         {/* Status List */}
         <div className="space-y-4">
           {statuses.map((status, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between text-sm"
-            >
+            <div key={index} className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
                 <status.icon size={16} className="text-muted-foreground" />
                 <span>{status.label}</span>

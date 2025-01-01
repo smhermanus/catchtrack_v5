@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useTheme } from "next-themes";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTheme } from 'next-themes';
 import {
   Area,
   AreaChart,
@@ -9,8 +9,8 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
-import { format } from "date-fns";
+} from 'recharts';
+import { format } from 'date-fns';
 
 interface VesselActivity {
   date: string;
@@ -27,11 +27,11 @@ export function VesselTrends({ data }: VesselTrendsProps) {
   const { theme } = useTheme();
 
   const chartColors = {
-    active: theme === "dark" ? "#22c55e" : "#16a34a",
-    fishing: theme === "dark" ? "#60a5fa" : "#2563eb",
-    docked: theme === "dark" ? "#6b7280" : "#9ca3af",
-    grid: theme === "dark" ? "#374151" : "#e5e7eb",
-    text: theme === "dark" ? "#9ca3af" : "#6b7280",
+    active: theme === 'dark' ? '#22c55e' : '#16a34a',
+    fishing: theme === 'dark' ? '#60a5fa' : '#2563eb',
+    docked: theme === 'dark' ? '#6b7280' : '#9ca3af',
+    grid: theme === 'dark' ? '#374151' : '#e5e7eb',
+    text: theme === 'dark' ? '#9ca3af' : '#6b7280',
   };
 
   return (
@@ -48,24 +48,24 @@ export function VesselTrends({ data }: VesselTrendsProps) {
                 dataKey="date"
                 stroke={chartColors.text}
                 tick={{ fill: chartColors.text }}
-                tickFormatter={(value) => format(new Date(value), "MMM d")}
+                tickFormatter={(value) => format(new Date(value), 'MMM d')}
               />
               <YAxis
                 stroke={chartColors.text}
                 tick={{ fill: chartColors.text }}
                 label={{
-                  value: "Number of Vessels",
+                  value: 'Number of Vessels',
                   angle: -90,
-                  position: "insideLeft",
+                  position: 'insideLeft',
                   fill: chartColors.text,
                 }}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: theme === "dark" ? "#1f2937" : "#ffffff",
+                  backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
                   borderColor: chartColors.grid,
                 }}
-                labelFormatter={(value) => format(new Date(value), "MMM d, yyyy")}
+                labelFormatter={(value) => format(new Date(value), 'MMM d, yyyy')}
               />
               <Legend />
               <Area

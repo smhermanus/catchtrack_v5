@@ -78,13 +78,15 @@ export class AuditAnalytics {
   public async getUserActivitySummaries(options: AnalyticsOptions): Promise<UserActivitySummary[]> {
     const { data, error } = await supabase
       .from('audit_logs')
-      .select(`
+      .select(
+        `
         user_id,
         action,
         resource_type,
         created_at,
         metadata
-      `)
+      `
+      )
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -92,15 +94,19 @@ export class AuditAnalytics {
     return this.aggregateUserActivity(data);
   }
 
-  public async getResourceUsageStatistics(options: AnalyticsOptions): Promise<ResourceUsageStats[]> {
+  public async getResourceUsageStatistics(
+    options: AnalyticsOptions
+  ): Promise<ResourceUsageStats[]> {
     const { data, error } = await supabase
       .from('audit_logs')
-      .select(`
+      .select(
+        `
         resource_type,
         user_id,
         created_at,
         metadata
-      `)
+      `
+      )
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -133,22 +139,22 @@ export class AuditAnalytics {
   private aggregateTimeSeriesData(data: any[]): TimeSeriesData[] {
     const timeSeriesMap = new Map<string, TimeSeriesData>();
 
-    data.forEach(log => {
+    data.forEach((log) => {
       const timestamp = DateTime.fromISO(log.created_at).startOf('hour').toISO();
       const existing = timeSeriesMap.get(timestamp) || { timestamp, count: 0, metadata: {} };
       existing.count++;
       timeSeriesMap.set(timestamp, existing);
     });
 
-    return Array.from(timeSeriesMap.values()).sort((a, b) => 
-      DateTime.fromISO(a.timestamp).toMillis() - DateTime.fromISO(b.timestamp).toMillis()
+    return Array.from(timeSeriesMap.values()).sort(
+      (a, b) => DateTime.fromISO(a.timestamp).toMillis() - DateTime.fromISO(b.timestamp).toMillis()
     );
   }
 
   private aggregateUserActivity(data: any[]): UserActivitySummary[] {
     const userMap = new Map<string, any>();
 
-    data.forEach(log => {
+    data.forEach((log) => {
       const userId = log.user_id;
       const existing = userMap.get(userId) || {
         userId,
@@ -160,11 +166,14 @@ export class AuditAnalytics {
 
       existing.totalActions++;
       existing.actions.set(log.action, (existing.actions.get(log.action) || 0) + 1);
-      existing.resources.set(log.resource_type, (existing.resources.get(log.resource_type) || 0) + 1);
+      existing.resources.set(
+        log.resource_type,
+        (existing.resources.get(log.resource_type) || 0) + 1
+      );
       userMap.set(userId, existing);
     });
 
-    return Array.from(userMap.values()).map(user => ({
+    return Array.from(userMap.values()).map((user) => ({
       userId: user.userId,
       totalActions: user.totalActions,
       lastActive: user.lastActive,
@@ -181,7 +190,7 @@ export class AuditAnalytics {
   private aggregateResourceUsage(data: any[]): ResourceUsageStats[] {
     const resourceMap = new Map<string, any>();
 
-    data.forEach(log => {
+    data.forEach((log) => {
       const resourceType = log.resource_type;
       const existing = resourceMap.get(resourceType) || {
         resourceType,
@@ -203,17 +212,18 @@ export class AuditAnalytics {
       resourceMap.set(resourceType, existing);
     });
 
-    return Array.from(resourceMap.values()).map(resource => ({
+    return Array.from(resourceMap.values()).map((resource) => ({
       resourceType: resource.resourceType,
       totalAccesses: resource.totalAccesses,
       uniqueUsers: resource.uniqueUsers.size,
       averageDuration: resource.durations.length
         ? resource.durations.reduce((a: number, b: number) => a + b, 0) / resource.durations.length
         : 0,
-      peakUsageTime: Array.from(resource.usageByHour.entries())
-        .sort((a, b) => b[1] - a[1])[0][0]
-        .toString()
-        .padStart(2, '0') + ':00',
+      peakUsageTime:
+        Array.from(resource.usageByHour.entries())
+          .sort((a, b) => b[1] - a[1])[0][0]
+          .toString()
+          .padStart(2, '0') + ':00',
     }));
   }
 

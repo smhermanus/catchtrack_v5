@@ -87,7 +87,9 @@ export async function createCatchRecord({
         vesselId: parseInt(vesselId),
         siteId: parseInt(siteId),
         grossRegisteredTonnage,
-        locationCoordinates: locationCoordinates ? { type: 'Point', coordinates: [locationCoordinates.lng, locationCoordinates.lat] } : undefined,
+        locationCoordinates: locationCoordinates
+          ? { type: 'Point', coordinates: [locationCoordinates.lng, locationCoordinates.lat] }
+          : undefined,
         trapsSet,
         trapsPulled,
         binsAnimals,

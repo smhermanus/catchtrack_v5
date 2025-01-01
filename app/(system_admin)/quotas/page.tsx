@@ -1,14 +1,14 @@
-import { Metadata } from "next";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card"; 
-import { Overview } from "./_components/overview";
-import { QuotaList } from "./_components/quota-list";
-import { ComplianceList } from "./_components/compliance-list";
-import { TransferList } from "./_components/transfer-list";
+import { Metadata } from 'next';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card } from '@/components/ui/card';
+import { Overview } from './_components/overview';
+import { QuotaList } from './_components/quota-list';
+import { ComplianceList } from './_components/compliance-list';
+import { TransferList } from './_components/transfer-list';
 
 export const metadata: Metadata = {
-  title: "Quota Management",
-  description: "Comprehensive quota management system",
+  title: 'Quota Management',
+  description: 'Comprehensive quota management system',
 };
 
 export default async function QuotaManagementPage() {

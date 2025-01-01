@@ -1,4 +1,12 @@
-import { LiveKit, Room, RoomEvent, Participant, LocalParticipant, RemoteParticipant, Track } from 'livekit-client';
+import {
+  LiveKit,
+  Room,
+  RoomEvent,
+  Participant,
+  LocalParticipant,
+  RemoteParticipant,
+  Track,
+} from 'livekit-client';
 import { EventEmitter } from 'events';
 
 interface VoiceChatOptions {
@@ -70,11 +78,11 @@ class VoiceChat extends EventEmitter {
 
       // Create and connect audio processing nodes
       const source = this.audioContext.createMediaStreamSource(this.mediaStream);
-      
+
       // Noise reduction
       await this.audioContext.audioWorklet.addModule('/audio-worklets/noise-reducer.js');
       this.noiseReducer = new AudioWorkletNode(this.audioContext, 'noise-reducer');
-      
+
       // Gain control
       this.gainNode = this.audioContext.createGain();
       this.gainNode.gain.value = 1.0;
@@ -106,12 +114,13 @@ class VoiceChat extends EventEmitter {
       // Noise gate
       const threshold = 0.01;
       output[i] = Math.abs(input[i]) > threshold ? input[i] : 0;
-      
+
       // Compression
       const threshold2 = 0.5;
       const ratio = 4;
       if (Math.abs(output[i]) > threshold2) {
-        output[i] = threshold2 + (Math.abs(output[i]) - threshold2) / ratio * Math.sign(output[i]);
+        output[i] =
+          threshold2 + ((Math.abs(output[i]) - threshold2) / ratio) * Math.sign(output[i]);
       }
     }
   }
@@ -180,7 +189,7 @@ class VoiceChat extends EventEmitter {
   }
 
   private cleanup() {
-    this.mediaStream?.getTracks().forEach(track => track.stop());
+    this.mediaStream?.getTracks().forEach((track) => track.stop());
     if (this.audioProcessor) {
       this.audioProcessor.disconnect();
     }

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { LogIn, UserPlus } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+import { LogIn, UserPlus } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
 
 export default function WelcomePage() {
   return (
@@ -34,7 +34,7 @@ export default function WelcomePage() {
           <motion.div
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
             className="text-center space-y-6 mb-8 md:mb-12"
           >
             <motion.div
@@ -68,8 +68,7 @@ export default function WelcomePage() {
               transition={{ delay: 0.7, duration: 0.5 }}
               className="text-lg md:text-xl text-muted-foreground max-w-md mx-auto px-4"
             >
-              Your comprehensive solution for documenting and managing fishing
-              operations
+              Your comprehensive solution for documenting and managing fishing operations
             </motion.p>
           </motion.div>
 

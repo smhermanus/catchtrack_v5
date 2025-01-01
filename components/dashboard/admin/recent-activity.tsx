@@ -73,18 +73,13 @@ export function RecentActivity() {
     <Card className="col-span-3">
       <CardHeader>
         <CardTitle>Recent Activity</CardTitle>
-        <CardDescription>
-          Latest actions performed in the system
-        </CardDescription>
+        <CardDescription>Latest actions performed in the system</CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[400px] pr-4">
           <div className="space-y-4">
             {recentActivities.map((activity) => (
-              <div
-                key={activity.id}
-                className="flex items-center gap-4 rounded-lg border p-4"
-              >
+              <div key={activity.id} className="flex items-center gap-4 rounded-lg border p-4">
                 <Avatar>
                   <AvatarImage src={activity.user.image} />
                   <AvatarFallback>
@@ -95,16 +90,12 @@ export function RecentActivity() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    {activity.user.name}
-                  </p>
+                  <p className="text-sm font-medium leading-none">{activity.user.name}</p>
                   <p className="text-sm text-muted-foreground">
                     {activity.action} {activity.target}
                   </p>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  {activity.timestamp}
-                </div>
+                <div className="text-sm text-muted-foreground">{activity.timestamp}</div>
               </div>
             ))}
           </div>

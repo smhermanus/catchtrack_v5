@@ -1,24 +1,16 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { format } from "date-fns";
-import { useQuota } from "../../_hooks/use-quotas";
-import { QuotaModal } from "../../_components/quota-modal";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  AlertCircle,
-  Calendar,
-  Edit,
-  FileText,
-  MapPin,
-  Ship,
-  Users,
-} from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from 'react';
+import { format } from 'date-fns';
+import { useQuota } from '../../_hooks/use-quotas';
+import { QuotaModal } from '../../_components/quota-modal';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertCircle, Calendar, Edit, FileText, MapPin, Ship, Users } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface QuotaDetailsProps {
   id: string;
@@ -26,7 +18,7 @@ interface QuotaDetailsProps {
 
 export function QuotaDetails({ id }: QuotaDetailsProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const { data: quota, isLoading } = useQuota(id);
+  const { data: quota, isLoading } = useQuota(Number(id));
 
   if (isLoading) {
     return <QuotaDetailsSkeleton />;
@@ -50,12 +42,8 @@ export function QuotaDetails({ id }: QuotaDetailsProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            Quota {quota.quotaCode}
-          </h2>
-          <p className="text-muted-foreground">
-            {quota.marineResources.join(", ")}
-          </p>
+          <h2 className="text-2xl font-bold tracking-tight">Quota {quota.quotaCode}</h2>
+          <p className="text-muted-foreground">{quota.marineResources.join(', ')}</p>
         </div>
         <Button onClick={() => setIsEditing(true)}>
           <Edit className="mr-2 h-4 w-4" /> Edit Quota
@@ -69,9 +57,7 @@ export function QuotaDetails({ id }: QuotaDetailsProps) {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {quota.quotaAllocation.toLocaleString()} kg
-            </div>
+            <div className="text-2xl font-bold">{quota.quotaAllocation.toLocaleString()} kg</div>
             <div className="mt-4 space-y-2">
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Utilization</p>
@@ -82,9 +68,7 @@ export function QuotaDetails({ id }: QuotaDetailsProps) {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Balance</p>
-                <p className="text-sm font-medium">
-                  {quota.quotaBalance?.toLocaleString()} kg
-                </p>
+                <p className="text-sm font-medium">{quota.quotaBalance?.toLocaleString()} kg</p>
               </div>
             </div>
           </CardContent>
@@ -100,15 +84,11 @@ export function QuotaDetails({ id }: QuotaDetailsProps) {
             <div className="mt-4 space-y-2">
               <div>
                 <p className="text-xs text-muted-foreground">Start Date</p>
-                <p className="text-sm font-medium">
-                  {format(new Date(quota.startDate), "PPP")}
-                </p>
+                <p className="text-sm font-medium">{format(new Date(quota.startDate), 'PPP')}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">End Date</p>
-                <p className="text-sm font-medium">
-                  {format(new Date(quota.endDate), "PPP")}
-                </p>
+                <p className="text-sm font-medium">{format(new Date(quota.endDate), 'PPP')}</p>
               </div>
             </div>
           </CardContent>
@@ -120,9 +100,7 @@ export function QuotaDetails({ id }: QuotaDetailsProps) {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {quota.rightsholders.length}
-            </div>
+            <div className="text-2xl font-bold">{quota.rightsholders.length}</div>
             <div className="mt-4 space-y-1">
               {quota.rightsholders.map((rh) => (
                 <div key={rh.rightsholder.id} className="text-sm">
@@ -139,9 +117,7 @@ export function QuotaDetails({ id }: QuotaDetailsProps) {
             <MapPin className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {quota.landingSites.length}
-            </div>
+            <div className="text-2xl font-bold">{quota.landingSites.length}</div>
             <div className="mt-4 space-y-1">
               {quota.landingSites.map((site) => (
                 <div key={site.landingSite.id} className="text-sm">
@@ -198,14 +174,10 @@ export function QuotaDetails({ id }: QuotaDetailsProps) {
             {quota.alerts.map((alert) => (
               <Alert
                 key={alert.id}
-                variant={
-                  alert.alertType.includes("WARNING") ? "warning" : "default"
-                }
+                variant={alert.alertType.includes('WARNING') ? 'warning' : 'default'}
               >
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>
-                  {alert.alertType.replace(/_/g, " ")}
-                </AlertTitle>
+                <AlertTitle>{alert.alertType.replace(/_/g, ' ')}</AlertTitle>
                 <AlertDescription>{alert.message}</AlertDescription>
               </Alert>
             ))}
@@ -213,11 +185,7 @@ export function QuotaDetails({ id }: QuotaDetailsProps) {
         </Card>
       </div>
 
-      <QuotaModal
-        isOpen={isEditing}
-        onClose={() => setIsEditing(false)}
-        initialData={quota}
-      />
+      <QuotaModal isOpen={isEditing} onClose={() => setIsEditing(false)} initialData={quota} />
     </div>
   );
 }
@@ -234,20 +202,22 @@ function QuotaDetailsSkeleton() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {Array(4).fill(0).map((_, i) => (
-          <Card key={i}>
-            <CardHeader>
-              <Skeleton className="h-4 w-[100px]" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-[150px]" />
-              <div className="space-y-2 mt-4">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-[80%]" />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        {Array(4)
+          .fill(0)
+          .map((_, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-4 w-[100px]" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-[150px]" />
+                <div className="space-y-2 mt-4">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-[80%]" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
       </div>
     </div>
   );

@@ -14,9 +14,9 @@ export interface VesselTrendData {
 
 export interface Alert {
   id: string;
-  type: "quota" | "vessel" | "system";
+  type: 'quota' | 'vessel' | 'system';
   title: string;
   message: string;
-  severity: "high" | "medium" | "low";
+  severity: 'high' | 'medium' | 'low';
   timestamp: string;
 }

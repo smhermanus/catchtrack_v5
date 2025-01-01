@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Bar,
   XAxis,
@@ -60,14 +60,24 @@ export function QuotaAnalytics({ data }: QuotaAnalyticsProps) {
                 yAxisId="left"
                 stroke={chartColors.text}
                 tick={{ fill: chartColors.text }}
-                label={{ value: 'Quota (tons)', angle: -90, position: 'insideLeft', fill: chartColors.text }}
+                label={{
+                  value: 'Quota (tons)',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fill: chartColors.text,
+                }}
               />
               <YAxis
                 yAxisId="right"
                 orientation="right"
                 stroke={chartColors.text}
                 tick={{ fill: chartColors.text }}
-                label={{ value: 'Utilization Rate (%)', angle: 90, position: 'insideRight', fill: chartColors.text }}
+                label={{
+                  value: 'Utilization Rate (%)',
+                  angle: 90,
+                  position: 'insideRight',
+                  fill: chartColors.text,
+                }}
               />
               <Tooltip
                 contentStyle={{
@@ -82,12 +92,7 @@ export function QuotaAnalytics({ data }: QuotaAnalyticsProps) {
                 fill={chartColors.allocated}
                 name="Allocated Quota"
               />
-              <Bar
-                yAxisId="left"
-                dataKey="used"
-                fill={chartColors.used}
-                name="Used Quota"
-              />
+              <Bar yAxisId="left" dataKey="used" fill={chartColors.used} name="Used Quota" />
               <Bar
                 yAxisId="left"
                 dataKey="remaining"

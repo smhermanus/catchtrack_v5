@@ -40,24 +40,16 @@ export class EnterpriseIntegrations {
 
   private initializeEventHandlers() {
     // Slack event handlers
-    this.eventHandlers.set('slack:message', [
-      this.handleSlackMessage.bind(this),
-    ]);
+    this.eventHandlers.set('slack:message', [this.handleSlackMessage.bind(this)]);
 
     // GitHub event handlers
-    this.eventHandlers.set('github:issue', [
-      this.handleGitHubIssue.bind(this),
-    ]);
+    this.eventHandlers.set('github:issue', [this.handleGitHubIssue.bind(this)]);
 
     // Google Workspace event handlers
-    this.eventHandlers.set('google:calendar', [
-      this.handleGoogleCalendarEvent.bind(this),
-    ]);
+    this.eventHandlers.set('google:calendar', [this.handleGoogleCalendarEvent.bind(this)]);
 
     // Microsoft 365 event handlers
-    this.eventHandlers.set('microsoft:teams', [
-      this.handleTeamsMessage.bind(this),
-    ]);
+    this.eventHandlers.set('microsoft:teams', [this.handleTeamsMessage.bind(this)]);
 
     // Additional handlers...
   }
@@ -73,13 +65,16 @@ export class EnterpriseIntegrations {
       case 'slack':
         this.clients.set('slack', new WebClient(config.credentials.token));
         break;
-      
+
       case 'github':
-        this.clients.set('github', new Octokit({
-          auth: config.credentials.token,
-        }));
+        this.clients.set(
+          'github',
+          new Octokit({
+            auth: config.credentials.token,
+          })
+        );
         break;
-      
+
       case 'google':
         const auth = new google.auth.OAuth2(
           config.credentials.clientId,
@@ -89,25 +84,31 @@ export class EnterpriseIntegrations {
         auth.setCredentials(config.credentials.tokens);
         this.clients.set('google', { auth });
         break;
-      
+
       case 'microsoft':
-        this.clients.set('microsoft', MSGraphClient.init({
-          authProvider: (done) => {
-            done(null, config.credentials.token);
-          },
-        }));
+        this.clients.set(
+          'microsoft',
+          MSGraphClient.init({
+            authProvider: (done) => {
+              done(null, config.credentials.token);
+            },
+          })
+        );
         break;
-      
+
       case 'dropbox':
-        this.clients.set('dropbox', new DropboxClient({
-          accessToken: config.credentials.token,
-        }));
+        this.clients.set(
+          'dropbox',
+          new DropboxClient({
+            accessToken: config.credentials.token,
+          })
+        );
         break;
-      
+
       case 'box':
         this.clients.set('box', BoxClient.getBasicClient(config.credentials.token));
         break;
-      
+
       case 'salesforce':
         const sfClient = new SalesforceClient({
           instanceUrl: config.credentials.instanceUrl,
@@ -119,27 +120,36 @@ export class EnterpriseIntegrations {
         );
         this.clients.set('salesforce', sfClient);
         break;
-      
+
       case 'zendesk':
-        this.clients.set('zendesk', new ZendeskClient({
-          username: config.credentials.username,
-          token: config.credentials.token,
-          remoteUri: config.credentials.subdomain,
-        }));
+        this.clients.set(
+          'zendesk',
+          new ZendeskClient({
+            username: config.credentials.username,
+            token: config.credentials.token,
+            remoteUri: config.credentials.subdomain,
+          })
+        );
         break;
-      
+
       case 'hubspot':
-        this.clients.set('hubspot', new HubspotClient({
-          accessToken: config.credentials.token,
-        }));
+        this.clients.set(
+          'hubspot',
+          new HubspotClient({
+            accessToken: config.credentials.token,
+          })
+        );
         break;
-      
+
       case 'intercom':
-        this.clients.set('intercom', new IntercomClient({
-          token: config.credentials.token,
-        }));
+        this.clients.set(
+          'intercom',
+          new IntercomClient({
+            token: config.credentials.token,
+          })
+        );
         break;
-      
+
       default:
         throw new Error(`Unsupported integration type: ${config.type}`);
     }
@@ -148,7 +158,7 @@ export class EnterpriseIntegrations {
   public async handleEvent(event: IntegrationEvent): Promise<void> {
     const handlers = this.eventHandlers.get(`${event.type}:${event.action}`);
     if (handlers) {
-      await Promise.all(handlers.map(handler => handler(event)));
+      await Promise.all(handlers.map((handler) => handler(event)));
     }
   }
 
@@ -198,12 +208,11 @@ export class EnterpriseIntegrations {
   // Microsoft 365 Integration Methods
   public async sendTeamsMessage(channel: string, message: string): Promise<void> {
     const client = this.clients.get('microsoft');
-    await client.api('/teams/{channel}/messages')
-      .post({
-        body: {
-          content: message,
-        },
-      });
+    await client.api('/teams/{channel}/messages').post({
+      body: {
+        content: message,
+      },
+    });
   }
 
   private async handleTeamsMessage(event: IntegrationEvent): Promise<void> {

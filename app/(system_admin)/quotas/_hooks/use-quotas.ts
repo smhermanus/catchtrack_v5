@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import { QuotaWithRelations, QuotaStats } from "../_types";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import { QuotaWithRelations, QuotaStats } from '../_types';
 
 interface QuotasResponse {
   quotas: QuotaWithRelations[];
@@ -16,16 +16,16 @@ interface UseQuotasOptions {
 }
 
 export const useQuotas = (options: UseQuotasOptions = {}) => {
-  const { search = "", status, page = 1, limit = 10 } = options;
+  const { search = '', status, page = 1, limit = 10 } = options;
 
   return useQuery<QuotasResponse>({
-    queryKey: ["quotas", { search, status, page, limit }],
+    queryKey: ['quotas', { search, status, page, limit }],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (search) params.append("search", search);
-      if (status) params.append("status", status);
-      params.append("page", page.toString());
-      params.append("limit", limit.toString());
+      if (search) params.append('search', search);
+      if (status) params.append('status', status);
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
 
       const { data } = await axios.get(`/api/quotas?${params.toString()}`);
       return data;
@@ -35,20 +35,20 @@ export const useQuotas = (options: UseQuotasOptions = {}) => {
 
 export const useQuota = (id: number) => {
   return useQuery<QuotaWithRelations>({
-    queryKey: ["quota", id],
+    queryKey: ['quota', id],
     queryFn: async () => {
       const { data } = await axios.get(`/api/quotas/${id}`);
       return data;
     },
-    enabled: !!id && typeof id === "number",
+    enabled: !!id && typeof id === 'number',
   });
 };
 
 export const useLatestQuota = () => {
   return useQuery<QuotaWithRelations>({
-    queryKey: ["quota", "latest"],
+    queryKey: ['quota', 'latest'],
     queryFn: async () => {
-      const { data } = await axios.get("/api/quotas/latest");
+      const { data } = await axios.get('/api/quotas/latest');
       return data;
     },
   });
@@ -56,9 +56,9 @@ export const useLatestQuota = () => {
 
 export const useQuotaStats = () => {
   return useQuery<QuotaStats>({
-    queryKey: ["quota-stats"],
+    queryKey: ['quota-stats'],
     queryFn: async () => {
-      const { data } = await axios.get("/api/quotas/stats");
+      const { data } = await axios.get('/api/quotas/stats');
       return data;
     },
   });
@@ -69,12 +69,12 @@ export const useCreateQuota = () => {
 
   return useMutation({
     mutationFn: async (data: any) => {
-      const response = await axios.post("/api/quotas", data);
+      const response = await axios.post('/api/quotas', data);
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["quotas"] });
-      queryClient.invalidateQueries({ queryKey: ["quota-stats"] });
+      queryClient.invalidateQueries({ queryKey: ['quotas'] });
+      queryClient.invalidateQueries({ queryKey: ['quota-stats'] });
     },
   });
 };
@@ -88,9 +88,9 @@ export const useUpdateQuota = () => {
       return response.data;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["quotas"] });
-      queryClient.invalidateQueries({ queryKey: ["quota", variables.id] });
-      queryClient.invalidateQueries({ queryKey: ["quota-stats"] });
+      queryClient.invalidateQueries({ queryKey: ['quotas'] });
+      queryClient.invalidateQueries({ queryKey: ['quota', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['quota-stats'] });
     },
   });
 };
@@ -104,8 +104,8 @@ export const useDeleteQuota = () => {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["quotas"] });
-      queryClient.invalidateQueries({ queryKey: ["quota-stats"] });
+      queryClient.invalidateQueries({ queryKey: ['quotas'] });
+      queryClient.invalidateQueries({ queryKey: ['quota-stats'] });
     },
   });
 };

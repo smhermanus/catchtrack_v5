@@ -1,9 +1,9 @@
-import { Metadata } from "next";
-import ApplyForm from "./_components/ApplyForm";
+import { Metadata } from 'next';
+import ApplyForm from './_components/ApplyForm';
 
 export const metadata: Metadata = {
-  title: "Apply for Permit | CatchTrack",
-  description: "Apply for a new fishing permit",
+  title: 'Apply for Permit | CatchTrack',
+  description: 'Apply for a new fishing permit',
 };
 
 export default function ApplyPage() {

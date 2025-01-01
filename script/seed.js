@@ -1,8 +1,8 @@
-import { PrismaClient } from "@prisma/client";
-import * as fs from "fs";
-import * as path from "path";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
+import { PrismaClient } from '@prisma/client';
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -10,10 +10,10 @@ const __dirname = dirname(__filename);
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Starting seed...");
+  console.log('Starting seed...');
 
   try {
-    const ADMIN_USER_ID = "6hqxx4ootcrrrkke";
+    const ADMIN_USER_ID = '6hqxx4ootcrrrkke';
 
     // Verify the user exists
     const adminUser = await prisma.user.findUnique({
@@ -21,12 +21,12 @@ async function main() {
     });
 
     if (!adminUser) {
-      throw new Error("Admin user not found");
+      throw new Error('Admin user not found');
     }
 
     // Read the JSON file
-    const jsonPath = path.join(__dirname, "./quota.json");
-    const jsonData = fs.readFileSync(jsonPath, "utf8");
+    const jsonPath = path.join(__dirname, './quota.json');
+    const jsonData = fs.readFileSync(jsonPath, 'utf8');
     let quotas = JSON.parse(jsonData);
 
     // If the data is wrapped in an object with a quotas property, extract it
@@ -63,14 +63,12 @@ async function main() {
         })),
       });
 
-      console.log(
-        `Imported batch ${i / batchSize + 1} of ${Math.ceil(quotas.length / batchSize)}`,
-      );
+      console.log(`Imported batch ${i / batchSize + 1} of ${Math.ceil(quotas.length / batchSize)}`);
     }
 
-    console.log("Seeding completed successfully");
+    console.log('Seeding completed successfully');
   } catch (error) {
-    console.error("Error during seeding:", error);
+    console.error('Error during seeding:', error);
     throw error;
   }
 }

@@ -1,7 +1,7 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Ship, Fish, Factory, MapPin } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Ship, Fish, Factory, MapPin } from 'lucide-react';
 
 interface StatsCardsProps {
   totalVessels: number;
@@ -25,9 +25,7 @@ export function StatsCards({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{totalVessels}</div>
-          <p className="text-xs text-muted-foreground">
-            Registered vessels in system
-          </p>
+          <p className="text-xs text-muted-foreground">Registered vessels in system</p>
         </CardContent>
       </Card>
       <Card>
@@ -37,9 +35,7 @@ export function StatsCards({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{activeCatches}</div>
-          <p className="text-xs text-muted-foreground">
-            Ongoing catch operations
-          </p>
+          <p className="text-xs text-muted-foreground">Ongoing catch operations</p>
         </CardContent>
       </Card>
       <Card>
@@ -49,9 +45,7 @@ export function StatsCards({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{activeFactories}</div>
-          <p className="text-xs text-muted-foreground">
-            Operating processing facilities
-          </p>
+          <p className="text-xs text-muted-foreground">Operating processing facilities</p>
         </CardContent>
       </Card>
       <Card>
@@ -61,9 +55,7 @@ export function StatsCards({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{landingSites}</div>
-          <p className="text-xs text-muted-foreground">
-            Active landing locations
-          </p>
+          <p className="text-xs text-muted-foreground">Active landing locations</p>
         </CardContent>
       </Card>
     </div>

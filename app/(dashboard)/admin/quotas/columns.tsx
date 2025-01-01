@@ -94,22 +94,27 @@ export const columns: ColumnDef<Quota>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => {
-              navigator.clipboard.writeText(String(quota.id));
-              toast.success('Quota ID copied to clipboard');
-            }}>
+            <DropdownMenuItem
+              onClick={() => {
+                navigator.clipboard.writeText(String(quota.id));
+                toast.success('Quota ID copied to clipboard');
+              }}
+            >
               Copy quota ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Edit quota</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive" onClick={async () => {
-              try {
-                await deleteQuota(String(quota.id));
-                toast.success('Quota deleted successfully');
-              } catch {
-                toast.error('Failed to delete quota');
-              }
-            }}>
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={async () => {
+                try {
+                  await deleteQuota(String(quota.id));
+                  toast.success('Quota deleted successfully');
+                } catch {
+                  toast.error('Failed to delete quota');
+                }
+              }}
+            >
               Delete quota
             </DropdownMenuItem>
           </DropdownMenuContent>

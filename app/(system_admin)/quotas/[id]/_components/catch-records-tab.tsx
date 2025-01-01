@@ -1,18 +1,12 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { format } from "date-fns";
-import { useCatchRecords } from "../../_hooks/use-catch-records";
-import { DataTable } from "@/components/ui/data-table";
-import { columns, FormattedCatchRecord } from "./catch-record-columns";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Decimal } from "@prisma/client/runtime/library";
+import { useState } from 'react';
+import { format } from 'date-fns';
+import { useCatchRecords } from '../../_hooks/use-catch-records';
+import { DataTable } from '@/components/ui/data-table';
+import { columns, FormattedCatchRecord } from './catch-record-columns';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Decimal } from '@prisma/client/runtime/library';
 
 interface CatchRecordsTabProps {
   id: string;
@@ -23,7 +17,7 @@ export function CatchRecordsTab({ id }: CatchRecordsTabProps) {
 
   const formattedRecords: FormattedCatchRecord[] = catchRecords.map((record) => ({
     id: record.id.toString(),
-    date: format(new Date(record.date), "PPP"),
+    date: format(new Date(record.date), 'PPP'),
     landingSite: record.landingSite.siteName,
     rightsholder: record.rightsholder.companyName,
     species: record.species.commonName,
@@ -36,15 +30,21 @@ export function CatchRecordsTab({ id }: CatchRecordsTabProps) {
 
   // Calculate summary statistics
   const totalWeight = formattedRecords.reduce((sum, record) => sum + record.weight, 0);
-  const speciesSummary = formattedRecords.reduce((acc, record) => {
-    acc[record.species] = (acc[record.species] || 0) + record.weight;
-    return acc;
-  }, {} as Record<string, number>);
+  const speciesSummary = formattedRecords.reduce(
+    (acc, record) => {
+      acc[record.species] = (acc[record.species] || 0) + record.weight;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
-  const landingSiteSummary = formattedRecords.reduce((acc, record) => {
-    acc[record.landingSite] = (acc[record.landingSite] || 0) + record.weight;
-    return acc;
-  }, {} as Record<string, number>);
+  const landingSiteSummary = formattedRecords.reduce(
+    (acc, record) => {
+      acc[record.landingSite] = (acc[record.landingSite] || 0) + record.weight;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   return (
     <div className="space-y-6">
@@ -55,9 +55,7 @@ export function CatchRecordsTab({ id }: CatchRecordsTabProps) {
             <CardDescription>Total weight of all catches</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {totalWeight.toLocaleString()} kg
-            </div>
+            <div className="text-2xl font-bold">{totalWeight.toLocaleString()} kg</div>
           </CardContent>
         </Card>
 
@@ -99,9 +97,7 @@ export function CatchRecordsTab({ id }: CatchRecordsTabProps) {
       <Card>
         <CardHeader>
           <CardTitle>Catch Records</CardTitle>
-          <CardDescription>
-            Detailed list of all catch records for this quota
-          </CardDescription>
+          <CardDescription>Detailed list of all catch records for this quota</CardDescription>
         </CardHeader>
         <CardContent>
           <DataTable

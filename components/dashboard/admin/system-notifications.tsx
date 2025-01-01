@@ -59,26 +59,16 @@ export function SystemNotifications() {
                 key={notification.id}
                 variant={notification.type === 'error' ? 'destructive' : 'default'}
                 className={
-                  notification.type === 'success'
-                    ? 'border-green-500 text-green-700'
-                    : undefined
+                  notification.type === 'success' ? 'border-green-500 text-green-700' : undefined
                 }
               >
-                {notification.type === 'error' && (
-                  <AlertCircle className="h-4 w-4" />
-                )}
-                {notification.type === 'warning' && (
-                  <AlertTriangle className="h-4 w-4" />
-                )}
-                {notification.type === 'success' && (
-                  <CheckCircle2 className="h-4 w-4" />
-                )}
+                {notification.type === 'error' && <AlertCircle className="h-4 w-4" />}
+                {notification.type === 'warning' && <AlertTriangle className="h-4 w-4" />}
+                {notification.type === 'success' && <CheckCircle2 className="h-4 w-4" />}
                 <div>
                   <AlertTitle className="flex items-center justify-between">
                     <span>{notification.title}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {notification.timestamp}
-                    </span>
+                    <span className="text-xs text-muted-foreground">{notification.timestamp}</span>
                   </AlertTitle>
                   <AlertDescription>{notification.description}</AlertDescription>
                 </div>

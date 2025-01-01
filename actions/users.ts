@@ -3,7 +3,7 @@
 import { db } from '@/lib/db';
 import { hash } from 'bcrypt';
 import { revalidatePath } from 'next/cache';
-import { Role } from '@/types/auth';
+import { UserRole } from '@prisma/client';
 
 export async function getUsers() {
   try {
@@ -38,15 +38,17 @@ export async function createUser({
   rsaId,
   cellNumber,
   physicalAddress,
+  companyname,
 }: {
   firstName: string;
   email: string;
   password: string;
-  role: Role;
+  role: UserRole;
   lastName: string;
   rsaId: string;
   cellNumber: string;
   physicalAddress: string;
+  companyname?: string;
 }) {
   try {
     const exists = await db.user.findUnique({
@@ -61,7 +63,7 @@ export async function createUser({
 
     // Generate a unique username from email
     const username = email.split('@')[0];
-    
+
     // Generate a unique user code
     const userCode = `USR${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
@@ -77,6 +79,7 @@ export async function createUser({
         rsaId,
         cellNumber,
         physicalAddress,
+        companyname: companyname || 'Default Company',
       },
     });
 
@@ -87,15 +90,18 @@ export async function createUser({
   }
 }
 
-export async function updateUser(id: string, data: Partial<{
-  firstName: string;
-  email: string;
-  role: Role;
-  lastName: string;
-  rsaId: string;
-  cellNumber: string;
-  physicalAddress: string;
-}>) {
+export async function updateUser(
+  id: string,
+  data: Partial<{
+    firstName: string;
+    email: string;
+    role: UserRole;
+    lastName: string;
+    rsaId: string;
+    cellNumber: string;
+    physicalAddress: string;
+  }>
+) {
   try {
     const user = await db.user.update({
       where: { id: parseInt(id) },

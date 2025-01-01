@@ -45,8 +45,8 @@ export function VesselManagement({ className, ...props }: VesselManagementProps)
                   vessel.status === 'active'
                     ? 'success'
                     : vessel.status === 'docked'
-                    ? 'secondary'
-                    : 'destructive'
+                      ? 'secondary'
+                      : 'destructive'
                 }
               >
                 {vessel.status}

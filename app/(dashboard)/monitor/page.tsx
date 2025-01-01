@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { MonitoringStats } from '@/components/dashboard/monitor/monitoring-stats';
+import Monitor from '../../(monitor)/monitor/_components/MonitorPage';
 
 export const metadata: Metadata = {
   title: 'Monitor Dashboard | CatchTrack',
@@ -13,6 +14,7 @@ export default function MonitorDashboardPage() {
         <h2 className="text-3xl font-bold tracking-tight">Monitoring Dashboard</h2>
       </div>
       <MonitoringStats />
+      <Monitor />
     </div>
   );
 }

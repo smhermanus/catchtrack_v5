@@ -1,9 +1,9 @@
 'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -12,12 +12,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { toast } from "sonner";
-import { updateNotificationPreferences } from "@/app/(dashboard)/settings/notifications/actions";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
+import { updateNotificationPreferences } from '@/app/(dashboard)/settings/notifications/actions';
 
 const notificationPreferencesSchema = z.object({
   quotaWarningThreshold: z.coerce.number().min(1).max(100),
@@ -50,9 +50,9 @@ export function NotificationPreferences({ userId }: NotificationPreferencesProps
   async function onSubmit(data: NotificationPreferences) {
     try {
       await updateNotificationPreferences(userId, data);
-      toast.success("Notification preferences updated");
+      toast.success('Notification preferences updated');
     } catch {
-      toast.error("Failed to update notification preferences");
+      toast.error('Failed to update notification preferences');
     }
   }
 
@@ -123,9 +123,7 @@ export function NotificationPreferences({ userId }: NotificationPreferencesProps
         <Card>
           <CardHeader>
             <CardTitle>Notification Delivery</CardTitle>
-            <CardDescription>
-              Choose how you want to receive notifications
-            </CardDescription>
+            <CardDescription>Choose how you want to receive notifications</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <FormField
@@ -135,15 +133,10 @@ export function NotificationPreferences({ userId }: NotificationPreferencesProps
                 <FormItem className="flex items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Email Notifications</FormLabel>
-                    <FormDescription>
-                      Receive notifications via email
-                    </FormDescription>
+                    <FormDescription>Receive notifications via email</FormDescription>
                   </div>
                   <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                 </FormItem>
               )}
@@ -155,15 +148,10 @@ export function NotificationPreferences({ userId }: NotificationPreferencesProps
                 <FormItem className="flex items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Daily Digest</FormLabel>
-                    <FormDescription>
-                      Receive a daily summary of your quota usage
-                    </FormDescription>
+                    <FormDescription>Receive a daily summary of your quota usage</FormDescription>
                   </div>
                   <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                 </FormItem>
               )}
@@ -175,15 +163,10 @@ export function NotificationPreferences({ userId }: NotificationPreferencesProps
                 <FormItem className="flex items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Weekly Report</FormLabel>
-                    <FormDescription>
-                      Receive detailed weekly reports and forecasts
-                    </FormDescription>
+                    <FormDescription>Receive detailed weekly reports and forecasts</FormDescription>
                   </div>
                   <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                 </FormItem>
               )}

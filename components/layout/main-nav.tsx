@@ -3,18 +3,18 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { 
-  Activity, 
-  Users, 
-  Ship, 
-  Fish, 
-  AlertCircle, 
-  FileText, 
-  Truck, 
-  MapPin, 
-  Database, 
+import {
+  Activity,
+  Users,
+  Ship,
+  Fish,
+  AlertCircle,
+  FileText,
+  Truck,
+  MapPin,
+  Database,
   Shield,
-  ChevronRight
+  ChevronRight,
 } from 'lucide-react';
 
 const items = [
@@ -80,9 +80,7 @@ export function MainNav({ className }: MainNavProps) {
   return (
     <nav className={cn('flex flex-col space-y-1', className)}>
       <div className="px-4 py-2">
-        <h2 className="px-2 text-lg font-semibold tracking-tight">
-          CatchTrack
-        </h2>
+        <h2 className="px-2 text-lg font-semibold tracking-tight">CatchTrack</h2>
       </div>
       <div className="space-y-1">
         {items.map((item) => (
@@ -91,9 +89,7 @@ export function MainNav({ className }: MainNavProps) {
             href={item.href}
             className={cn(
               'flex items-center justify-between px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground',
-              pathname === item.href
-                ? 'bg-accent text-accent-foreground'
-                : 'transparent',
+              pathname === item.href ? 'bg-accent text-accent-foreground' : 'transparent',
               'rounded-md mx-2'
             )}
           >

@@ -21,9 +21,7 @@ export function AdminLayoutClient({ children, user }: AdminLayoutClientProps) {
         <aside className="hidden w-[200px] flex-col md:flex">
           <MainNav />
         </aside>
-        <main className="flex w-full flex-1 flex-col overflow-hidden">
-          {children}
-        </main>
+        <main className="flex w-full flex-1 flex-col overflow-hidden">{children}</main>
       </div>
     </div>
   );

@@ -25,15 +25,24 @@ import {
 } from '@/components/ui/select';
 
 const vesselFormSchema = z.object({
-  name: z.string().min(2, {
-    message: 'Name must be at least 2 characters.',
-  }).max(100),
-  registrationNumber: z.string().min(2, {
-    message: 'Registration number is required.',
-  }).max(50),
-  vesselType: z.string().min(2, {
-    message: 'Vessel type is required.',
-  }).max(50),
+  name: z
+    .string()
+    .min(2, {
+      message: 'Name must be at least 2 characters.',
+    })
+    .max(100),
+  registrationNumber: z
+    .string()
+    .min(2, {
+      message: 'Registration number is required.',
+    })
+    .max(50),
+  vesselType: z
+    .string()
+    .min(2, {
+      message: 'Vessel type is required.',
+    })
+    .max(50),
   rightsholderId: z.number().int().positive(),
 });
 
@@ -83,9 +92,7 @@ export function VesselForm({ onSubmit, initialData }: VesselFormProps) {
               <FormControl>
                 <Input placeholder="Enter vessel name" {...field} />
               </FormControl>
-              <FormDescription>
-                The name of the vessel
-              </FormDescription>
+              <FormDescription>The name of the vessel</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -99,9 +106,7 @@ export function VesselForm({ onSubmit, initialData }: VesselFormProps) {
               <FormControl>
                 <Input placeholder="Enter registration number" {...field} />
               </FormControl>
-              <FormDescription>
-                Official registration number of the vessel
-              </FormDescription>
+              <FormDescription>Official registration number of the vessel</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -125,9 +130,7 @@ export function VesselForm({ onSubmit, initialData }: VesselFormProps) {
                   <SelectItem value="POLE_AND_LINE">Pole and Line</SelectItem>
                 </SelectContent>
               </Select>
-              <FormDescription>
-                Type of the vessel
-              </FormDescription>
+              <FormDescription>Type of the vessel</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -139,16 +142,14 @@ export function VesselForm({ onSubmit, initialData }: VesselFormProps) {
             <FormItem>
               <FormLabel>Rightsholder ID</FormLabel>
               <FormControl>
-                <Input 
+                <Input
                   type="number"
                   placeholder="Enter rightsholder ID"
                   {...field}
                   onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                 />
               </FormControl>
-              <FormDescription>
-                ID of the rightsholder who owns this vessel
-              </FormDescription>
+              <FormDescription>ID of the rightsholder who owns this vessel</FormDescription>
               <FormMessage />
             </FormItem>
           )}

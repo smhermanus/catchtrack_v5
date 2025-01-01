@@ -1,7 +1,7 @@
 'use client';
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 export function QuotaAlerts() {
   return (
@@ -14,9 +14,7 @@ export function QuotaAlerts() {
       </Alert>
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          2 vessels have exceeded their daily catch limit.
-        </AlertDescription>
+        <AlertDescription>2 vessels have exceeded their daily catch limit.</AlertDescription>
       </Alert>
     </div>
   );

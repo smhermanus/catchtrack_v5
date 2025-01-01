@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -12,45 +12,41 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useState } from 'react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
 
 const formSchema = z.object({
   vesselName: z.string().min(2, {
-    message: "Vessel name must be at least 2 characters.",
+    message: 'Vessel name must be at least 2 characters.',
   }),
   registrationNumber: z.string().min(1, {
-    message: "Registration number is required.",
+    message: 'Registration number is required.',
   }),
   permitType: z.string({
-    required_error: "Please select a permit type.",
+    required_error: 'Please select a permit type.',
   }),
   startDate: z.date({
-    required_error: "Start date is required.",
+    required_error: 'Start date is required.',
   }),
   endDate: z.date({
-    required_error: "End date is required.",
+    required_error: 'End date is required.',
   }),
   fishingArea: z.string().min(1, {
-    message: "Fishing area is required.",
+    message: 'Fishing area is required.',
   }),
   additionalNotes: z.string().optional(),
 });
@@ -61,10 +57,10 @@ export default function ApplyForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      vesselName: "",
-      registrationNumber: "",
-      fishingArea: "",
-      additionalNotes: "",
+      vesselName: '',
+      registrationNumber: '',
+      fishingArea: '',
+      additionalNotes: '',
     },
   });
 
@@ -147,17 +143,13 @@ export default function ApplyForm() {
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
-                        variant={"outline"}
+                        variant={'outline'}
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
+                          'w-full pl-3 text-left font-normal',
+                          !field.value && 'text-muted-foreground'
                         )}
                       >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
+                        {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </FormControl>
@@ -167,9 +159,7 @@ export default function ApplyForm() {
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < new Date() || date < new Date("1900-01-01")
-                      }
+                      disabled={(date) => date < new Date() || date < new Date('1900-01-01')}
                       initialFocus
                     />
                   </PopoverContent>
@@ -189,17 +179,13 @@ export default function ApplyForm() {
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
-                        variant={"outline"}
+                        variant={'outline'}
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
+                          'w-full pl-3 text-left font-normal',
+                          !field.value && 'text-muted-foreground'
                         )}
                       >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
+                        {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </FormControl>
@@ -209,9 +195,7 @@ export default function ApplyForm() {
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < new Date() || date < new Date("1900-01-01")
-                      }
+                      disabled={(date) => date < new Date() || date < new Date('1900-01-01')}
                       initialFocus
                     />
                   </PopoverContent>
@@ -258,7 +242,7 @@ export default function ApplyForm() {
         />
 
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Submitting..." : "Submit Application"}
+          {isLoading ? 'Submitting...' : 'Submit Application'}
         </Button>
       </form>
     </Form>

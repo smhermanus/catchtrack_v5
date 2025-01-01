@@ -6,8 +6,8 @@ import { validateRequest } from '@/auth';
 export async function getVesselStatusData() {
   try {
     const { user } = await validateRequest();
-    
-    if (!user || user.role !== 'ADMIN') {
+
+    if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
@@ -31,8 +31,8 @@ export async function getVesselStatusData() {
 export async function getDashboardStats() {
   try {
     const { user } = await validateRequest();
-    
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'SYSTEMADMINISTRATOR')) {
+
+    if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
@@ -40,33 +40,28 @@ export async function getDashboardStats() {
     const startOfDay = new Date(today.setHours(0, 0, 0, 0));
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-    const [
-      totalVessels,
-      activeCatches,
-      activeFactories,
-      landingSites,
-      activeQuotas,
-    ] = await Promise.all([
-      db.vessel.count(),
-      db.catchRecord.count({
-        where: {
-          landingDate: {
-            gte: startOfDay,
-            lte: endOfDay,
+    const [totalVessels, activeCatches, activeFactories, landingSites, activeQuotas] =
+      await Promise.all([
+        db.vessel.count(),
+        db.catchRecord.count({
+          where: {
+            landingDate: {
+              gte: startOfDay,
+              lte: endOfDay,
+            },
           },
-        },
-      }),
-      db.factory.count(),
-      db.landingSite.count(),
-      db.quota.count({
-        where: {
-          status: 'VALID',
-          endDate: {
-            gte: today,
+        }),
+        db.factory.count(),
+        db.landingSite.count(),
+        db.quota.count({
+          where: {
+            status: 'VALID',
+            endDate: {
+              gte: today,
+            },
           },
-        },
-      }),
-    ]);
+        }),
+      ]);
 
     return {
       totalVessels,
@@ -84,8 +79,8 @@ export async function getDashboardStats() {
 export async function getCatchAnalytics() {
   try {
     const { user } = await validateRequest();
-    
-    if (!user || user.role !== 'ADMIN') {
+
+    if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
@@ -126,10 +121,10 @@ export async function getCatchAnalytics() {
     });
 
     // Combine catches and quotas by date
-    const combinedData = catches.map(c => {
+    const combinedData = catches.map((c) => {
       const date = c.landingDate.toISOString().split('T')[0];
-      const quota = quotas.find(q => q.startDate.toISOString().split('T')[0] === date);
-      
+      const quota = quotas.find((q) => q.startDate.toISOString().split('T')[0] === date);
+
       return {
         date,
         totalCatch: Number(c._sum.totalCatchMass || 0),
@@ -147,8 +142,8 @@ export async function getCatchAnalytics() {
 export async function getActiveVesselsCount() {
   try {
     const { user } = await validateRequest();
-    
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'SYSTEMADMINISTRATOR')) {
+
+    if (!user || (user.role !== 'SYSTEMADMINISTRATOR')) {
       throw new Error('Unauthorized');
     }
 
@@ -168,8 +163,8 @@ export async function getActiveVesselsCount() {
 export async function getPendingNotifications() {
   try {
     const { user } = await validateRequest();
-    
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'SYSTEMADMINISTRATOR')) {
+
+    if (!user || (user.role !== 'SYSTEMADMINISTRATOR')) {
       throw new Error('Unauthorized');
     }
 
@@ -189,21 +184,21 @@ export async function getPendingNotifications() {
 export async function getCatchVsQuota() {
   try {
     const { user } = await validateRequest();
-    
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'SYSTEMADMINISTRATOR')) {
+
+    if (!user || (user.role !== 'SYSTEMADMINISTRATOR')) {
       throw new Error('Unauthorized');
     }
 
     const quotas = await db.quota.findMany({
       where: {
-        status: "VALID" as const,
+        status: 'VALID' as const,
       },
       include: {
         catchRecords: true,
       },
     });
 
-    return quotas.map(quota => ({
+    return quotas.map((quota) => ({
       species: quota.productType,
       catch: Number(quota.quotaUsed),
       quota: Number(quota.quotaAllocation),
@@ -218,8 +213,8 @@ export async function getCatchVsQuota() {
 export async function getVesselTrends() {
   try {
     const { user } = await validateRequest();
-    
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'SYSTEMADMINISTRATOR')) {
+
+    if (!user || (user.role !== 'SYSTEMADMINISTRATOR')) {
       throw new Error('Unauthorized');
     }
 
@@ -244,29 +239,32 @@ export async function getVesselTrends() {
     });
 
     // Group vessels by date and status
-    const groupedData = vessels.reduce((acc: Record<string, { active: number; fishing: number; docked: number }>, curr) => {
-      if (!curr.lastStatusUpdate) return acc;
-      
-      const date = curr.lastStatusUpdate.toISOString().split('T')[0];
-      if (!acc[date]) {
-        acc[date] = { active: 0, fishing: 0, docked: 0 };
-      }
+    const groupedData = vessels.reduce(
+      (acc: Record<string, { active: number; fishing: number; docked: number }>, curr) => {
+        if (!curr.lastStatusUpdate) return acc;
 
-      switch (curr.status.toUpperCase()) {
-        case 'ACTIVE':
-          acc[date].active++;
-          break;
-        case 'MAINTENANCE':
-        case 'INACTIVE':
-          acc[date].fishing++;  // Count maintenance and inactive as fishing for trend visualization
-          break;
-        case 'DOCKED':
-          acc[date].docked++;
-          break;
-      }
+        const date = curr.lastStatusUpdate.toISOString().split('T')[0];
+        if (!acc[date]) {
+          acc[date] = { active: 0, fishing: 0, docked: 0 };
+        }
 
-      return acc;
-    }, {});
+        switch (curr.status.toUpperCase()) {
+          case 'ACTIVE':
+            acc[date].active++;
+            break;
+          case 'MAINTENANCE':
+          case 'INACTIVE':
+            acc[date].fishing++; // Count maintenance and inactive as fishing for trend visualization
+            break;
+          case 'DOCKED':
+            acc[date].docked++;
+            break;
+        }
+
+        return acc;
+      },
+      {}
+    );
 
     // Convert to array format for the chart
     return Object.entries(groupedData).map(([date, counts]) => ({
@@ -282,8 +280,8 @@ export async function getVesselTrends() {
 export async function getActiveAlerts() {
   try {
     const { user } = await validateRequest();
-    
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'SYSTEMADMINISTRATOR')) {
+
+    if (!user || (user.role !== 'SYSTEMADMINISTRATOR')) {
       throw new Error('Unauthorized');
     }
 
@@ -301,18 +299,18 @@ export async function getActiveAlerts() {
       take: 5,
     });
 
-    return alerts.map(alert => {
+    return alerts.map((alert) => {
       const quotaUsed = alert.quota.quotaUsed;
       const quotaAllocation = alert.quota.quotaAllocation;
-      const utilizationRate = Number(quotaUsed) / Number(quotaAllocation) * 100;
+      const utilizationRate = (Number(quotaUsed) / Number(quotaAllocation)) * 100;
       const isHighSeverity = utilizationRate >= 90;
-      
+
       return {
         id: alert.id.toString(),
-        type: "quota" as const,
+        type: 'quota' as const,
         title: `Quota Alert: ${alert.vessel.name}`,
         message: `Quota utilization at ${utilizationRate.toFixed(1)}%`,
-        severity: isHighSeverity ? "high" as const : "medium" as const,
+        severity: isHighSeverity ? ('high' as const) : ('medium' as const),
         timestamp: alert.createdAt.toISOString(),
       };
     });

@@ -31,9 +31,9 @@ export function NotificationFeed() {
     const channel = pusherClient.subscribe('notifications');
 
     channel.bind('new-notification', (data: Notification) => {
-      setNotifications(prev => [data, ...prev].slice(0, 10));
-      setUnreadCount(prev => prev + 1);
-      
+      setNotifications((prev) => [data, ...prev].slice(0, 10));
+      setUnreadCount((prev) => prev + 1);
+
       // Show toast for new notifications
       toast(data.title, {
         description: data.message,
@@ -68,29 +68,20 @@ export function NotificationFeed() {
         <DropdownMenuLabel className="flex items-center justify-between">
           Notifications
           {unreadCount > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleMarkAsRead}
-              className="text-xs"
-            >
+            <Button variant="ghost" size="sm" onClick={handleMarkAsRead} className="text-xs">
               Mark all as read
             </Button>
           )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {notifications.length === 0 ? (
-          <DropdownMenuItem disabled>
-            No notifications
-          </DropdownMenuItem>
+          <DropdownMenuItem disabled>No notifications</DropdownMenuItem>
         ) : (
           notifications.map((notification) => (
             <DropdownMenuItem key={notification.id}>
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium">{notification.title}</p>
-                <p className="text-xs text-muted-foreground">
-                  {notification.message}
-                </p>
+                <p className="text-xs text-muted-foreground">{notification.message}</p>
                 <p className="text-xs text-muted-foreground">
                   {new Date(notification.createdAt).toLocaleString()}
                 </p>

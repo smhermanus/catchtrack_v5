@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -12,34 +12,34 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useCreateComplianceRecord } from "../../_hooks/use-compliance";
-import { toast } from "sonner";
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useCreateComplianceRecord } from '../../_hooks/use-compliance';
+import { toast } from 'sonner';
 
 const formSchema = z.object({
   violationType: z.string({
-    required_error: "Please select a violation type",
+    required_error: 'Please select a violation type',
   }),
-  description: z.string().min(1, "Description is required"),
+  description: z.string().min(1, 'Description is required'),
 });
 
 const violationTypes = [
-  "QUOTA_EXCEEDANCE",
-  "ILLEGAL_FISHING",
-  "REPORTING_VIOLATION",
-  "GEAR_VIOLATION",
-  "AREA_VIOLATION",
-  "DOCUMENTATION_VIOLATION",
-  "OTHER",
+  'QUOTA_EXCEEDANCE',
+  'ILLEGAL_FISHING',
+  'REPORTING_VIOLATION',
+  'GEAR_VIOLATION',
+  'AREA_VIOLATION',
+  'DOCUMENTATION_VIOLATION',
+  'OTHER',
 ] as const;
 
 interface ComplianceFormProps {
@@ -54,7 +54,7 @@ export function ComplianceForm({ quotaId, onSuccess }: ComplianceFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      description: "",
+      description: '',
     },
   });
 
@@ -65,10 +65,10 @@ export function ComplianceForm({ quotaId, onSuccess }: ComplianceFormProps) {
         quotaId,
         data: values,
       });
-      toast.success("Compliance record created successfully");
+      toast.success('Compliance record created successfully');
       onSuccess();
     } catch (error) {
-      toast.error("Failed to create compliance record");
+      toast.error('Failed to create compliance record');
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -84,11 +84,7 @@ export function ComplianceForm({ quotaId, onSuccess }: ComplianceFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Violation Type</FormLabel>
-              <Select
-                disabled={isLoading}
-                onValueChange={field.onChange}
-                value={field.value}
-              >
+              <Select disabled={isLoading} onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a violation type" />
@@ -97,7 +93,7 @@ export function ComplianceForm({ quotaId, onSuccess }: ComplianceFormProps) {
                 <SelectContent>
                   {violationTypes.map((type) => (
                     <SelectItem key={type} value={type}>
-                      {type.replace(/_/g, " ")}
+                      {type.replace(/_/g, ' ')}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -126,12 +122,7 @@ export function ComplianceForm({ quotaId, onSuccess }: ComplianceFormProps) {
         />
 
         <div className="flex justify-end gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onSuccess}
-            disabled={isLoading}
-          >
+          <Button type="button" variant="outline" onClick={onSuccess} disabled={isLoading}>
             Cancel
           </Button>
           <Button type="submit" disabled={isLoading}>

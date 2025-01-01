@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ColumnDef } from '@tanstack/react-table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Check, X } from "lucide-react";
+} from '@/components/ui/dropdown-menu';
+import { MoreHorizontal, Check, X } from 'lucide-react';
 
 export type UserManagement = {
   id: string;
@@ -25,38 +25,30 @@ export type UserManagement = {
 
 export const columns: ColumnDef<UserManagement>[] = [
   {
-    accessorKey: "name",
-    header: "Name",
+    accessorKey: 'name',
+    header: 'Name',
   },
   {
-    accessorKey: "email",
-    header: "Email",
+    accessorKey: 'email',
+    header: 'Email',
   },
   {
-    accessorKey: "role",
-    header: "Role",
+    accessorKey: 'role',
+    header: 'Role',
     cell: ({ row }) => {
-      const role = row.getValue("role") as string;
-      return (
-        <Badge variant="outline">
-          {role.replace(/_/g, " ")}
-        </Badge>
-      );
+      const role = row.getValue('role') as string;
+      return <Badge variant="outline">{role.replace(/_/g, ' ')}</Badge>;
     },
   },
   {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: 'status',
+    header: 'Status',
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
+      const status = row.getValue('status') as string;
       return (
         <Badge
           variant={
-            status === "ACTIVE"
-              ? "default"
-              : status === "PENDING"
-              ? "secondary"
-              : "destructive"
+            status === 'ACTIVE' ? 'default' : status === 'PENDING' ? 'secondary' : 'destructive'
           }
         >
           {status}
@@ -65,10 +57,10 @@ export const columns: ColumnDef<UserManagement>[] = [
     },
   },
   {
-    accessorKey: "isVerified",
-    header: "Verified",
+    accessorKey: 'isVerified',
+    header: 'Verified',
     cell: ({ row }) => {
-      const isVerified = row.getValue("isVerified") as boolean;
+      const isVerified = row.getValue('isVerified') as boolean;
       return isVerified ? (
         <Check className="w-4 h-4 text-green-500" />
       ) : (
@@ -77,15 +69,15 @@ export const columns: ColumnDef<UserManagement>[] = [
     },
   },
   {
-    accessorKey: "lastLogin",
-    header: "Last Login",
+    accessorKey: 'lastLogin',
+    header: 'Last Login',
   },
   {
-    accessorKey: "createdAt",
-    header: "Created At",
+    accessorKey: 'createdAt',
+    header: 'Created At',
   },
   {
-    id: "actions",
+    id: 'actions',
     cell: ({ row }) => {
       const user = row.original;
 
@@ -103,13 +95,13 @@ export const columns: ColumnDef<UserManagement>[] = [
               Edit User
             </DropdownMenuItem>
             <DropdownMenuItem>View Details</DropdownMenuItem>
-            {user.status === "PENDING" && (
+            {user.status === 'PENDING' && (
               <>
                 <DropdownMenuItem>Approve User</DropdownMenuItem>
                 <DropdownMenuItem>Reject User</DropdownMenuItem>
               </>
             )}
-            {user.status === "ACTIVE" && (
+            {user.status === 'ACTIVE' && (
               <DropdownMenuItem className="text-red-600">Suspend User</DropdownMenuItem>
             )}
           </DropdownMenuContent>

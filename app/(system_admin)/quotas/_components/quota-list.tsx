@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -8,9 +8,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,17 +18,17 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { MoreHorizontal, Plus, Loader2 } from "lucide-react";
-import { useQuotas, useDeleteQuota } from "../_hooks/use-quotas";
-import { QuotaWithRelations } from "../_types";
-import { format } from "date-fns";
-import { toast } from "sonner";
+} from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { MoreHorizontal, Plus, Loader2 } from 'lucide-react';
+import { useQuotas, useDeleteQuota } from '../_hooks/use-quotas';
+import { QuotaWithRelations } from '../_types';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 export function QuotaList() {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const { data, isLoading, error } = useQuotas({ search, page });
   const deleteQuota = useDeleteQuota();
@@ -36,9 +36,9 @@ export function QuotaList() {
   const handleDelete = async (id: number) => {
     try {
       await deleteQuota.mutateAsync(id.toString());
-      toast.success("Quota deleted successfully");
+      toast.success('Quota deleted successfully');
     } catch (error) {
-      toast.error("Failed to delete quota");
+      toast.error('Failed to delete quota');
     }
   };
 
@@ -101,8 +101,11 @@ export function QuotaList() {
                   <TableCell>{quota.quotaAllocation.toLocaleString()} kg</TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <Progress 
-                        value={calculateUsagePercentage(quota.quotaUsed, quota.finalQuotaAllocation)} 
+                      <Progress
+                        value={calculateUsagePercentage(
+                          quota.quotaUsed,
+                          quota.finalQuotaAllocation
+                        )}
                       />
                       <p className="text-xs text-muted-foreground">
                         {quota.quotaUsed.toLocaleString()} kg (
@@ -133,7 +136,7 @@ export function QuotaList() {
                         <DropdownMenuItem>View Catch Records</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>Transfer Quota</DropdownMenuItem>
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           className="text-red-600"
                           onClick={() => handleDelete(quota.id)}
                         >

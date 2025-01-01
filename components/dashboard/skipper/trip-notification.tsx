@@ -38,8 +38,8 @@ export function TripNotification({ className, ...props }: TripNotificationProps)
           </div>
         </div>
         <div className="space-y-2">
-          <Button 
-            className="w-full" 
+          <Button
+            className="w-full"
             variant="default"
             disabled={isStarting}
             onClick={handleTripStart}

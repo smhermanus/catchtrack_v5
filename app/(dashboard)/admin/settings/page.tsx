@@ -30,9 +30,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>General Settings</CardTitle>
-              <CardDescription>
-                Manage your system-wide settings and preferences
-              </CardDescription>
+              <CardDescription>Manage your system-wide settings and preferences</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -56,9 +54,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Notification Settings</CardTitle>
-              <CardDescription>
-                Configure system notifications and alerts
-              </CardDescription>
+              <CardDescription>Configure system notifications and alerts</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2">
@@ -82,9 +78,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Security Settings</CardTitle>
-              <CardDescription>
-                Configure security settings and policies
-              </CardDescription>
+              <CardDescription>Configure security settings and policies</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2">
@@ -104,9 +98,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>API Settings</CardTitle>
-              <CardDescription>
-                Manage API access and keys
-              </CardDescription>
+              <CardDescription>Manage API access and keys</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">

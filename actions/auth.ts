@@ -9,6 +9,21 @@ import { UserRole } from '@prisma/client';
 type LoginData = z.infer<typeof loginSchema>;
 type RegisterData = z.infer<typeof registerSchema>;
 
+const mapRole = (role: string): UserRole => {
+  switch (role) {
+    case 'SKIPPER':
+      return UserRole.SKIPPER;
+    case 'RIGHTSHOLDER':
+      return UserRole.RIGHTSHOLDER;
+    case 'SYSTEMADMINISTRATOR':
+      return UserRole.SYSTEMADMINISTRATOR;
+    case 'MONITOR':
+      return UserRole.MONITOR;
+    default:
+      throw new Error(`Invalid role: ${role}`);
+  }
+};
+
 export async function authenticate(credentials: LoginData) {
   try {
     await loginSchema.parseAsync(credentials);
@@ -24,7 +39,6 @@ export async function authenticate(credentials: LoginData) {
 
 export async function register(credentials: Omit<RegisterData, 'confirmPassword'>) {
   console.log('Received registration credentials:', credentials);
-  
   try {
     // Check for existing user
     const existingUser = await db.user.findUnique({
@@ -42,18 +56,22 @@ export async function register(credentials: Omit<RegisterData, 'confirmPassword'
 
     // Create user
     const userData = {
-      username: credentials.email.split('@')[0],
+      username: credentials.username,
       email: credentials.email,
       passwordHash: hashedPassword,
-      role: UserRole.SKIPPER,
+      role: mapRole(credentials.role),
       firstName: credentials.firstName,
       lastName: credentials.lastName,
       rsaId: credentials.rsaId,
       cellNumber: credentials.cellNumber,
       physicalAddress: credentials.physicalAddress,
-      userCode: credentials.userCode,
+      userCode: credentials.userCode || ' ',
+      companyname: credentials.companyname || 'Default Company',
     };
-    console.log('Attempting to create user with data:', { ...userData, passwordHash: '[REDACTED]' });
+    console.log('Attempting to create user with data:', {
+      ...userData,
+      passwordHash: '[REDACTED]',
+    });
 
     const user = await db.user.create({
       data: userData,
@@ -73,13 +91,13 @@ export async function register(credentials: Omit<RegisterData, 'confirmPassword'
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        role: user.role
-      }
+        role: user.role,
+      },
     };
   } catch (error) {
     console.error('Registration error:', error);
-    return { 
-      error: error instanceof Error ? error.message : 'Something went wrong during registration'
+    return {
+      error: error instanceof Error ? error.message : 'Something went wrong during registration',
     };
   }
 }

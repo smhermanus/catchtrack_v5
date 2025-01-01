@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { format } from "date-fns";
-import { useTransfers } from "../../_hooks/use-transfers";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { DataTable } from "@/components/ui/data-table";
-import { columns } from "./transfer-columns";
-import { TransferForm } from "./transfer-form";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FormattedTransfer } from "../../_types";
+import { useState } from 'react';
+import { format } from 'date-fns';
+import { useTransfers } from '../../_hooks/use-transfers';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { DataTable } from '@/components/ui/data-table';
+import { columns } from './transfer-columns';
+import { TransferForm } from './transfer-form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { FormattedTransfer } from '../../_types';
 
 interface TransfersTabProps {
   id: string;
@@ -21,17 +21,19 @@ export function TransfersTab({ id }: TransfersTabProps) {
 
   const formattedTransfers: FormattedTransfer[] = transfers.map((transfer) => ({
     id: transfer.id.toString(),
-    date: format(new Date(transfer.date), "PPP"),
+    date: format(new Date(transfer.date), 'PPP'),
     type: transfer.transferType,
     status: transfer.status,
     amount: Number(transfer.amount),
     fromRightsholder: transfer.fromRightsholder.companyName,
     toRightsholder: transfer.toRightsholder.companyName,
-    approvedBy: transfer.approver ? `${transfer.approver.firstName} ${transfer.approver.lastName}` : undefined,
+    approvedBy: transfer.approver
+      ? `${transfer.approver.firstName} ${transfer.approver.lastName}`
+      : undefined,
     notes: transfer.notes || undefined,
-    documents: transfer.documents.map(doc => ({
+    documents: transfer.documents.map((doc) => ({
       ...doc,
-      id: doc.id.toString()
+      id: doc.id.toString(),
     })),
   }));
 
@@ -56,10 +58,7 @@ export function TransfersTab({ id }: TransfersTabProps) {
           <DialogHeader>
             <DialogTitle>Create Transfer</DialogTitle>
           </DialogHeader>
-          <TransferForm
-            quotaId={id}
-            onSuccess={() => setIsCreating(false)}
-          />
+          <TransferForm quotaId={id} onSuccess={() => setIsCreating(false)} />
         </DialogContent>
       </Dialog>
     </>

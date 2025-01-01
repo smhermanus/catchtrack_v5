@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import {
   Form,
   FormControl,
@@ -13,14 +13,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { LoginFormValues, loginSchema } from "./validation";
-import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
-import { login } from "./actions";
+} from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { LoginFormValues, loginSchema } from './validation';
+import { toast } from 'sonner';
+import { ArrowLeft } from 'lucide-react';
+import { login } from './actions';
 
 const LoginForm = () => {
   const router = useRouter();
@@ -29,8 +29,8 @@ const LoginForm = () => {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
       remember: false,
     },
   });
@@ -43,20 +43,20 @@ const LoginForm = () => {
 
       if (result?.error) {
         toast.error(result.error);
-        if (result.error.includes("Invalid email or password")) {
-          form.setError("email", { message: "Invalid credentials" });
-          form.setError("password", { message: "Invalid credentials" });
+        if (result.error.includes('Invalid email or password')) {
+          form.setError('email', { message: 'Invalid credentials' });
+          form.setError('password', { message: 'Invalid credentials' });
         }
         return;
       }
 
       if (result?.redirectPath) {
-        toast.success("Logged in successfully!");
+        toast.success('Logged in successfully!');
         router.push(result.redirectPath);
         router.refresh();
       }
     } catch (error) {
-      toast.error("Something went wrong. Please try again.");
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setIsPending(false);
     }
@@ -112,19 +112,14 @@ const LoginForm = () => {
             </div>
 
             <div className="space-y-2 text-center mb-8">
-              <h1 className="text-2xl font-semibold tracking-tight">
-                Welcome back
-              </h1>
+              <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
               <p className="text-sm text-muted-foreground">
                 Enter your credentials to access your account
               </p>
             </div>
 
             <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="email"
@@ -175,9 +170,7 @@ const LoginForm = () => {
                           disabled={isPending}
                         />
                       </FormControl>
-                      <FormLabel className="text-sm font-normal">
-                        Remember me
-                      </FormLabel>
+                      <FormLabel className="text-sm font-normal">Remember me</FormLabel>
                     </FormItem>
                   )}
                 />
@@ -187,19 +180,14 @@ const LoginForm = () => {
                   className="w-full bg-[#1C72BD] text-primary-foreground hover:bg-[#1C72BD]/90"
                   disabled={isPending}
                 >
-                  {isPending ? "Signing in..." : "Sign in"}
+                  {isPending ? 'Signing in...' : 'Sign in'}
                 </Button>
               </form>
             </Form>
 
             <div className="text-center text-sm">
-              <span className="text-muted-foreground">
-                Don&apos;t have an account?{" "}
-              </span>
-              <Link
-                href="/register"
-                className="text-primary hover:underline font-medium"
-              >
+              <span className="text-muted-foreground">Don&apos;t have an account? </span>
+              <Link href="/register" className="text-primary hover:underline font-medium">
                 Sign up
               </Link>
             </div>

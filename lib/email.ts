@@ -21,7 +21,7 @@ export async function sendQuotaAlertEmail({
 }: QuotaAlertEmailProps) {
   try {
     const subject = `Quota Alert: ${vesselName}`;
-    
+
     let message = `
       <h2>Quota Alert for ${vesselName}</h2>
       <p>Current Status:</p>

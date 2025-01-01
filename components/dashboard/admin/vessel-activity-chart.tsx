@@ -1,7 +1,16 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 
 const vesselActivity = [
   { day: 'Mon', active: 24 },
@@ -26,12 +35,7 @@ export function VesselActivityChart() {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="active" 
-                stroke="#2563eb" 
-                name="Active Vessels"
-              />
+              <Line type="monotone" dataKey="active" stroke="#2563eb" name="Active Vessels" />
             </LineChart>
           </ResponsiveContainer>
         </div>

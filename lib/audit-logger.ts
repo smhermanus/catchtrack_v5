@@ -90,9 +90,7 @@ class AuditLogger extends EventEmitter {
     this.eventQueue = [];
 
     try {
-      const { data, error } = await supabase
-        .from('audit_logs')
-        .insert(events);
+      const { data, error } = await supabase.from('audit_logs').insert(events);
 
       if (error) {
         console.error('Failed to store audit logs:', error);
@@ -115,9 +113,7 @@ class AuditLogger extends EventEmitter {
     limit?: number;
     offset?: number;
   }) {
-    let query = supabase
-      .from('audit_logs')
-      .select('*');
+    let query = supabase.from('audit_logs').select('*');
 
     if (filters.userId) {
       query = query.eq('userId', filters.userId);

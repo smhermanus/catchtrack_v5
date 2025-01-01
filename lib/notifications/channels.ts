@@ -28,7 +28,7 @@ export async function sendNotification(
   target: NotificationTarget,
   channels: string[]
 ) {
-  const notifications = channels.map(channel => {
+  const notifications = channels.map((channel) => {
     switch (channel) {
       case 'email':
         return sendEmailNotification(content, target.email!);
@@ -70,7 +70,7 @@ async function sendEmailNotification(content: NotificationContent, to: string) {
 
 async function sendSMSNotification(content: NotificationContent, to: string) {
   const message = `${content.type.toUpperCase()}: ${content.title}\n${content.message}`;
-  
+
   await twilio.messages.create({
     body: message,
     to,
@@ -115,7 +115,7 @@ async function sendSlackNotification(content: NotificationContent, channel: stri
 
 async function sendTelegramNotification(content: NotificationContent, chatId: string) {
   const message = `*${content.type.toUpperCase()}: ${content.title}*\n\n${content.message}`;
-  
+
   if (content.data) {
     const formattedData = '```\n' + JSON.stringify(content.data, null, 2) + '\n```';
     await telegram.sendMessage(chatId, message + '\n\n' + formattedData, {

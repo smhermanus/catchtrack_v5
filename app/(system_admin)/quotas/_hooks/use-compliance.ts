@@ -1,10 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import { ComplianceWithRelations } from "../_types";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import { ComplianceWithRelations } from '../_types';
 
 export const useComplianceRecords = (quotaId: string) => {
   return useQuery<ComplianceWithRelations[]>({
-    queryKey: ["compliance", quotaId],
+    queryKey: ['compliance', quotaId],
     queryFn: async () => {
       const { data } = await axios.get(`/api/quotas/${quotaId}/compliance`);
       return data;
@@ -30,8 +30,8 @@ export const useCreateComplianceRecord = () => {
       return response.data;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["compliance", variables.quotaId] });
-      queryClient.invalidateQueries({ queryKey: ["quota", variables.quotaId] });
+      queryClient.invalidateQueries({ queryKey: ['compliance', variables.quotaId] });
+      queryClient.invalidateQueries({ queryKey: ['quota', variables.quotaId] });
     },
   });
 };
@@ -48,7 +48,7 @@ export const useUpdateComplianceRecord = () => {
       quotaId: string;
       recordId: string;
       data: {
-        status: "RESOLVED" | "DISMISSED" | "INVESTIGATING";
+        status: 'RESOLVED' | 'DISMISSED' | 'INVESTIGATING';
         resolution?: string;
       };
     }) => {
@@ -59,8 +59,8 @@ export const useUpdateComplianceRecord = () => {
       return response.data;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["compliance", variables.quotaId] });
-      queryClient.invalidateQueries({ queryKey: ["quota", variables.quotaId] });
+      queryClient.invalidateQueries({ queryKey: ['compliance', variables.quotaId] });
+      queryClient.invalidateQueries({ queryKey: ['quota', variables.quotaId] });
     },
   });
 };

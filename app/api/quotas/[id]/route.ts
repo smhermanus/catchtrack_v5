@@ -1,16 +1,13 @@
-import { NextResponse } from "next/server";
-import { validateRequest } from "@/auth";
-import { db } from "@/lib/db";
+import { NextResponse } from 'next/server';
+import { validateRequest } from '@/auth';
+import { db } from '@/lib/db';
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
     const { user } = await validateRequest();
 
     if (!user) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
     const quota = await db.quota.findUnique({
@@ -35,13 +32,13 @@ export async function GET(
         },
         alerts: {
           orderBy: {
-            createdAt: "desc",
+            createdAt: 'desc',
           },
           take: 10,
         },
         complianceRecords: {
           orderBy: {
-            reportedAt: "desc",
+            reportedAt: 'desc',
           },
           take: 10,
           include: {
@@ -51,7 +48,7 @@ export async function GET(
         },
         transfers: {
           orderBy: {
-            requestedAt: "desc",
+            requestedAt: 'desc',
           },
           take: 10,
           include: {
@@ -61,7 +58,7 @@ export async function GET(
         },
         transfersReceived: {
           orderBy: {
-            requestedAt: "desc",
+            requestedAt: 'desc',
           },
           take: 10,
           include: {
@@ -73,25 +70,22 @@ export async function GET(
     });
 
     if (!quota) {
-      return new NextResponse("Not found", { status: 404 });
+      return new NextResponse('Not found', { status: 404 });
     }
 
     return NextResponse.json(quota);
   } catch (error) {
-    console.error("[QUOTA_GET]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.error('[QUOTA_GET]', error);
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   try {
     const { user } = await validateRequest();
 
     if (!user) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
     const body = await request.json();
@@ -158,9 +152,9 @@ export async function PATCH(
     await db.auditLog.create({
       data: {
         userId: parseInt(user.id),
-        action: "QUOTA_UPDATED",
-        actionType: "UPDATE",
-        tableName: "quotas",
+        action: 'QUOTA_UPDATED',
+        actionType: 'UPDATE',
+        tableName: 'quotas',
         recordId: quota.id,
         changes: body,
       },
@@ -168,20 +162,17 @@ export async function PATCH(
 
     return NextResponse.json(quota);
   } catch (error) {
-    console.error("[QUOTA_PATCH]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.error('[QUOTA_PATCH]', error);
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     const { user } = await validateRequest();
 
     if (!user) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
     const quota = await db.quota.delete({
@@ -194,9 +185,9 @@ export async function DELETE(
     await db.auditLog.create({
       data: {
         userId: parseInt(user.id),
-        action: "QUOTA_DELETED",
-        actionType: "DELETE",
-        tableName: "quotas",
+        action: 'QUOTA_DELETED',
+        actionType: 'DELETE',
+        tableName: 'quotas',
         recordId: quota.id,
         changes: quota,
       },
@@ -204,7 +195,7 @@ export async function DELETE(
 
     return NextResponse.json(quota);
   } catch (error) {
-    console.error("[QUOTA_DELETE]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.error('[QUOTA_DELETE]', error);
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }

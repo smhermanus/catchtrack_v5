@@ -52,7 +52,7 @@ export async function sendEnterpriseNotification(
   target: EnterpriseTarget,
   channels: string[]
 ) {
-  const notifications = channels.map(channel => {
+  const notifications = channels.map((channel) => {
     switch (channel) {
       case 'teams':
         return sendTeamsNotification(notification, target);
@@ -109,23 +109,21 @@ async function sendTeamsNotification(
   }
 
   if (target.teamsChannel) {
-    await teamsClient.api(`/teams/${target.teamsChannel}/channels`)
-      .post({
-        body: {
-          contentType: 'application/vnd.microsoft.card.adaptive',
-          content: card,
-        },
-      });
+    await teamsClient.api(`/teams/${target.teamsChannel}/channels`).post({
+      body: {
+        contentType: 'application/vnd.microsoft.card.adaptive',
+        content: card,
+      },
+    });
   }
 
   if (target.teamsUser) {
-    await teamsClient.api(`/users/${target.teamsUser}/chat/messages`)
-      .post({
-        body: {
-          contentType: 'application/vnd.microsoft.card.adaptive',
-          content: card,
-        },
-      });
+    await teamsClient.api(`/users/${target.teamsUser}/chat/messages`).post({
+      body: {
+        contentType: 'application/vnd.microsoft.card.adaptive',
+        content: card,
+      },
+    });
   }
 }
 
@@ -136,15 +134,19 @@ async function sendDiscordNotification(
   const embed = {
     title: notification.title,
     description: notification.message,
-    color: notification.type === 'critical' ? 0xFF0000 : 
-           notification.type === 'warning' ? 0xFFA500 : 
-           0x00FF00,
-    fields: notification.data ? 
-      Object.entries(notification.data).map(([key, value]) => ({
-        name: key,
-        value: String(value),
-        inline: true,
-      })) : [],
+    color:
+      notification.type === 'critical'
+        ? 0xff0000
+        : notification.type === 'warning'
+          ? 0xffa500
+          : 0x00ff00,
+    fields: notification.data
+      ? Object.entries(notification.data).map(([key, value]) => ({
+          name: key,
+          value: String(value),
+          inline: true,
+        }))
+      : [],
     timestamp: new Date(),
   };
 
@@ -172,9 +174,11 @@ async function sendZoomNotification(
     };
 
     if (notification.data) {
-      message.message += '\n\n' + Object.entries(notification.data)
-        .map(([key, value]) => `**${key}**: ${value}`)
-        .join('\n');
+      message.message +=
+        '\n\n' +
+        Object.entries(notification.data)
+          .map(([key, value]) => `**${key}**: ${value}`)
+          .join('\n');
     }
 
     await zoomClient.chat.post(message);
@@ -189,9 +193,11 @@ async function sendWebexNotification(
     let markdown = `**${notification.title}**\n\n${notification.message}`;
 
     if (notification.data) {
-      markdown += '\n\n' + Object.entries(notification.data)
-        .map(([key, value]) => `**${key}**: ${value}`)
-        .join('\n');
+      markdown +=
+        '\n\n' +
+        Object.entries(notification.data)
+          .map(([key, value]) => `**${key}**: ${value}`)
+          .join('\n');
     }
 
     await webexClient.messages.create({

@@ -1,5 +1,5 @@
-import React from "react";
-import SystemAdmin from "./_components/SystemAdminPage";
+import React from 'react';
+import SystemAdmin from './_components/SystemAdminPage';
 
 const SystemAdminPage = () => {
   return (

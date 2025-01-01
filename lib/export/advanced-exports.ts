@@ -124,7 +124,7 @@ async function exportToPowerPoint({ template, settings }: ExportOptions) {
 
   template.components.forEach((component: any) => {
     const slide = pres.addSlide();
-    
+
     switch (component.type) {
       case 'text':
         slide.addText(component.content);

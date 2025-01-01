@@ -15,9 +15,9 @@ export function holtWinters(
   gamma = 0.1,
   period = 7
 ) {
-  const y = data.map(d => d.value);
+  const y = data.map((d) => d.value);
   const n = y.length;
-  
+
   // Initialize seasonal components
   const seasonals: number[] = Array(period).fill(0);
   for (let i = 0; i < period; i++) {
@@ -44,12 +44,13 @@ export function holtWinters(
     const observation = y[i];
     const lastLevel = level;
     const seasonalIndex = i % period;
-    
+
     // Update components
     level = alpha * (observation / seasonals[seasonalIndex]) + (1 - alpha) * (lastLevel + trend);
     trend = beta * (level - lastLevel) + (1 - beta) * trend;
-    seasonals[seasonalIndex] = gamma * (observation / level) + (1 - gamma) * seasonals[seasonalIndex];
-    
+    seasonals[seasonalIndex] =
+      gamma * (observation / level) + (1 - gamma) * seasonals[seasonalIndex];
+
     results.push((level + trend) * seasonals[seasonalIndex]);
   }
 
@@ -61,7 +62,7 @@ export function holtWinters(
     const forecastDate = addDays(lastDate, i);
     const seasonalIndex = (n + i - 1) % period;
     const forecastValue = (level + trend * i) * seasonals[seasonalIndex];
-    
+
     forecast.push({
       date: format(forecastDate, 'yyyy-MM-dd'),
       value: Math.max(0, forecastValue),
@@ -72,19 +73,15 @@ export function holtWinters(
 }
 
 // SARIMA-inspired seasonal decomposition
-export function seasonalDecomposition(
-  data: TimeSeriesPoint[],
-  daysToForecast: number,
-  period = 7
-) {
-  const y = data.map(d => d.value);
+export function seasonalDecomposition(data: TimeSeriesPoint[], daysToForecast: number, period = 7) {
+  const y = data.map((d) => d.value);
   const n = y.length;
 
   // Calculate moving average
   const ma: number[] = [];
-  for (let i = Math.floor(period/2); i < n - Math.floor(period/2); i++) {
+  for (let i = Math.floor(period / 2); i < n - Math.floor(period / 2); i++) {
     let sum = 0;
-    for (let j = -Math.floor(period/2); j <= Math.floor(period/2); j++) {
+    for (let j = -Math.floor(period / 2); j <= Math.floor(period / 2); j++) {
       sum += y[i + j];
     }
     ma.push(sum / period);
@@ -93,7 +90,7 @@ export function seasonalDecomposition(
   // Calculate seasonal components
   const seasonal: number[] = Array(period).fill(0);
   for (let i = 0; i < n; i++) {
-    const maIndex = i - Math.floor(period/2);
+    const maIndex = i - Math.floor(period / 2);
     if (maIndex >= 0 && maIndex < ma.length) {
       const seasonalIndex = i % period;
       seasonal[seasonalIndex] += y[i] / ma[maIndex];
@@ -109,7 +106,7 @@ export function seasonalDecomposition(
   // Calculate trend using linear regression on deseasonalized data
   const deseasonalized = y.map((val, i) => val / seasonal[i % period]);
   const x = Array.from({ length: n }, (_, i) => i);
-  
+
   const sumX = x.reduce((a, b) => a + b, 0);
   const sumY = deseasonalized.reduce((a, b) => a + b, 0);
   const sumXY = x.reduce((acc, curr, i) => acc + curr * deseasonalized[i], 0);
@@ -143,7 +140,7 @@ export function changePointForecast(
   daysToForecast: number,
   changePointPrior = 0.05
 ) {
-  const y = data.map(d => d.value);
+  const y = data.map((d) => d.value);
   const n = y.length;
   const potentialChangePoints: number[] = [];
 
@@ -152,7 +149,7 @@ export function changePointForecast(
     const gradBefore = y[i] - y[i - 1];
     const gradAfter = y[i + 1] - y[i];
     const gradChange = Math.abs(gradAfter - gradBefore);
-    
+
     if (gradChange > changePointPrior * Math.max(...y)) {
       potentialChangePoints.push(i);
     }

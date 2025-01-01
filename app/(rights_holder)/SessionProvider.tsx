@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import { Session, User } from "lucia";
-import React, { createContext, useContext } from "react";
+import { Session, User } from 'lucia';
+import React, { createContext, useContext } from 'react';
 
 interface SessionContext {
   user: User & {
     role:
-      | "USER"
-      | "SYSTEMADMINISTRATOR"
-      | "SECURITYADMINISTRATOR"
-      | "PERMITADMINISTRATOR"
-      | "PERMITHOLDER"
-      | "RIGHTSHOLDER"
-      | "SKIPPER"
-      | "INSPECTOR"
-      | "MONITOR"
-      | "DRIVER"
-      | "FACTORYSTOCKCONTROLLER"
-      | "LOCALOUTLETCONTROLLER"
-      | "EXPORTCONTROLLER";
+      | 'USER'
+      | 'SYSTEMADMINISTRATOR'
+      | 'SECURITYADMINISTRATOR'
+      | 'PERMITADMINISTRATOR'
+      | 'PERMITHOLDER'
+      | 'RIGHTSHOLDER'
+      | 'SKIPPER'
+      | 'INSPECTOR'
+      | 'MONITOR'
+      | 'DRIVER'
+      | 'FACTORYSTOCKCONTROLLER'
+      | 'LOCALOUTLETCONTROLLER'
+      | 'EXPORTCONTROLLER';
   };
   session: Session;
 }
@@ -29,15 +29,13 @@ export default function SessionProvider({
   children,
   value,
 }: React.PropsWithChildren<{ value: SessionContext }>) {
-  return (
-    <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
-  );
+  return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 
 export function useSession() {
   const context = useContext(SessionContext);
   if (!context) {
-    throw new Error("useSession must be used within a SessionProvider");
+    throw new Error('useSession must be used within a SessionProvider');
   }
   return context;
 }

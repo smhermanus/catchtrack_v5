@@ -28,9 +28,7 @@ export default function UsersPage() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">User Management</h1>
-          <p className="text-muted-foreground">
-            Manage user accounts and approval requests
-          </p>
+          <p className="text-muted-foreground">Manage user accounts and approval requests</p>
         </div>
         <Button>
           <UserPlus className="mr-2 h-4 w-4" />

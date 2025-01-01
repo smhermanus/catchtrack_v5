@@ -2,21 +2,38 @@
 
 import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import { useRoom } from '@/hooks';
-import { HeaderComponent, FooterComponent, TableComponent, ChartComponent, ImageComponent, TextComponent, SignatureComponent, QRCodeComponent, BarcodeComponent, MapComponent, WeatherWidget, CatchSummaryComponent, VesselStatsComponent, QuotaProgressComponent, TimelineComponent, AnnotationsComponent } from '@/components/dashboard/reports/template-components';
+import {
+  HeaderComponent,
+  FooterComponent,
+  TableComponent,
+  ChartComponent,
+  ImageComponent,
+  TextComponent,
+  SignatureComponent,
+  QRCodeComponent,
+  BarcodeComponent,
+  MapComponent,
+  WeatherWidget,
+  CatchSummaryComponent,
+  VesselStatsComponent,
+  QuotaProgressComponent,
+  TimelineComponent,
+  AnnotationsComponent,
+} from '@/components/dashboard/reports/template-components';
 
 interface TemplateComponent {
   id: string;
@@ -49,7 +66,7 @@ const templateComponents: Record<string, TemplateComponentItem> = {
   annotations: { title: 'Annotations', icon: AnnotationsComponent },
 };
 
-type TemplateComponentConfig = 
+type TemplateComponentConfig =
   | ChartConfig
   | TableConfig
   | TextConfig
@@ -192,7 +209,7 @@ const templateSettings: TemplateSettings = {
 
 export function TemplateDesigner({ onSave }: TemplateDesignerProps) {
   const { room } = useRoom();
-  
+
   const [components, setComponents] = useState<TemplateComponent[]>([]);
   const [templateName, setTemplateName] = useState('');
   const [settings, setSettings] = useState(templateSettings);
@@ -225,13 +242,11 @@ export function TemplateDesigner({ onSave }: TemplateDesignerProps) {
   };
 
   const updateComponent = (id: string, updates: Partial<TemplateComponent>) => {
-    setComponents(components.map(c => 
-      c.id === id ? { ...c, ...updates } : c
-    ));
+    setComponents(components.map((c) => (c.id === id ? { ...c, ...updates } : c)));
   };
 
   const removeComponent = (id: string) => {
-    setComponents(components.filter(c => c.id !== id));
+    setComponents(components.filter((c) => c.id !== id));
   };
 
   const handleSave = () => {
@@ -273,7 +288,7 @@ export function TemplateDesigner({ onSave }: TemplateDesignerProps) {
                     <Label>Page Orientation</Label>
                     <Select
                       value={settings.orientation}
-                      onValueChange={(value: 'portrait' | 'landscape') => 
+                      onValueChange={(value: 'portrait' | 'landscape') =>
                         setSettings({ ...settings, orientation: value })
                       }
                     >
@@ -282,7 +297,9 @@ export function TemplateDesigner({ onSave }: TemplateDesignerProps) {
                       </SelectTrigger>
                       <SelectContent>
                         {(['portrait', 'landscape'] as const).map((orientation) => (
-                          <SelectItem key={orientation} value={orientation}>{orientation}</SelectItem>
+                          <SelectItem key={orientation} value={orientation}>
+                            {orientation}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -292,7 +309,7 @@ export function TemplateDesigner({ onSave }: TemplateDesignerProps) {
                     <Label>Page Size</Label>
                     <Select
                       value={settings.pageSize}
-                      onValueChange={(value: 'A4' | 'Letter' | 'Legal') => 
+                      onValueChange={(value: 'A4' | 'Letter' | 'Legal') =>
                         setSettings({ ...settings, pageSize: value })
                       }
                     >
@@ -301,7 +318,9 @@ export function TemplateDesigner({ onSave }: TemplateDesignerProps) {
                       </SelectTrigger>
                       <SelectContent>
                         {(['A4', 'Letter', 'Legal'] as const).map((pageSize) => (
-                          <SelectItem key={pageSize} value={pageSize}>{pageSize}</SelectItem>
+                          <SelectItem key={pageSize} value={pageSize}>
+                            {pageSize}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -332,7 +351,12 @@ export function TemplateDesigner({ onSave }: TemplateDesignerProps) {
                     <Switch
                       checked={settings.margins !== undefined}
                       onCheckedChange={(checked) =>
-                        setSettings({ ...settings, margins: checked ? { top: 10, right: 10, bottom: 10, left: 10 } : undefined })
+                        setSettings({
+                          ...settings,
+                          margins: checked
+                            ? { top: 10, right: 10, bottom: 10, left: 10 }
+                            : undefined,
+                        })
                       }
                     />
                   </div>
@@ -365,11 +389,7 @@ export function TemplateDesigner({ onSave }: TemplateDesignerProps) {
                         className="space-y-2"
                       >
                         {components.map((component, index) => (
-                          <Draggable
-                            key={component.id}
-                            draggableId={component.id}
-                            index={index}
-                          >
+                          <Draggable key={component.id} draggableId={component.id} index={index}>
                             {(provided) => (
                               <div
                                 ref={provided.innerRef}

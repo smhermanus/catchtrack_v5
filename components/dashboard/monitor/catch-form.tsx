@@ -47,7 +47,7 @@ export function CatchForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    
+
     try {
       // TODO: Replace with actual API call
       console.log('Creating catch record:', {
@@ -56,7 +56,7 @@ export function CatchForm() {
         weight: parseFloat(values.weight),
         location: values.location,
       });
-      
+
       toast({
         title: 'Success',
         description: `Recorded ${values.weight}kg of ${values.species} for vessel ${values.vesselName}.`,
@@ -76,7 +76,10 @@ export function CatchForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 bg-card p-4 rounded-lg border">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-6 bg-card p-4 rounded-lg border"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}

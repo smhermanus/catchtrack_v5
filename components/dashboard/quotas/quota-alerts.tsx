@@ -1,8 +1,8 @@
 'use client';
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertCircle, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 interface QuotaAlert {
   id: string;
@@ -49,10 +49,7 @@ export function QuotaAlerts({ alerts }: QuotaAlertsProps) {
           <p className="text-sm text-muted-foreground">No active alerts</p>
         ) : (
           alerts.map((alert) => (
-            <Alert
-              key={alert.id}
-              variant={getAlertVariant(alert.type)}
-            >
+            <Alert key={alert.id} variant={getAlertVariant(alert.type)}>
               <div className="flex items-start gap-4">
                 {getAlertIcon(alert.type)}
                 <div className="grid gap-1">

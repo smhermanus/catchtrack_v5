@@ -34,8 +34,8 @@ export type QuotaFormData = z.infer<typeof quotaSchema>;
 export async function getQuotas() {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session || session.user.role !== 'ADMIN') {
+
+    if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
@@ -63,7 +63,7 @@ export async function getQuotas() {
 export async function createQuota(data: QuotaFormData) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
@@ -99,7 +99,7 @@ export async function createQuota(data: QuotaFormData) {
 export async function deleteQuota(quotaId: string) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
@@ -124,16 +124,18 @@ export async function getQuotaAnalytics() {
         catchRecords: true,
         quotaAllocations: {
           include: {
-            vessel: true
-          }
-        }
-      }
+            vessel: true,
+          },
+        },
+      },
     });
 
     const vesselUtilization = quotas.map((quota) => {
       const allocated = parseFloat(quota.quotaAllocation.toString());
-      const used = quota.catchRecords.reduce((sum, record) => 
-        sum + parseFloat(record.totalCatchMass.toString()), 0);
+      const used = quota.catchRecords.reduce(
+        (sum, record) => sum + parseFloat(record.totalCatchMass.toString()),
+        0
+      );
       const remaining = allocated - used;
       const utilizationRate = (used / allocated) * 100;
 
@@ -142,7 +144,7 @@ export async function getQuotaAnalytics() {
         allocated,
         used,
         remaining,
-        utilizationRate
+        utilizationRate,
       };
     });
 
@@ -191,7 +193,9 @@ export async function getQuotaAlerts() {
       }
 
       // Check for expiring soon
-      const daysUntilExpiry = Math.ceil((quota.endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+      const daysUntilExpiry = Math.ceil(
+        (quota.endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+      );
       if (daysUntilExpiry <= 30 && remaining > 0) {
         alerts.push({
           id: `${quota.id}-expiring`,
@@ -231,8 +235,8 @@ export async function getQuotaTrends() {
       include: {
         catchRecords: {
           orderBy: {
-            landingDate: 'asc'
-          }
+            landingDate: 'asc',
+          },
         },
         quotaAllocations: {
           include: {
@@ -252,10 +256,13 @@ export async function getQuotaTrends() {
       for (let i = 0; i <= 30; i++) {
         const date = addDays(startDate, i);
         const daysCatches = quota.catchRecords.filter(
-          (record) => formatDate(record.landingDate, 'yyyy-MM-dd') === formatDate(date, 'yyyy-MM-dd')
+          (record) =>
+            formatDate(record.landingDate, 'yyyy-MM-dd') === formatDate(date, 'yyyy-MM-dd')
         );
-        const usage = daysCatches.reduce((sum: number, record) => 
-          sum + parseFloat(record.totalCatchMass.toString()), 0);
+        const usage = daysCatches.reduce(
+          (sum: number, record) => sum + parseFloat(record.totalCatchMass.toString()),
+          0
+        );
         cumulativeUsage += usage;
 
         // Calculate projected usage based on current trend
@@ -302,7 +309,7 @@ export async function getQuotaForecasts(quotaId: string) {
     }
 
     // Get historical catch data
-    const catchData = quota.catchRecords.map(record => ({
+    const catchData = quota.catchRecords.map((record) => ({
       date: formatDate(record.landingDate, 'yyyy-MM-dd'),
       amount: parseFloat(record.totalCatchMass.toString()),
     }));
@@ -311,7 +318,7 @@ export async function getQuotaForecasts(quotaId: string) {
     const forecast = await generateQuotaForecast(catchData, {
       historicalDays: 30, // Use last 30 days of data
       daysToForecast: 14, // Forecast next 14 days
-      model: 'linear' // Use linear regression model
+      model: 'linear', // Use linear regression model
     });
 
     return {
@@ -340,7 +347,7 @@ export async function exportQuotaReport(format: 'csv' | 'pdf' | 'excel' = 'csv')
       },
     });
 
-    const reportData = quotas.map(quota => {
+    const reportData = quotas.map((quota) => {
       const totalCatch = quota.catchRecords.reduce(
         (sum, record) => sum + parseFloat(record.totalCatchMass.toString()),
         0
@@ -362,7 +369,16 @@ export async function exportQuotaReport(format: 'csv' | 'pdf' | 'excel' = 'csv')
     });
 
     if (format === 'csv') {
-      const fields = ['quotaId', 'vesselName', 'allocated', 'used', 'remaining', 'utilizationRate', 'startDate', 'endDate'];
+      const fields = [
+        'quotaId',
+        'vesselName',
+        'allocated',
+        'used',
+        'remaining',
+        'utilizationRate',
+        'startDate',
+        'endDate',
+      ];
       return parse(reportData, { fields });
     } else if (format === 'pdf' || format === 'excel') {
       return generateQuotaReport(reportData, { format });
@@ -419,7 +435,7 @@ export async function checkAndSendQuotaAlerts(userEmail: string) {
 
       // Check thresholds and send alerts
       if (
-        utilizationRate >= (100 - criticalThreshold) ||
+        utilizationRate >= 100 - criticalThreshold ||
         daysUntilExpiry <= daysBeforeExpiry ||
         remaining <= criticalThreshold
       ) {
@@ -431,10 +447,7 @@ export async function checkAndSendQuotaAlerts(userEmail: string) {
           utilizationRate,
           daysUntilExpiry,
         });
-      } else if (
-        utilizationRate >= (100 - warningThreshold) ||
-        remaining <= warningThreshold
-      ) {
+      } else if (utilizationRate >= 100 - warningThreshold || remaining <= warningThreshold) {
         await sendQuotaAlertEmail({
           to: userEmail,
           vesselName: quota.quotaAllocations[0]?.vessel?.name || 'Unknown',

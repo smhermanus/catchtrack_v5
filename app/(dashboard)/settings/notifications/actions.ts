@@ -1,8 +1,8 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { revalidatePath } from "next/cache";
-import { z } from "zod";
+import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 
 const preferencesSchema = z.object({
   quotaWarningThreshold: z.number().min(1).max(100),

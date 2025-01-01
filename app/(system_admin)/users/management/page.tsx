@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DataTable } from "@/components/ui/data-table";
-import { columns } from "./_components/columns";
-import { useUsers } from "../../_hooks/use-users";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DataTable } from '@/components/ui/data-table';
+import { columns } from './_components/columns';
+import { useUsers } from '../../_hooks/use-users';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 export default function UserManagementPage() {
   const { data: users = [], isLoading } = useUsers();
@@ -20,7 +20,7 @@ export default function UserManagementPage() {
     role: user.role,
     status: user.status,
     isVerified: user.isVerified,
-    lastLogin: user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : "Never",
+    lastLogin: user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never',
     createdAt: new Date(user.createdAt).toLocaleDateString(),
   }));
 
@@ -58,7 +58,7 @@ export default function UserManagementPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {users.filter((user) => user.status === "ACTIVE").length}
+                  {users.filter((user) => user.status === 'ACTIVE').length}
                 </div>
               </CardContent>
             </Card>
@@ -69,7 +69,7 @@ export default function UserManagementPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {users.filter((user) => user.status === "PENDING").length}
+                  {users.filter((user) => user.status === 'PENDING').length}
                 </div>
               </CardContent>
             </Card>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   LineChart,
   Line,
@@ -15,8 +15,14 @@ import {
 } from 'recharts';
 import { useTheme } from 'next-themes';
 import { format } from 'date-fns';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface ForecastData {
   date: string;
@@ -108,7 +114,12 @@ export function ForecastVisualization({
                   labelFormatter={(value) => format(new Date(value), 'MMM d, yyyy')}
                 />
                 <Legend />
-                <ReferenceLine y={quotaLimit} stroke="red" strokeDasharray="3 3" label="Quota Limit" />
+                <ReferenceLine
+                  y={quotaLimit}
+                  stroke="red"
+                  strokeDasharray="3 3"
+                  label="Quota Limit"
+                />
                 <Line
                   type="monotone"
                   dataKey="actual"

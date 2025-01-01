@@ -1,22 +1,18 @@
-import { validateRequest } from "@/auth";
-import { redirect } from "next/navigation";
-import SessionProvider from "./SessionProvider";
-import Navbar from "./_components/Navbar";
-import { Toaster } from "sonner";
-import SidebarNavigation from "./_components/SlideInSideBar";
-import QueryProvider from "./QueryProvider";
+import { validateRequest } from '@/auth';
+import { redirect } from 'next/navigation';
+import SessionProvider from './SessionProvider';
+import Navbar from './_components/Navbar';
+import { Toaster } from 'sonner';
+import SidebarNavigation from './_components/SlideInSideBar';
+import QueryProvider from './QueryProvider';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
-export default async function SystemAdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function SystemAdminLayout({ children }: { children: React.ReactNode }) {
   const session = await validateRequest();
 
-  if (!session.user || session.user.role !== "SYSTEMADMINISTRATOR") {
-    redirect("/login");
+  if (!session.user || session.user.role !== 'SYSTEMADMINISTRATOR') {
+    redirect('/login');
   }
 
   return (

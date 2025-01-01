@@ -49,7 +49,7 @@ export async function createEnterpriseEvent(
   target: EnterpriseTarget,
   integrations: string[]
 ) {
-  const tasks = integrations.map(integration => {
+  const tasks = integrations.map((integration) => {
     switch (integration) {
       case 'calendar':
         return createGoogleCalendarEvent(event, target);
@@ -132,10 +132,7 @@ async function createJiraIssue(event: EnterpriseEvent, target: EnterpriseTarget)
       assignee: { name: event.assignee },
       customfield_10000: event.type,
       ...Object.fromEntries(
-        Object.entries(event.data || {}).map(([key, value]) => [
-          `customfield_${key}`,
-          value,
-        ])
+        Object.entries(event.data || {}).map(([key, value]) => [`customfield_${key}`, value])
       ),
     },
   });

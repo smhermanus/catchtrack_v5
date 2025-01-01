@@ -78,8 +78,7 @@ export default function ActiveUsersTable({ searchQuery }: ActiveUsersTableProps)
   const filteredUsers = mockActiveUsers.filter((user) =>
     Object.values(user).some(
       (value) =>
-        typeof value === 'string' &&
-        value.toLowerCase().includes(searchQuery.toLowerCase())
+        typeof value === 'string' && value.toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
 
@@ -108,19 +107,13 @@ export default function ActiveUsersTable({ searchQuery }: ActiveUsersTableProps)
                 <Badge variant="outline">{user.role}</Badge>
               </TableCell>
               <TableCell>
-                <Badge
-                  variant={user.status === 'active' ? 'default' : 'secondary'}
-                >
+                <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
                   {user.status}
                 </Badge>
               </TableCell>
+              <TableCell>{format(user.lastLogin, 'MMM d, yyyy HH:mm')}</TableCell>
               <TableCell>
-                {format(user.lastLogin, 'MMM d, yyyy HH:mm')}
-              </TableCell>
-              <TableCell>
-                <Badge
-                  variant={user.twoFactorEnabled ? 'default' : 'secondary'}
-                >
+                <Badge variant={user.twoFactorEnabled ? 'default' : 'secondary'}>
                   {user.twoFactorEnabled ? 'Enabled' : 'Disabled'}
                 </Badge>
               </TableCell>
@@ -173,10 +166,7 @@ export default function ActiveUsersTable({ searchQuery }: ActiveUsersTableProps)
             className="min-h-[100px]"
           />
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowSuspendDialog(false)}
-            >
+            <Button variant="outline" onClick={() => setShowSuspendDialog(false)}>
               Cancel
             </Button>
             <Button

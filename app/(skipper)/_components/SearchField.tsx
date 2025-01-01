@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { Input } from "@/components/ui/input";
-import { SearchIcon } from "lucide-react";
-import React, { useState } from "react";
+import { Input } from '@/components/ui/input';
+import { SearchIcon } from 'lucide-react';
+import React, { useState } from 'react';
 
 export default function SearchField() {
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState('');
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

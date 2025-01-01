@@ -11,7 +11,7 @@ interface ExportOptions {
 }
 
 export async function generateQuotaReport(quotas: QuotaWithRelations[], options: ExportOptions) {
-  const reportData = quotas.map(quota => {
+  const reportData = quotas.map((quota) => {
     const totalCatch = quota.catches.reduce((sum, c) => sum + c.weight, 0);
     const remaining = quota.amount - totalCatch;
     const utilizationRate = (totalCatch / quota.amount) * 100;
@@ -28,7 +28,7 @@ export async function generateQuotaReport(quotas: QuotaWithRelations[], options:
       'Start Date': format(quota.startDate, 'yyyy-MM-dd'),
       'End Date': format(quota.endDate, 'yyyy-MM-dd'),
       'Days Until Expiry': daysUntilExpiry,
-      'Status': utilizationRate >= 90 ? 'Critical' : utilizationRate >= 75 ? 'Warning' : 'Normal',
+      Status: utilizationRate >= 90 ? 'Critical' : utilizationRate >= 75 ? 'Warning' : 'Normal',
     };
   });
 
@@ -44,7 +44,7 @@ export async function generateQuotaReport(quotas: QuotaWithRelations[], options:
 
 function generatePDF(data: any[]) {
   const doc = new jsPDF();
-  
+
   // Add title
   doc.setFontSize(16);
   doc.text('Quota Management Report', 14, 15);
@@ -93,12 +93,12 @@ function generateExcel(data: any[]) {
   ws['!cols'] = colWidths;
 
   XLSX.utils.book_append_sheet(wb, ws, 'Quota Report');
-  
+
   return XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
 }
 
 function generateCSV(data: any[]) {
   const headers = Object.keys(data[0]).join(',');
-  const rows = data.map(row => Object.values(row).join(','));
+  const rows = data.map((row) => Object.values(row).join(','));
   return [headers, ...rows].join('\n');
 }

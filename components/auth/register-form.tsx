@@ -42,36 +42,39 @@ export function RegisterForm() {
 
   async function onSubmit(values: FormData) {
     setIsLoading(true);
-    
+
     try {
       // Log the form values
       console.log('Form values:', JSON.stringify(values, null, 2));
 
       // Validate the data
       const validationResult = registerSchema.safeParse(values);
-      
+
       if (!validationResult.success) {
         console.error('Validation errors:', validationResult.error.errors);
-        form.setError('root', { 
-          message: 'Please check all fields and try again' 
+        form.setError('root', {
+          message: 'Please check all fields and try again',
         });
         validationResult.error.errors.forEach((error) => {
           if (error.path[0]) {
             form.setError(error.path[0] as keyof FormData, {
-              message: error.message
+              message: error.message,
             });
           }
         });
         return;
       }
 
-      console.log('Validation successful, parsed data:', JSON.stringify(validationResult.data, null, 2));
+      console.log(
+        'Validation successful, parsed data:',
+        JSON.stringify(validationResult.data, null, 2)
+      );
 
       // Extract everything except confirmPassword
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...registrationData } = validationResult.data;
       console.log('Registration data being sent:', JSON.stringify(registrationData, null, 2));
-      
+
       const result = await register(registrationData);
       console.log('Registration result:', JSON.stringify(result, null, 2));
 
@@ -80,23 +83,23 @@ export function RegisterForm() {
       }
 
       if (result.error) {
-        form.setError('root', { 
-          message: result.error 
+        form.setError('root', {
+          message: result.error,
         });
         return;
       }
 
       if (!result.success) {
-        form.setError('root', { 
-          message: 'Registration failed. Please try again.' 
+        form.setError('root', {
+          message: 'Registration failed. Please try again.',
         });
         return;
       }
 
       // Sign in after successful registration
-      console.log('Attempting sign in with:', { 
+      console.log('Attempting sign in with:', {
         email: registrationData.email,
-        password: '[REDACTED]'
+        password: '[REDACTED]',
       });
 
       const signInResult = await signIn('credentials', {
@@ -109,8 +112,9 @@ export function RegisterForm() {
 
       if (signInResult?.error) {
         console.error('Sign in error:', signInResult.error);
-        form.setError('root', { 
-          message: 'Registration successful but could not sign in automatically. Please try signing in manually.' 
+        form.setError('root', {
+          message:
+            'Registration successful but could not sign in automatically. Please try signing in manually.',
         });
         router.push('/auth/login');
         return;
@@ -123,10 +127,10 @@ export function RegisterForm() {
       console.error('Registration error:', {
         error,
         message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
+        stack: error instanceof Error ? error.stack : undefined,
       });
-      form.setError('root', { 
-        message: error instanceof Error ? error.message : 'An unexpected error occurred' 
+      form.setError('root', {
+        message: error instanceof Error ? error.message : 'An unexpected error occurred',
       });
     } finally {
       setIsLoading(false);

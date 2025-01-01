@@ -85,7 +85,7 @@ export function useCollaborativeEditing(quotaId: string) {
   };
 
   const isBeingEditedByOthers = others.some(
-    other => other.presence.isEditing && other.presence.selectedQuotaId === quotaId
+    (other) => other.presence.isEditing && other.presence.selectedQuotaId === quotaId
   );
 
   return {
@@ -124,7 +124,7 @@ export function useCollaborativeAnnotations(quotaId: string) {
     });
   }, []);
 
-  const annotations = storage?.sharedAnnotations.filter(a => a.quotaId === quotaId) || [];
+  const annotations = storage?.sharedAnnotations.filter((a) => a.quotaId === quotaId) || [];
 
   return {
     annotations,
@@ -134,10 +134,13 @@ export function useCollaborativeAnnotations(quotaId: string) {
 
 export function useCollaborativeFilters() {
   const storage = useStorage();
-  const updateFilters = useMutation(({ storage }, updates: Partial<Storage['collaborativeFilters']>) => {
-    const filters = storage.get('collaborativeFilters');
-    Object.assign(filters, updates);
-  }, []);
+  const updateFilters = useMutation(
+    ({ storage }, updates: Partial<Storage['collaborativeFilters']>) => {
+      const filters = storage.get('collaborativeFilters');
+      Object.assign(filters, updates);
+    },
+    []
+  );
 
   return {
     filters: storage?.collaborativeFilters,
@@ -158,7 +161,7 @@ export function useCollaborativeCursors() {
   };
 
   return {
-    cursors: others.map(other => ({
+    cursors: others.map((other) => ({
       connectionId: other.connectionId,
       cursor: other.presence.cursor,
       user: other.info,

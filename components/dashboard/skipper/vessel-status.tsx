@@ -22,7 +22,9 @@ export function VesselStatus({ className, ...props }: VesselStatusProps) {
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Status</p>
-              <Badge variant="success" className="mt-1">At Sea</Badge>
+              <Badge variant="success" className="mt-1">
+                At Sea
+              </Badge>
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Current Location</p>

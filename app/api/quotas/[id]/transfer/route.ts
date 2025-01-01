@@ -1,16 +1,13 @@
-import { NextResponse } from "next/server";
-import { validateRequest } from "@/auth";
-import { db } from "@/lib/db";
+import { NextResponse } from 'next/server';
+import { validateRequest } from '@/auth';
+import { db } from '@/lib/db';
 
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
     const { user } = await validateRequest();
 
     if (!user) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
     const body = await request.json();
@@ -21,11 +18,11 @@ export async function POST(
     });
 
     if (!sourceQuota) {
-      return new NextResponse("Source quota not found", { status: 404 });
+      return new NextResponse('Source quota not found', { status: 404 });
     }
 
     if (sourceQuota.quotaBalance && sourceQuota.quotaBalance < amount) {
-      return new NextResponse("Insufficient quota balance", { status: 400 });
+      return new NextResponse('Insufficient quota balance', { status: 400 });
     }
 
     const transfer = await db.quotaTransfer.create({
@@ -41,7 +38,7 @@ export async function POST(
     await db.quotaAlert.create({
       data: {
         quotaId: parseInt(params.id),
-        alertType: "TRANSFER_REQUEST",
+        alertType: 'TRANSFER_REQUEST',
         message: `Transfer request of ${amount} to Quota #${destinationQuotaId}`,
       },
     });
@@ -50,9 +47,9 @@ export async function POST(
     await db.auditLog.create({
       data: {
         userId: parseInt(user.id),
-        action: "TRANSFER_REQUESTED",
-        actionType: "CREATE",
-        tableName: "quota_transfers",
+        action: 'TRANSFER_REQUESTED',
+        actionType: 'CREATE',
+        tableName: 'quota_transfers',
         recordId: transfer.id,
         changes: {
           sourceQuotaId: params.id,
@@ -65,20 +62,17 @@ export async function POST(
 
     return NextResponse.json(transfer);
   } catch (error) {
-    console.error("[QUOTA_TRANSFER_POST]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.error('[QUOTA_TRANSFER_POST]', error);
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   try {
     const { user } = await validateRequest();
 
     if (!user) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
     const body = await request.json();
@@ -88,12 +82,12 @@ export async function PATCH(
       where: { id: parseInt(transferId) },
       data: {
         status,
-        approvedAt: status === "APPROVED" ? new Date() : null,
-        approvedBy: status === "APPROVED" ? parseInt(user.id) : null,
+        approvedAt: status === 'APPROVED' ? new Date() : null,
+        approvedBy: status === 'APPROVED' ? parseInt(user.id) : null,
       },
     });
 
-    if (status === "APPROVED") {
+    if (status === 'APPROVED') {
       // Update source quota balance
       await db.quota.update({
         where: { id: transfer.sourceQuotaId },
@@ -119,24 +113,24 @@ export async function PATCH(
         db.quotaAlert.create({
           data: {
             quotaId: transfer.sourceQuotaId,
-            alertType: "TRANSFER_APPROVED",
+            alertType: 'TRANSFER_APPROVED',
             message: `Transfer of ${transfer.amount} to Quota #${transfer.destinationQuotaId} approved`,
           },
         }),
         db.quotaAlert.create({
           data: {
             quotaId: transfer.destinationQuotaId,
-            alertType: "TRANSFER_APPROVED",
+            alertType: 'TRANSFER_APPROVED',
             message: `Transfer of ${transfer.amount} from Quota #${transfer.sourceQuotaId} approved`,
           },
         }),
       ]);
-    } else if (status === "REJECTED") {
+    } else if (status === 'REJECTED') {
       // Create alert for rejection
       await db.quotaAlert.create({
         data: {
           quotaId: transfer.sourceQuotaId,
-          alertType: "TRANSFER_REJECTED",
+          alertType: 'TRANSFER_REJECTED',
           message: `Transfer request rejected: ${rejectionReason}`,
         },
       });
@@ -146,9 +140,9 @@ export async function PATCH(
     await db.auditLog.create({
       data: {
         userId: parseInt(user.id),
-        action: status === "APPROVED" ? "TRANSFER_APPROVED" : "TRANSFER_REJECTED",
-        actionType: "UPDATE",
-        tableName: "quota_transfers",
+        action: status === 'APPROVED' ? 'TRANSFER_APPROVED' : 'TRANSFER_REJECTED',
+        actionType: 'UPDATE',
+        tableName: 'quota_transfers',
         recordId: transfer.id,
         changes: {
           status,
@@ -159,7 +153,7 @@ export async function PATCH(
 
     return NextResponse.json(transfer);
   } catch (error) {
-    console.error("[QUOTA_TRANSFER_PATCH]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.error('[QUOTA_TRANSFER_PATCH]', error);
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }

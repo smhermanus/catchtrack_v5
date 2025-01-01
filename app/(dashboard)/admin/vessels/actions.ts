@@ -17,8 +17,8 @@ export type VesselFormData = z.infer<typeof vesselSchema>;
 export async function getVessels() {
   try {
     const { user } = await validateRequest();
-    
-    if (!user || user.role !== 'ADMIN') {
+
+  if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
@@ -38,8 +38,8 @@ export async function getVessels() {
 export async function createVessel(data: VesselFormData) {
   try {
     const { user } = await validateRequest();
-    
-    if (!user || user.role !== 'ADMIN') {
+
+    if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
@@ -71,19 +71,19 @@ export async function createVessel(data: VesselFormData) {
 }
 
 export async function updateVesselStatus(
-  vesselId: string, 
+  vesselId: string,
   status: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE' | 'DOCKED'
 ) {
   try {
     const { user } = await validateRequest();
-    
-    if (!user || user.role !== 'ADMIN') {
+
+    if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
     const vessel = await db.vessel.update({
       where: { id: parseInt(vesselId, 10) },
-      data: { 
+      data: {
         status,
         lastStatusUpdate: new Date(),
       },
@@ -100,8 +100,8 @@ export async function updateVesselStatus(
 export async function updateVessel(vesselId: string, data: Partial<VesselFormData>) {
   try {
     const { user } = await validateRequest();
-    
-    if (!user || user.role !== 'ADMIN') {
+
+    if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
@@ -127,8 +127,8 @@ export async function updateVessel(vesselId: string, data: Partial<VesselFormDat
 export async function deleteVessel(vesselId: string) {
   try {
     const { user } = await validateRequest();
-    
-    if (!user || user.role !== 'ADMIN') {
+
+    if (!user || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 

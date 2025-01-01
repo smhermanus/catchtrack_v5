@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 
 export default async function NewQuotaPage() {
   const { user } = await validateRequest();
-  
-  if (!user || !['SYSTEMADMINISTRATOR', 'ADMIN'].includes(user.role)) {
+
+  if (!user || !['SYSTEMADMINISTRATOR'].includes(user.role)) {
     redirect('/');
   }
 
@@ -45,17 +45,15 @@ export default async function NewQuotaPage() {
       <Card>
         <CardHeader>
           <CardTitle>Quota Details</CardTitle>
-          <CardDescription>
-            Set a new quota for a vessel
-          </CardDescription>
+          <CardDescription>Set a new quota for a vessel</CardDescription>
         </CardHeader>
         <CardContent>
-          <QuotaForm 
-            onSubmit={handleCreateQuota} 
-            vessels={vessels.map(vessel => ({ 
-              id: String(vessel.id), 
-              name: vessel.name 
-            }))} 
+          <QuotaForm
+            onSubmit={handleCreateQuota}
+            vessels={vessels.map((vessel) => ({
+              id: String(vessel.id),
+              name: vessel.name,
+            }))}
           />
         </CardContent>
       </Card>

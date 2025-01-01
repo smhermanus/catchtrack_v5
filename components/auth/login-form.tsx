@@ -36,7 +36,7 @@ export function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    
+
     try {
       const result = await signIn('credentials', {
         email: values.email,
@@ -46,10 +46,11 @@ export function LoginForm() {
 
       if (result?.error) {
         console.error('Login error:', result.error);
-        form.setError('root', { 
-          message: result.error === 'CredentialsSignin' 
-            ? 'Invalid email or password' 
-            : 'An error occurred during sign in'
+        form.setError('root', {
+          message:
+            result.error === 'CredentialsSignin'
+              ? 'Invalid email or password'
+              : 'An error occurred during sign in',
         });
       } else {
         router.push('/dashboard');
@@ -57,8 +58,8 @@ export function LoginForm() {
       }
     } catch (error) {
       console.error('Sign in error:', error);
-      form.setError('root', { 
-        message: 'An unexpected error occurred'
+      form.setError('root', {
+        message: 'An unexpected error occurred',
       });
     } finally {
       setIsLoading(false);

@@ -4,12 +4,12 @@ import { db } from './db';
 export async function sendNotification({
   title,
   message,
-  type = 'info',
+  type = 'INFO',
   userId,
 }: {
   title: string;
   message: string;
-  type?: 'info' | 'warning' | 'error' | 'success';
+  type?: 'INFO' | 'WARNING' | 'ERROR' | 'SUCCESS';
   userId?: string;
 }) {
   try {
@@ -19,7 +19,7 @@ export async function sendNotification({
         title,
         message,
         type,
-        userId,
+        userId: userId ? parseInt(userId, 10) : null,
       },
     });
 

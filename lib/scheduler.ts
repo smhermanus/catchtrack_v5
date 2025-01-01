@@ -169,7 +169,7 @@ function calculateNextRun(task: ScheduledTask): Date {
   const now = new Date();
   const [hours, minutes] = task.time.split(':').map(Number);
   const next = new Date(now);
-  
+
   next.setHours(hours, minutes, 0, 0);
 
   if (next <= now) {

@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { AlertCircle, ArrowUpRight, ChevronUp, ChevronDown, Loader2 } from "lucide-react";
-import { useQuotaStats, useLatestQuota } from "../_hooks/use-quotas";
-import { RecentSales } from "./recent-sales";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { AlertCircle, ArrowUpRight, ChevronUp, ChevronDown, Loader2 } from 'lucide-react';
+import { useQuotaStats, useLatestQuota } from '../_hooks/use-quotas';
+import { RecentSales } from './recent-sales';
 
 export function Overview() {
   const { data: stats, isLoading: statsLoading } = useQuotaStats();
@@ -34,9 +34,7 @@ export function Overview() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats?.totalActiveQuotas || 0}</div>
-          <p className="text-xs text-muted-foreground">
-            Currently active quotas
-          </p>
+          <p className="text-xs text-muted-foreground">Currently active quotas</p>
         </CardContent>
       </Card>
       <Card>
@@ -45,11 +43,8 @@ export function Overview() {
           <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats?.totalAllocation.toFixed(2) || "0.00"}</div>
-          <Progress 
-            value={usagePercentage} 
-            className="mt-2" 
-          />
+          <div className="text-2xl font-bold">{stats?.totalAllocation.toFixed(2) || '0.00'}</div>
+          <Progress value={usagePercentage} className="mt-2" />
         </CardContent>
       </Card>
       <Card>
@@ -58,7 +53,7 @@ export function Overview() {
           <AlertCircle className="h-4 w-4 text-yellow-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats?.totalUsed.toFixed(2) || "0.00"}</div>
+          <div className="text-2xl font-bold">{stats?.totalUsed.toFixed(2) || '0.00'}</div>
           <p className="text-xs text-muted-foreground">
             {usagePercentage.toFixed(1)}% of allocation
           </p>
@@ -70,10 +65,8 @@ export function Overview() {
           <ChevronUp className="h-4 w-4 text-green-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats?.totalBalance.toFixed(2) || "0.00"}</div>
-          <p className="text-xs text-muted-foreground">
-            {balancePercentage.toFixed(1)}% remaining
-          </p>
+          <div className="text-2xl font-bold">{stats?.totalBalance.toFixed(2) || '0.00'}</div>
+          <p className="text-xs text-muted-foreground">{balancePercentage.toFixed(1)}% remaining</p>
         </CardContent>
       </Card>
 
@@ -85,10 +78,10 @@ export function Overview() {
           {recentQuota?.alerts?.map((alert) => (
             <Alert
               key={alert.id}
-              variant={alert.alertType.includes("WARNING") ? "warning" : "default"}
+              variant={alert.alertType.includes('WARNING') ? 'warning' : 'default'}
             >
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>{alert.alertType.replace(/_/g, " ")}</AlertTitle>
+              <AlertTitle>{alert.alertType.replace(/_/g, ' ')}</AlertTitle>
               <AlertDescription>{alert.message}</AlertDescription>
             </Alert>
           ))}

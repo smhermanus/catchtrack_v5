@@ -1,10 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import { TransferWithRelations } from "../_types";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import { TransferWithRelations } from '../_types';
 
 export const useTransfers = (quotaId: string) => {
   return useQuery<TransferWithRelations[]>({
-    queryKey: ["transfers", quotaId],
+    queryKey: ['transfers', quotaId],
     queryFn: async () => {
       const { data } = await axios.get(`/api/quotas/${quotaId}/transfers`);
       return data;
@@ -31,8 +31,8 @@ export const useCreateTransfer = () => {
       return response.data;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["transfers", variables.quotaId] });
-      queryClient.invalidateQueries({ queryKey: ["quota", variables.quotaId] });
+      queryClient.invalidateQueries({ queryKey: ['transfers', variables.quotaId] });
+      queryClient.invalidateQueries({ queryKey: ['quota', variables.quotaId] });
     },
   });
 };
@@ -49,7 +49,7 @@ export const useUpdateTransfer = () => {
       quotaId: string;
       transferId: string;
       data: {
-        status: "APPROVED" | "REJECTED";
+        status: 'APPROVED' | 'REJECTED';
         rejectionReason?: string;
       };
     }) => {
@@ -60,8 +60,8 @@ export const useUpdateTransfer = () => {
       return response.data;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["transfers", variables.quotaId] });
-      queryClient.invalidateQueries({ queryKey: ["quota", variables.quotaId] });
+      queryClient.invalidateQueries({ queryKey: ['transfers', variables.quotaId] });
+      queryClient.invalidateQueries({ queryKey: ['quota', variables.quotaId] });
     },
   });
 };

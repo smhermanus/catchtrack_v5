@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Table,
@@ -7,27 +7,24 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal, Plus } from "lucide-react";
+} from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { MoreHorizontal, Plus } from 'lucide-react';
 
 export function ComplianceList() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Input
-          placeholder="Search compliance records..."
-          className="max-w-sm"
-        />
+        <Input placeholder="Search compliance records..." className="max-w-sm" />
         <Button>
           <Plus className="mr-2 h-4 w-4" /> Report Violation
         </Button>

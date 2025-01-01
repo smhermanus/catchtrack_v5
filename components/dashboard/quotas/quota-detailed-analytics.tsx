@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   LineChart,
   Line,
@@ -14,7 +14,7 @@ import {
   Area,
 } from 'recharts';
 import { useTheme } from 'next-themes';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 
 interface DailyUsage {
@@ -77,7 +77,12 @@ export function QuotaDetailedAnalytics({ trends, onExport }: QuotaDetailedAnalyt
                 <YAxis
                   stroke={chartColors.text}
                   tick={{ fill: chartColors.text }}
-                  label={{ value: 'Daily Usage (tons)', angle: -90, position: 'insideLeft', fill: chartColors.text }}
+                  label={{
+                    value: 'Daily Usage (tons)',
+                    angle: -90,
+                    position: 'insideLeft',
+                    fill: chartColors.text,
+                  }}
                 />
                 <Tooltip
                   contentStyle={{
@@ -112,7 +117,12 @@ export function QuotaDetailedAnalytics({ trends, onExport }: QuotaDetailedAnalyt
                 <YAxis
                   stroke={chartColors.text}
                   tick={{ fill: chartColors.text }}
-                  label={{ value: 'Cumulative Usage (tons)', angle: -90, position: 'insideLeft', fill: chartColors.text }}
+                  label={{
+                    value: 'Cumulative Usage (tons)',
+                    angle: -90,
+                    position: 'insideLeft',
+                    fill: chartColors.text,
+                  }}
                 />
                 <Tooltip
                   contentStyle={{
@@ -145,7 +155,12 @@ export function QuotaDetailedAnalytics({ trends, onExport }: QuotaDetailedAnalyt
                 <YAxis
                   stroke={chartColors.text}
                   tick={{ fill: chartColors.text }}
-                  label={{ value: 'Usage (tons)', angle: -90, position: 'insideLeft', fill: chartColors.text }}
+                  label={{
+                    value: 'Usage (tons)',
+                    angle: -90,
+                    position: 'insideLeft',
+                    fill: chartColors.text,
+                  }}
                 />
                 <Tooltip
                   contentStyle={{

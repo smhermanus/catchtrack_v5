@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ColumnDef } from '@tanstack/react-table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, FileText } from "lucide-react";
-import { ComplianceWithRelations } from "../../_types";
+} from '@/components/ui/dropdown-menu';
+import { MoreHorizontal, FileText } from 'lucide-react';
+import { ComplianceWithRelations } from '../../_types';
 
 export type FormattedComplianceRecord = {
   id: string;
@@ -26,58 +26,54 @@ export type FormattedComplianceRecord = {
 
 export const columns: ColumnDef<FormattedComplianceRecord>[] = [
   {
-    accessorKey: "date",
-    header: "Date",
+    accessorKey: 'date',
+    header: 'Date',
   },
   {
-    accessorKey: "type",
-    header: "Type",
+    accessorKey: 'type',
+    header: 'Type',
     cell: ({ row }) => {
-      const type = row.getValue("type") as string;
-      return (
-        <Badge variant="outline">
-          {type.replace(/_/g, " ")}
-        </Badge>
-      );
+      const type = row.getValue('type') as string;
+      return <Badge variant="outline">{type.replace(/_/g, ' ')}</Badge>;
     },
   },
   {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: 'status',
+    header: 'Status',
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
+      const status = row.getValue('status') as string;
       return (
         <Badge
           variant={
-            status === "COMPLIANT"
-              ? "success"
-              : status === "NON_COMPLIANT"
-              ? "destructive"
-              : "default"
+            status === 'COMPLIANT'
+              ? 'success'
+              : status === 'NON_COMPLIANT'
+                ? 'destructive'
+                : 'default'
           }
         >
-          {status.replace(/_/g, " ")}
+          {status.replace(/_/g, ' ')}
         </Badge>
       );
     },
   },
   {
-    accessorKey: "description",
-    header: "Description",
+    accessorKey: 'description',
+    header: 'Description',
   },
   {
-    accessorKey: "inspector",
-    header: "Inspector",
+    accessorKey: 'inspector',
+    header: 'Inspector',
   },
   {
-    accessorKey: "actions",
-    header: "Actions Taken",
+    accessorKey: 'actions',
+    header: 'Actions Taken',
   },
   {
-    accessorKey: "documents",
-    header: "Documents",
+    accessorKey: 'documents',
+    header: 'Documents',
     cell: ({ row }) => {
-      const documents = row.getValue("documents") as { id: number; name: string; url: string }[];
+      const documents = row.getValue('documents') as { id: number; name: string; url: string }[];
       if (!documents?.length) return null;
 
       return (
@@ -108,7 +104,7 @@ export const columns: ColumnDef<FormattedComplianceRecord>[] = [
     },
   },
   {
-    id: "actions",
+    id: 'actions',
     cell: ({ row }) => {
       return (
         <DropdownMenu>

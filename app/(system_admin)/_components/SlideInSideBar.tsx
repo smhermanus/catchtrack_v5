@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   ChevronRight,
   Mail,
@@ -25,18 +25,14 @@ import {
   FileBarChart,
   MapPin,
   Database,
-} from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
+} from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
 
 interface DropdownItem {
   title: string;
@@ -85,18 +81,15 @@ const SidebarContent = ({
                     {item.hasDropdown ? (
                       <Collapsible
                         open={expandedItem === item.title}
-                        onOpenChange={(open) =>
-                          setExpandedItem(open ? item.title : null)
-                        }
+                        onOpenChange={(open) => setExpandedItem(open ? item.title : null)}
                       >
                         <CollapsibleTrigger asChild>
                           <Button
                             variant="ghost"
                             className={cn(
-                              "w-full relative h-10",
-                              isCollapsed ? "px-0" : "px-4",
-                              pathname?.startsWith(item.href) &&
-                                "bg-accent text-accent-foreground",
+                              'w-full relative h-10',
+                              isCollapsed ? 'px-0' : 'px-4',
+                              pathname?.startsWith(item.href) && 'bg-accent text-accent-foreground'
                             )}
                           >
                             {isCollapsed ? (
@@ -104,13 +97,11 @@ const SidebarContent = ({
                             ) : (
                               <div className="grid grid-cols-[24px_1fr_24px] items-center w-full">
                                 <item.icon className="h-4 w-4" />
-                                <span className="text-left px-3">
-                                  {item.title}
-                                </span>
+                                <span className="text-left px-3">{item.title}</span>
                                 <ChevronRight
                                   className={cn(
-                                    "h-4 w-4 transition-transform duration-200",
-                                    expandedItem === item.title && "rotate-90",
+                                    'h-4 w-4 transition-transform duration-200',
+                                    expandedItem === item.title && 'rotate-90'
                                   )}
                                 />
                               </div>
@@ -119,25 +110,20 @@ const SidebarContent = ({
                         </CollapsibleTrigger>
                         {!isCollapsed && (
                           <CollapsibleContent>
-                            {item.dropdownItems?.map(
-                              (dropdownItem, dropdownIndex) => (
-                                <Link
-                                  key={dropdownIndex}
-                                  href={dropdownItem.href}
+                            {item.dropdownItems?.map((dropdownItem, dropdownIndex) => (
+                              <Link key={dropdownIndex} href={dropdownItem.href}>
+                                <Button
+                                  variant="ghost"
+                                  className={cn(
+                                    'w-full h-10 justify-start pl-[52px]',
+                                    pathname === dropdownItem.href &&
+                                      'bg-accent text-accent-foreground'
+                                  )}
                                 >
-                                  <Button
-                                    variant="ghost"
-                                    className={cn(
-                                      "w-full h-10 justify-start pl-[52px]",
-                                      pathname === dropdownItem.href &&
-                                        "bg-accent text-accent-foreground",
-                                    )}
-                                  >
-                                    {dropdownItem.title}
-                                  </Button>
-                                </Link>
-                              ),
-                            )}
+                                  {dropdownItem.title}
+                                </Button>
+                              </Link>
+                            ))}
                           </CollapsibleContent>
                         )}
                       </Collapsible>
@@ -146,10 +132,9 @@ const SidebarContent = ({
                         <Button
                           variant="ghost"
                           className={cn(
-                            "w-full h-10",
-                            isCollapsed ? "px-0" : "px-4",
-                            pathname === item.href &&
-                              "bg-accent text-accent-foreground",
+                            'w-full h-10',
+                            isCollapsed ? 'px-0' : 'px-4',
+                            pathname === item.href && 'bg-accent text-accent-foreground'
                           )}
                         >
                           {isCollapsed ? (
@@ -157,9 +142,7 @@ const SidebarContent = ({
                           ) : (
                             <div className="grid grid-cols-[24px_1fr] items-center w-full">
                               <item.icon className="h-4 w-4" />
-                              <span className="text-left px-3">
-                                {item.title}
-                              </span>
+                              <span className="text-left px-3">{item.title}</span>
                             </div>
                           )}
                         </Button>
@@ -178,15 +161,11 @@ const SidebarContent = ({
         size="icon"
         onClick={onToggleCollapse}
         className={cn(
-          "absolute -right-3 top-3 h-6 w-6 rounded-full border bg-background shadow-md",
-          "hover:bg-accent hover:text-accent-foreground",
+          'absolute -right-3 top-3 h-6 w-6 rounded-full border bg-background shadow-md',
+          'hover:bg-accent hover:text-accent-foreground'
         )}
       >
-        {isCollapsed ? (
-          <ChevronRight className="h-3 w-3" />
-        ) : (
-          <ChevronLeft className="h-3 w-3" />
-        )}
+        {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </Button>
     </div>
   );
@@ -197,87 +176,88 @@ const SidebarNavigation = () => {
 
   const navigationItems: NavigationSection[] = [
     {
-      section: "Overview",
+      section: 'Overview',
       items: [
         {
-          title: "DASHBOARD",
+          title: 'DASHBOARD',
           icon: BarChart3,
-          href: "/system_admin",
+          href: '/system_admin',
         },
       ],
     },
     {
-      section: "QUOTAS & PERMITS",
+      section: 'QUOTAS & PERMITS',
       items: [
         {
-        title: "MANAGE QUOTAS", icon: Fish, href: "/quotas",
+          title: 'MANAGE QUOTAS',
+          icon: Fish,
+          href: '/quotas',
           hasDropdown: true,
           dropdownItems: [
-            { title: "Overview", href: "/quotas" },
-            { title: "Active Quotas", href: "/quotas/active" },
-            { title: "Reports", href: "/quotas/reports" },
-            { title: "Quota History", href: "/quotas/history" },
-
+            { title: 'Overview', href: '/quotas' },
+            { title: 'Active Quotas', href: '/quotas/active' },
+            { title: 'Reports', href: '/quotas/reports' },
+            { title: 'Quota History', href: '/quotas/history' },
           ],
         },
         {
-          title: "MANAGE PERMITS", icon: ClipboardList, href: "/permits",
+          title: 'MANAGE PERMITS',
+          icon: ClipboardList,
+          href: '/permits',
           hasDropdown: true,
           dropdownItems: [
-            { title: "Apply", href: "/apply" },
-            { title: "List Applications", href: "/applications" },
-
+            { title: 'Apply', href: '/apply' },
+            { title: 'List Applications', href: '/applications' },
           ],
         },
       ],
     },
     {
-      section: "USERS",
+      section: 'USERS',
       items: [
         {
-          title: "USER MANAGEMENT",
+          title: 'USER MANAGEMENT',
           icon: Users,
-          href: "/users",
+          href: '/users',
           hasDropdown: true,
           dropdownItems: [
-            { title: "All Users", href: "/users" },
-            { title: "Rightsholders", href: "/users/rightsholders" },
-            { title: "Monitors", href: "/users/monitors" },
-            { title: "Inspectors", href: "/users/inspectors" },
-            { title: "Roles & Permissions", href: "/users/roles" },
+            { title: 'All Users', href: '/users' },
+            { title: 'Rightsholders', href: '/users/rightsholders' },
+            { title: 'Monitors', href: '/users/monitors' },
+            { title: 'Inspectors', href: '/users/inspectors' },
+            { title: 'Roles & Permissions', href: '/users/roles' },
           ],
         },
       ],
     },
     {
-      section: "TOOLS",
+      section: 'TOOLS',
       items: [
         {
-          title: "APPS & PAGES",
+          title: 'APPS & PAGES',
           icon: Layout,
-          href: "/apps",
+          href: '/apps',
           hasDropdown: true,
           dropdownItems: [
-            { title: "Email", href: "/email" },
-            { title: "Chat", href: "/chat" },
-            { title: "Calendar", href: "/calendar" },
-            { title: "Kanban", href: "/kanban" },
+            { title: 'Email', href: '/email' },
+            { title: 'Chat', href: '/chat' },
+            { title: 'Calendar', href: '/calendar' },
+            { title: 'Kanban', href: '/kanban' },
           ],
         },
       ],
     },
     {
-      section: "System",
+      section: 'System',
       items: [
-        { title: "Activity Log", icon: History, href: "/activity", },
-        { title: "Trip Notifications", icon: AlertCircle, href: "/tripnotifications", },
-        { title: "Catch Records", icon: FileText, href: "/catchrecords", },
-        { title: "Vessels", icon: Ship, href: "/vessels", },
-        { title: "Factories", icon: Truck, href: "/factories", },
-        { title: "Landing Sites", icon: MapPin, href: "/landingsites", },
-        { title: "System Data", icon: Database, href: "/systemdata", },
-        { title: "Settings", icon: Settings, href: "/settings", },
-
+        { title: 'Activity Log', icon: History, href: '/activity' },
+        { title: 'Trip Notifications', icon: AlertCircle, href: '/tripnotifications' },
+        { title: 'Catch Records', icon: FileText, href: '/catchrecords' },
+        { title: 'Vessels', icon: Ship, href: '/vessels' },
+        { title: 'Factories', icon: Truck, href: '/factories' },
+        { title: 'Landing Sites', icon: MapPin, href: '/landingsites' },
+        { title: 'System Data', icon: Database, href: '/systemdata' },
+        { title: 'Settings', icon: Settings, href: '/settings' },
       ],
     },
   ];
@@ -286,11 +266,7 @@ const SidebarNavigation = () => {
     <>
       <Sheet>
         <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="fixed top-16 left-4 z-40 lg:hidden"
-          >
+          <Button variant="ghost" size="icon" className="fixed top-16 left-4 z-40 lg:hidden">
             <Menu className="h-6 w-6" />
           </Button>
         </SheetTrigger>
@@ -301,8 +277,8 @@ const SidebarNavigation = () => {
 
       <div
         className={cn(
-          "fixed top-[88px] left-0 z-30 hidden h-[calc(100vh-88px)] border-r bg-background lg:block transition-all duration-300",
-          isOpen ? "w-64" : "w-16",
+          'fixed top-[88px] left-0 z-30 hidden h-[calc(100vh-88px)] border-r bg-background lg:block transition-all duration-300',
+          isOpen ? 'w-64' : 'w-16'
         )}
       >
         <SidebarContent
@@ -313,10 +289,7 @@ const SidebarNavigation = () => {
       </div>
 
       <div
-        className={cn(
-          "pl-0 lg:pl-16 pt-[88px] transition-all duration-300",
-          isOpen && "lg:pl-64",
-        )}
+        className={cn('pl-0 lg:pl-16 pt-[88px] transition-all duration-300', isOpen && 'lg:pl-64')}
       />
     </>
   );

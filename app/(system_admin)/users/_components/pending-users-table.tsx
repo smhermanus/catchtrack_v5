@@ -85,8 +85,7 @@ export default function PendingUsersTable({ searchQuery }: PendingUsersTableProp
   const filteredUsers = mockPendingUsers.filter((user) =>
     Object.values(user).some(
       (value) =>
-        typeof value === 'string' &&
-        value.toLowerCase().includes(searchQuery.toLowerCase())
+        typeof value === 'string' && value.toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
 
@@ -113,9 +112,7 @@ export default function PendingUsersTable({ searchQuery }: PendingUsersTableProp
               <TableCell>
                 <Badge variant="outline">{user.role}</Badge>
               </TableCell>
-              <TableCell>
-                {format(user.submittedAt, 'MMM d, yyyy')}
-              </TableCell>
+              <TableCell>{format(user.submittedAt, 'MMM d, yyyy')}</TableCell>
               <TableCell>
                 {user.documents.map((doc) => (
                   <Badge
@@ -129,18 +126,10 @@ export default function PendingUsersTable({ searchQuery }: PendingUsersTableProp
               </TableCell>
               <TableCell>
                 <div className="flex space-x-2">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setSelectedUser(user)}
-                  >
+                  <Button size="sm" variant="ghost" onClick={() => setSelectedUser(user)}>
                     <Eye className="h-4 w-4" />
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleApprove(user.id)}
-                  >
+                  <Button size="sm" variant="ghost" onClick={() => handleApprove(user.id)}>
                     <Check className="h-4 w-4 text-green-600" />
                   </Button>
                   <Button
@@ -175,10 +164,7 @@ export default function PendingUsersTable({ searchQuery }: PendingUsersTableProp
             className="min-h-[100px]"
           />
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowRejectionDialog(false)}
-            >
+            <Button variant="outline" onClick={() => setShowRejectionDialog(false)}>
               Cancel
             </Button>
             <Button

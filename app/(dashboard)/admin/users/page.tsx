@@ -34,7 +34,7 @@ async function getUsers() {
       },
     });
 
-    return users.map(user => {
+    return users.map((user) => {
       return {
         id: user.id.toString(),
         firstName: user.firstName,
@@ -55,7 +55,7 @@ async function getUsers() {
 
 export default async function UsersPage() {
   const session = await getServerSession(authOptions);
-  
+
   if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
     redirect('/');
   }

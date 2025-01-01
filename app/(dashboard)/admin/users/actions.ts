@@ -30,7 +30,7 @@ function generateUserCode(username: string): string {
 export async function createUser(data: CreateUserData) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
@@ -58,6 +58,7 @@ export async function createUser(data: CreateUserData) {
         rsaId: data.rsaId,
         cellNumber: data.cellNumber,
         physicalAddress: data.physicalAddress,
+        companyname: 'Unspecified Company',
       },
     });
 
@@ -72,7 +73,7 @@ export async function createUser(data: CreateUserData) {
 export async function updateUserStatus(userId: string, status: 'ACTIVE' | 'INACTIVE') {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
@@ -84,7 +85,7 @@ export async function updateUserStatus(userId: string, status: 'ACTIVE' | 'INACT
 
     const user = await db.user.update({
       where: { id: parsedUserId },
-      data: { 
+      data: {
         isActive: status === 'ACTIVE',
       },
     });
@@ -100,7 +101,7 @@ export async function updateUserStatus(userId: string, status: 'ACTIVE' | 'INACT
 export async function deleteUser(userId: string) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }

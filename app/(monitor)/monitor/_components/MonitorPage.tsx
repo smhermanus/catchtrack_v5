@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import React from "react";
-import StatCards from "./StatCards";
-import BoatsOverview from "./BoatsOverview";
-import ShipmentStatistics from "./ShipmentStatistics";
-import DeliveryPerformance from "./DeliveryPerformance";
-import DeliveryExceptions from "./DeliveryExceptions";
-import OrdersByOutlets from "./OrdersByOutlets";
+import React from 'react';
+import StatCards from './StatCards';
+import BoatsOverview from './BoatsOverview';
+import ShipmentStatistics from './ShipmentStatistics';
+import DeliveryPerformance from './DeliveryPerformance';
+import DeliveryExceptions from './DeliveryExceptions';
+import OrdersByOutlets from './OrdersByOutlets';
 
 const Monitor = () => {
   return (

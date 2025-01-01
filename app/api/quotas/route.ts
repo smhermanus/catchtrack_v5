@@ -1,26 +1,26 @@
-import { NextResponse } from "next/server";
-import { validateRequest } from "@/auth";
-import { db } from "@/lib/db";
-import { Prisma, QuotaStatus } from "@prisma/client";
+import { NextResponse } from 'next/server';
+import { validateRequest } from '@/auth';
+import { db } from '@/lib/db';
+import { Prisma, QuotaStatus } from '@prisma/client';
 
 export async function GET(request: Request) {
   try {
     const { user } = await validateRequest();
 
     if (!user) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get("search") || "";
-    const status = searchParams.get("status") as QuotaStatus | null;
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
+    const search = searchParams.get('search') || '';
+    const status = searchParams.get('status') as QuotaStatus | null;
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
     const skip = (page - 1) * limit;
 
     const where: Prisma.QuotaWhereInput = {
       OR: [
-        { quotaCode: { contains: search, mode: "insensitive" as Prisma.QueryMode } },
+        { quotaCode: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
         { marineResources: { hasSome: [search] } },
       ],
       ...(status && { status }),
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
         skip,
         take: limit,
         orderBy: {
-          createdAt: "desc",
+          createdAt: 'desc',
         },
       }),
       db.quota.count({ where }),
@@ -67,8 +67,8 @@ export async function GET(request: Request) {
       pages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error("[QUOTAS_GET]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.error('[QUOTAS_GET]', error);
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }
 
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     const { user } = await validateRequest();
 
     if (!user) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
     const body = await request.json();
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
         finalQuotaAllocation: quotaAllocation, // Initial allocation
         startDate: new Date(startDate),
         endDate: new Date(endDate),
-        status: "VALID",
+        status: 'VALID',
         season: `${new Date(startDate).getFullYear()}/${new Date(endDate).getFullYear()}`,
         marineResources,
         productType,
@@ -137,9 +137,9 @@ export async function POST(request: Request) {
     await db.auditLog.create({
       data: {
         userId: parseInt(user.id),
-        action: "QUOTA_CREATED",
-        actionType: "CREATE",
-        tableName: "quotas",
+        action: 'QUOTA_CREATED',
+        actionType: 'CREATE',
+        tableName: 'quotas',
         recordId: quota.id,
         changes: {
           quotaCode,
@@ -155,7 +155,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(quota);
   } catch (error) {
-    console.error("[QUOTAS_POST]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.error('[QUOTAS_POST]', error);
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }

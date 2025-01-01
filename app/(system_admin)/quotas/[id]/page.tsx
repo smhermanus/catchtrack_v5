@@ -1,13 +1,13 @@
-import { Metadata } from "next";
-import { QuotaDetails } from "./_components/quota-details";
-import { ComplianceTab } from "./_components/compliance-tab";
-import { TransfersTab } from "./_components/transfers-tab";
-import { CatchRecordsTab } from "./_components/catch-records-tab";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Metadata } from 'next';
+import { QuotaDetails } from './_components/quota-details';
+import { ComplianceTab } from './_components/compliance-tab';
+import { TransfersTab } from './_components/transfers-tab';
+import { CatchRecordsTab } from './_components/catch-records-tab';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const metadata: Metadata = {
-  title: "Quota Details",
-  description: "View and manage quota details",
+  title: 'Quota Details',
+  description: 'View and manage quota details',
 };
 
 export default function QuotaPage({ params }: { params: { id: string } }) {
