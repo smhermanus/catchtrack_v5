@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { validateRequest } from '@/auth';
+import { validateRequest } from '../../../auth';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';

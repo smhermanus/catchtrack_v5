@@ -2,8 +2,9 @@ import './globals.css';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'react-hot-toast';
 import SessionProvider from '@/app/(skipper)/SessionProvider';
-import { validateRequest } from '@/auth';
-
+import { validateRequest } from '../auth';
+import React from 'react';
+import { SidebarContainer } from '@/components/layout/sidebar-container';
 export default async function RootLayout({
   children,
 }: Readonly<{

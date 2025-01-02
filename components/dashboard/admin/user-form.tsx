@@ -238,7 +238,6 @@ export function UserForm({ onSubmit, initialData }: UserFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value={UserRole.ADMIN}>Administrator</SelectItem>
                   <SelectItem value={UserRole.MONITOR}>Monitor</SelectItem>
                   <SelectItem value={UserRole.SKIPPER}>Skipper</SelectItem>
                   <SelectItem value={UserRole.RIGHTSHOLDER}>Rights Holder</SelectItem>

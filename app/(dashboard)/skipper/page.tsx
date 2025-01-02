@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { TripNotification } from '@/components/dashboard/skipper/trip-notification';
 import { VesselStatus } from '@/components/dashboard/skipper/vessel-status';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Skipper Dashboard | CatchTrack',

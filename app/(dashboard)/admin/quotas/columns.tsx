@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Quota } from '@prisma/client';
 import { deleteQuota } from './actions';
 import { toast } from 'sonner';
+import React from 'react';
 
 export const columns: ColumnDef<Quota>[] = [
   {

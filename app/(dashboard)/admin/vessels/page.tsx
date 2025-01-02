@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { validateRequest } from '../../../../auth';
 import { redirect } from 'next/navigation';
 import { DataTable } from '@/components/shared/data-table';
 import { columns } from './columns';
@@ -11,6 +10,7 @@ import { getVessels } from './actions';
 import { Suspense } from 'react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Vessel Management | CatchTrack',
@@ -36,7 +36,6 @@ function TableSkeleton() {
 
 async function VesselTable() {
   const vessels = await getVessels();
-
   return (
     <DataTable
       columns={columns}
@@ -48,10 +47,14 @@ async function VesselTable() {
 }
 
 export default async function VesselsPage() {
-  const session = await getServerSession(authOptions);
+  const { user, session } = await validateRequest();
 
-  if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
-    redirect('/');
+  if (!user || !session) {
+    redirect('/login');
+  }
+
+  if (user.role !== 'SYSTEMADMINISTRATOR') {
+    redirect('/unauthorized');
   }
 
   return (

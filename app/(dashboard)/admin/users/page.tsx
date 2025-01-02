@@ -4,11 +4,11 @@ import { columns } from './columns';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { db } from '@/lib/db';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { validateRequest } from '../../../../auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { UserRole } from '@prisma/client';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'User Management | CatchTrack',
@@ -54,9 +54,9 @@ async function getUsers() {
 }
 
 export default async function UsersPage() {
-  const session = await getServerSession(authOptions);
+  const { user: currentUser, session } = await validateRequest();
 
-  if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
+  if (!currentUser || !session || currentUser.role !== 'SYSTEMADMINISTRATOR') {
     redirect('/');
   }
 

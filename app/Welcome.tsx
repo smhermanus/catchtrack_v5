@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { useSession } from '@/app/(skipper)/SessionProvider';
 import { redirect } from 'next/navigation';
 import { useEffect } from 'react';
+import React from 'react';
 
 export default function WelcomePage() {
   const { user } = useSession();

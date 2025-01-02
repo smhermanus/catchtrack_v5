@@ -1,29 +1,131 @@
 import { google } from 'googleapis';
-import { Asana } from 'asana';
-import { Jira } from 'jira.js';
-import { Client as ServiceNowClient } from 'servicenow-rest-api';
-import { Client as WorkdayClient } from 'workday-api';
+import { Client as AsanaClient } from 'asana';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { Version3Client } from 'jira.js';
 
-// Initialize enterprise clients
-const calendar = google.calendar({ version: 'v3', auth: process.env.GOOGLE_API_KEY });
-const asana = Asana.Client.create().useAccessToken(process.env.ASANA_ACCESS_TOKEN);
-const jira = new Jira({
-  host: process.env.JIRA_HOST!,
+function getRequiredEnvVar(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Required environment variable ${name} is not set`);
+  }
+  return value;
+}
+
+const calendar = google.calendar({
+  version: 'v3',
+  auth: getRequiredEnvVar('GOOGLE_API_KEY'),
+});
+
+const asana = AsanaClient.create().useAccessToken(getRequiredEnvVar('ASANA_ACCESS_TOKEN'));
+
+const jira = new Version3Client({
+  host: getRequiredEnvVar('JIRA_HOST'),
   authentication: {
     basic: {
-      email: process.env.JIRA_EMAIL!,
-      apiToken: process.env.JIRA_API_TOKEN!,
+      email: getRequiredEnvVar('JIRA_EMAIL'),
+      apiToken: getRequiredEnvVar('JIRA_API_TOKEN'),
     },
   },
 });
+
+export { calendar, asana, jira };
+
+class ServiceNowClient {
+  private readonly httpClient: AxiosInstance;
+  private readonly baseUrl: string;
+
+  constructor(options: { instance: string; username: string; password: string }) {
+    this.baseUrl = `https://${options.instance}.service-now.com/api/now/table/`;
+
+    this.httpClient = axios.create({
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization:
+          'Basic ' + Buffer.from(`${options.username}:${options.password}`).toString('base64'),
+      },
+    });
+  }
+
+  async createRecord(table: string, data: Record<string, any>) {
+    try {
+      const response = await this.httpClient.post(this.baseUrl + table, data);
+      return response.data;
+    } catch (error) {
+      console.error('ServiceNow API Error:', error);
+      throw error;
+    }
+  }
+}
+
+class WorkdayClient {
+  private readonly httpClient: AxiosInstance;
+  private accessToken: string | null = null;
+
+  constructor(options: { baseUrl: string; clientId: string; clientSecret: string }) {
+    const basicAuth = Buffer.from(`${options.clientId}:${options.clientSecret}`).toString('base64');
+
+    this.httpClient = axios.create({
+      baseURL: options.baseUrl,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Basic ${basicAuth}`,
+      },
+    });
+  }
+
+  private async getAccessToken() {
+    if (this.accessToken) return this.accessToken;
+
+    try {
+      const response = await this.httpClient.post(
+        '/oauth/token',
+        {
+          grant_type: 'client_credentials',
+        },
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      );
+
+      this.accessToken = response.data.access_token;
+      return this.accessToken;
+    } catch (error) {
+      console.error('Workday API Authentication Error:', error);
+      throw error;
+    }
+  }
+
+  async createTask(data: Record<string, any>) {
+    try {
+      const accessToken = await this.getAccessToken();
+
+      const response = await this.httpClient.post('/tasks', data, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Workday API Error:', error);
+      throw error;
+    }
+  }
+}
+
 const serviceNow = new ServiceNowClient({
-  instance: process.env.SERVICENOW_INSTANCE!,
-  username: process.env.SERVICENOW_USERNAME!,
-  password: process.env.SERVICENOW_PASSWORD!,
+  instance: getRequiredEnvVar('SERVICENOW_INSTANCE'),
+  username: getRequiredEnvVar('SERVICENOW_USERNAME'),
+  password: getRequiredEnvVar('SERVICENOW_PASSWORD'),
 });
+
 const workday = new WorkdayClient({
-  baseUrl: process.env.WORKDAY_API_URL!,
-  token: process.env.WORKDAY_TOKEN!,
+  baseUrl: getRequiredEnvVar('WORKDAY_API_URL'),
+  clientId: getRequiredEnvVar('WORKDAY_CLIENT_ID'),
+  clientSecret: getRequiredEnvVar('WORKDAY_CLIENT_SECRET'),
 });
 
 interface EnterpriseEvent {
@@ -75,6 +177,7 @@ export async function createEnterpriseEvent(
   }
 }
 
+// Implementation of individual service functions remains the same
 async function createGoogleCalendarEvent(event: EnterpriseEvent, target: EnterpriseTarget) {
   if (!target.googleCalendar) return;
 
@@ -101,17 +204,16 @@ async function createAsanaTask(event: EnterpriseEvent, target: EnterpriseTarget)
   if (!target.asanaProject) return;
 
   return asana.tasks.create({
-    data: {
-      name: event.title,
-      notes: event.description,
-      projects: [target.asanaProject],
-      due_on: event.dueDate?.toISOString(),
-      assignee: event.assignee,
-      custom_fields: {
-        priority: event.priority,
-        type: event.type,
-        ...event.data,
-      },
+    workspace: target.asanaProject,
+    name: event.title,
+    notes: event.description,
+    projects: [target.asanaProject],
+    due_on: event.dueDate?.toISOString().split('T')[0],
+    assignee: event.assignee,
+    custom_fields: {
+      priority: event.priority,
+      type: event.type,
+      ...(event.data || {}),
     },
   });
 }
@@ -141,7 +243,7 @@ async function createJiraIssue(event: EnterpriseEvent, target: EnterpriseTarget)
 async function createServiceNowTicket(event: EnterpriseEvent, target: EnterpriseTarget) {
   if (!target.serviceNowInstance) return;
 
-  return serviceNow.createIncident({
+  const data = {
     short_description: event.title,
     description: event.description,
     priority: event.priority === 'high' ? 1 : event.priority === 'medium' ? 2 : 3,
@@ -149,24 +251,23 @@ async function createServiceNowTicket(event: EnterpriseEvent, target: Enterprise
     due_date: event.dueDate?.toISOString(),
     category: event.type,
     variables: event.data,
-  });
+  };
+
+  return serviceNow.createRecord('incident', data);
 }
 
 async function createWorkdayTask(event: EnterpriseEvent, target: EnterpriseTarget) {
   if (!target.workdayTenant) return;
 
   return workday.createTask({
-    tenant: target.workdayTenant,
-    task: {
-      title: event.title,
-      description: event.description,
-      priority: event.priority,
-      dueDate: event.dueDate,
-      assignee: event.assignee,
-      metadata: {
-        type: event.type,
-        ...event.data,
-      },
+    title: event.title,
+    description: event.description,
+    priority: event.priority,
+    dueDate: event.dueDate,
+    assignee: event.assignee,
+    metadata: {
+      type: event.type,
+      ...event.data,
     },
   });
 }

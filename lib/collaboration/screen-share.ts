@@ -1,4 +1,4 @@
-import { Room, LocalParticipant, RemoteParticipant, Track } from 'livekit-client';
+import { Room, LocalParticipant, RemoteParticipant, Track, TrackPublication } from 'livekit-client';
 import { EventEmitter } from 'events';
 
 interface ScreenShareOptions {
@@ -15,7 +15,7 @@ export class ScreenShare extends EventEmitter {
   private mediaStream?: MediaStream;
   private videoTrack?: MediaStreamTrack;
   private audioTrack?: MediaStreamTrack;
-  private displaySurface?: 'monitor' | 'window' | 'browser';
+  private preferredDisplaySurface?: 'monitor' | 'window' | 'browser';
   private isSharing: boolean = false;
   private recordedChunks: Blob[] = [];
   private mediaRecorder?: MediaRecorder;
@@ -38,25 +38,20 @@ export class ScreenShare extends EventEmitter {
     }
 
     try {
-      this.displaySurface = displaySurface;
+      this.preferredDisplaySurface = displaySurface;
       const constraints = this.getConstraints();
       this.mediaStream = await navigator.mediaDevices.getDisplayMedia(constraints);
 
-      // Handle stream ending (user stops sharing)
       this.mediaStream.getVideoTracks()[0].onended = () => {
         this.stopSharing();
       };
 
-      // Setup tracks
       this.videoTrack = this.mediaStream.getVideoTracks()[0];
       if (this.options.audio) {
         this.audioTrack = this.mediaStream.getAudioTracks()[0];
       }
 
-      // Publish tracks to room
       await this.publishTracks();
-
-      // Start recording if needed
       this.startRecording();
 
       this.isSharing = true;
@@ -70,8 +65,6 @@ export class ScreenShare extends EventEmitter {
 
   private getConstraints(): MediaStreamConstraints {
     const videoConstraints: MediaTrackConstraints = {
-      displaySurface: this.displaySurface,
-      logicalSurface: true,
       frameRate: this.options.frameRate || 30,
     };
 
@@ -114,16 +107,49 @@ export class ScreenShare extends EventEmitter {
       await localParticipant.publishTrack(this.videoTrack, {
         name: 'screen_share',
         simulcast: true,
-        videoQuality: this.options.quality || 'high',
+        videoCodec: 'vp8', // or 'h264'
+        source: Track.Source.ScreenShare,
+        ...(this.options.quality && {
+          videoQuality: this.options.quality,
+        }),
       });
     }
 
-    if (this.audioTrack) {
+    if (this.options.audio && this.audioTrack) {
       await localParticipant.publishTrack(this.audioTrack, {
         name: 'screen_share_audio',
         source: Track.Source.ScreenShareAudio,
       });
     }
+  }
+
+  private getStreamConstraints() {
+    const constraints: MediaTrackConstraints = {
+      frameRate: this.options.frameRate || 30,
+    };
+
+    switch (this.options.quality) {
+      case 'low':
+        Object.assign(constraints, {
+          width: { max: 1280 },
+          height: { max: 720 },
+        });
+        break;
+      case 'medium':
+        Object.assign(constraints, {
+          width: { max: 1920 },
+          height: { max: 1080 },
+        });
+        break;
+      case 'high':
+        Object.assign(constraints, {
+          width: { max: 2560 },
+          height: { max: 1440 },
+        });
+        break;
+    }
+
+    return constraints;
   }
 
   private startRecording() {
@@ -142,23 +168,22 @@ export class ScreenShare extends EventEmitter {
       }
     };
 
-    this.mediaRecorder.start(1000); // Collect data every second
+    this.mediaRecorder.start(1000);
   }
 
   public async stopSharing() {
     if (!this.isSharing) return;
 
-    // Stop tracks
     this.mediaStream?.getTracks().forEach((track) => track.stop());
 
-    // Stop recording
     if (this.mediaRecorder?.state !== 'inactive') {
       this.mediaRecorder?.stop();
     }
 
-    // Unpublish tracks
     const localParticipant = this.options.room.localParticipant;
-    await localParticipant.unpublishTrack(this.videoTrack!);
+    if (this.videoTrack) {
+      await localParticipant.unpublishTrack(this.videoTrack);
+    }
     if (this.audioTrack) {
       await localParticipant.unpublishTrack(this.audioTrack);
     }
@@ -184,7 +209,7 @@ export class ScreenShare extends EventEmitter {
 
   private handleTrackSubscribed(
     track: Track,
-    publication: Track.Publication,
+    publication: TrackPublication,
     participant: RemoteParticipant
   ) {
     if (track.source === Track.Source.ScreenShare) {
@@ -197,7 +222,7 @@ export class ScreenShare extends EventEmitter {
 
   private handleTrackUnsubscribed(
     track: Track,
-    publication: Track.Publication,
+    publication: TrackPublication,
     participant: RemoteParticipant
   ) {
     if (track.source === Track.Source.ScreenShare) {
@@ -217,8 +242,12 @@ export class ScreenShare extends EventEmitter {
       throw new Error('No active screen share');
     }
 
+    if (!('ImageCapture' in window)) {
+      throw new Error('ImageCapture API is not supported in this browser');
+    }
+
     const videoTrack = this.mediaStream.getVideoTracks()[0];
-    const imageCapture = new ImageCapture(videoTrack);
+    const imageCapture = new (window as any).ImageCapture(videoTrack);
     const bitmap = await imageCapture.grabFrame();
 
     const canvas = document.createElement('canvas');
@@ -226,11 +255,18 @@ export class ScreenShare extends EventEmitter {
     canvas.height = bitmap.height;
 
     const context = canvas.getContext('2d');
-    context?.drawImage(bitmap, 0, 0);
+    if (!context) {
+      throw new Error('Failed to get canvas context');
+    }
+
+    context.drawImage(bitmap, 0, 0);
 
     return new Promise((resolve) => {
       canvas.toBlob((blob) => {
-        resolve(blob!);
+        if (!blob) {
+          throw new Error('Failed to create blob from canvas');
+        }
+        resolve(blob);
       }, 'image/png');
     });
   }

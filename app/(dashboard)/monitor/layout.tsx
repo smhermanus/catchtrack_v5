@@ -1,24 +1,47 @@
 'use client';
-
-import { Sidebar } from '@/components/layout/sidebar';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { SidebarContainer } from '@/components/layout/sidebar-container';
 import { UserNav } from '@/components/layout/user-nav';
-import { useSession } from 'next-auth/react';
-import { redirect } from 'next/navigation';
+import { Session, User } from 'lucia';
+import { SessionData } from '@/lib/auth-helpers';
+
+// Server action import
+import { checkMonitorAccess } from '@/lib/server/auth-helpers';
 
 export default function MonitorLayout({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession();
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
-  if (status === 'loading') {
-    return null;
-  }
+  useEffect(() => {
+    const verifyAccess = async () => {
+      try {
+        const result = await checkMonitorAccess();
 
-  if (!session || session.user.role !== 'MONITOR') {
-    redirect('/login');
+        if (result.authorized) {
+          setSession(result.session ?? null);
+          setUser(result.user ?? null);
+        }
+      } catch (error) {
+        console.error('Access verification failed:', error);
+        router.push('/login');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    verifyAccess();
+  }, [router]);
+
+  if (isLoading) {
+    return null; // or a loading spinner
   }
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
+      <SidebarContainer />
       <div className="flex-1">
         <header className="border-b">
           <div className="flex h-16 items-center px-4">

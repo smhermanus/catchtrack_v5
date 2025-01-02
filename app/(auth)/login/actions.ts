@@ -1,14 +1,12 @@
 'use server';
 
-import { lucia } from '@/auth';
+import { lucia } from '../../../auth';
 import prisma from '@/lib/prisma';
 import { verify } from '@node-rs/argon2';
 import { isRedirectError } from 'next/dist/client/components/redirect';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { cookies, headers } from 'next/headers';
 import { LoginFormValues } from './validation';
 
-// Define the UserRole enum based on your schema
 enum UserRole {
   USER = 'USER',
   SYSTEMADMINISTRATOR = 'SYSTEMADMINISTRATOR',
@@ -25,7 +23,6 @@ enum UserRole {
   EXPORTCONTROLLER = 'EXPORTCONTROLLER',
 }
 
-// Define route resolvers for each role
 const roleRoutes: Record<UserRole, string> = {
   [UserRole.USER]: '/register-pending-message',
   [UserRole.SYSTEMADMINISTRATOR]: '/admin',
@@ -47,8 +44,6 @@ export async function login(
 ): Promise<{ error?: string; redirectPath?: string } | void> {
   try {
     const { email, password } = credentials;
-
-    // Find user by email
     const existingUser = await prisma.user.findFirst({
       where: {
         email: {
@@ -64,7 +59,6 @@ export async function login(
       };
     }
 
-    // Verify password
     const validPassword = await verify(existingUser.passwordHash, password, {
       memoryCost: 19456,
       timeCost: 2,
@@ -80,19 +74,30 @@ export async function login(
 
     const userRole = existingUser.role as UserRole;
 
-    // Handle USER role differently - no session creation
     if (userRole === UserRole.USER) {
       return {
         error: 'Your account is pending approval. Please wait for administrator review.',
       };
     }
 
-    // For all other roles, create session and proceed
-    const session = await lucia.createSession(existingUser.id as any, {});
+    const headersList = headers();
+    const userAgent = headersList.get('user-agent') || 'unknown';
+    const ipAddress =
+      headersList.get('x-forwarded-for')?.split(',')[0] ||
+      headersList.get('x-real-ip') ||
+      'unknown';
+
+    const session = await lucia.createSession(
+      existingUser.id.toString(), // Convert numeric ID to string
+      {
+        ipAddress,
+        userAgent,
+      }
+    );
+
     const sessionCookie = lucia.createSessionCookie(session.id);
     cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
 
-    // Handle routing based on user role
     const redirectPath = roleRoutes[userRole];
 
     if (!redirectPath) {
@@ -102,11 +107,9 @@ export async function login(
       };
     }
 
-    // Return the redirect path
     return { redirectPath };
   } catch (error) {
     if (isRedirectError(error)) throw error;
-
     console.error('Login error:', error);
     return {
       error: 'Something went wrong. Please try again.',
@@ -114,7 +117,6 @@ export async function login(
   }
 }
 
-// Helper type for the login response
 export type LoginResponse = {
   error?: string;
   success?: boolean;

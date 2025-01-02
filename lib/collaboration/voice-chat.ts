@@ -1,22 +1,44 @@
 import {
-  LiveKit,
   Room,
+  RoomOptions,
+  createLocalVideoTrack,
+  createLocalAudioTrack,
   RoomEvent,
-  Participant,
   LocalParticipant,
   RemoteParticipant,
   Track,
+  ConnectionState,
+  RoomConnectOptions,
+  TrackPublication,
 } from 'livekit-client';
 import { EventEmitter } from 'events';
 
 interface VoiceChatOptions {
-  roomName: string;
+  url: string;
   token: string;
-  userId: string;
-  userName: string;
+  participantName?: string;
   onParticipantJoined?: (participant: RemoteParticipant) => void;
   onParticipantLeft?: (participant: RemoteParticipant) => void;
   onError?: (error: Error) => void;
+}
+
+async function connectToLiveKitRoom(url: string, token: string, options?: RoomOptions) {
+  const room = new Room(options);
+
+  try {
+    await room.connect(url, token);
+
+    const localVideoTrack = await createLocalVideoTrack();
+    const localAudioTrack = await createLocalAudioTrack();
+
+    await room.localParticipant.publishTrack(localVideoTrack);
+    await room.localParticipant.publishTrack(localAudioTrack);
+
+    return room;
+  } catch (error) {
+    console.error('LiveKit Room Connection Error:', error);
+    throw error;
+  }
 }
 
 class VoiceChat extends EventEmitter {
@@ -34,7 +56,11 @@ class VoiceChat extends EventEmitter {
     this.room = new Room({
       adaptiveStream: true,
       dynacast: true,
-      audioPreset: { maxBitrate: 64000 },
+      publishDefaults: {
+        audioPreset: {
+          maxBitrate: 64000,
+        },
+      },
     });
     this.remoteParticipants = new Map();
     this.audioContext = new AudioContext();
@@ -53,11 +79,7 @@ class VoiceChat extends EventEmitter {
 
   public async connect() {
     try {
-      await this.room.connect(this.options.token, {
-        identity: this.options.userId,
-        name: this.options.userName,
-      });
-
+      await this.room.connect(process.env.LIVEKIT_URL!, this.options.token);
       this.localParticipant = this.room.localParticipant;
       await this.setupLocalAudio();
     } catch (error) {
@@ -76,22 +98,17 @@ class VoiceChat extends EventEmitter {
         },
       });
 
-      // Create and connect audio processing nodes
       const source = this.audioContext.createMediaStreamSource(this.mediaStream);
 
-      // Noise reduction
       await this.audioContext.audioWorklet.addModule('/audio-worklets/noise-reducer.js');
       this.noiseReducer = new AudioWorkletNode(this.audioContext, 'noise-reducer');
 
-      // Gain control
       this.gainNode = this.audioContext.createGain();
       this.gainNode.gain.value = 1.0;
 
-      // Audio processing
       this.audioProcessor = this.audioContext.createScriptProcessor(2048, 1, 1);
       this.audioProcessor.onaudioprocess = this.handleAudioProcess.bind(this);
 
-      // Connect nodes
       source
         .connect(this.noiseReducer)
         .connect(this.gainNode)
@@ -109,13 +126,10 @@ class VoiceChat extends EventEmitter {
     const input = event.inputBuffer.getChannelData(0);
     const output = event.outputBuffer.getChannelData(0);
 
-    // Apply audio processing (e.g., noise gate, compression)
     for (let i = 0; i < input.length; i++) {
-      // Noise gate
       const threshold = 0.01;
       output[i] = Math.abs(input[i]) > threshold ? input[i] : 0;
 
-      // Compression
       const threshold2 = 0.5;
       const ratio = 4;
       if (Math.abs(output[i]) > threshold2) {
@@ -139,7 +153,7 @@ class VoiceChat extends EventEmitter {
 
   private handleTrackSubscribed(
     track: Track,
-    publication: Track.Publication,
+    publication: TrackPublication,
     participant: RemoteParticipant
   ) {
     if (track.kind === Track.Kind.Audio) {
@@ -151,7 +165,7 @@ class VoiceChat extends EventEmitter {
 
   private handleTrackUnsubscribed(
     track: Track,
-    publication: Track.Publication,
+    publication: TrackPublication,
     participant: RemoteParticipant
   ) {
     // Cleanup track resources

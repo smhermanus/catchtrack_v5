@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { ExtendedUser } from '@/types/auth';
+import React from 'react';
 
 export const columns: ColumnDef<ExtendedUser>[] = [
   {

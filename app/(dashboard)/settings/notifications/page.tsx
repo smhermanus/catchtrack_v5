@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
-import { validateRequest } from '@/auth';
+import { validateRequest } from '../../../../auth';
 import { redirect } from 'next/navigation';
 import { NotificationPreferences } from '@/components/dashboard/settings/notification-preferences';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Notification Settings | CatchTrack',

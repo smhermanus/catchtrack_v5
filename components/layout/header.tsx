@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/theme/mode-toggle';
 import { logout } from '@/app/(auth)/actions';
+import React from 'react';
 
 interface HeaderProps {
   user: {

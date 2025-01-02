@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { validateRequest } from '@/auth';
+import { validateRequest } from '../../../auth';
 
 export async function getVesselStatusData() {
   try {

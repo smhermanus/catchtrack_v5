@@ -1,10 +1,11 @@
 import { Metadata } from 'next';
 import { QuotaForm } from '@/components/dashboard/quotas/quota-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { validateRequest } from '@/auth';
+import { validateRequest } from '../../../../../auth';
 import { redirect } from 'next/navigation';
 import { createQuota, QuotaFormData } from '../actions';
 import { db } from '@/lib/db';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Add Quota | CatchTrack',

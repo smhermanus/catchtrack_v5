@@ -4,6 +4,7 @@ import { ComplianceTab } from './_components/compliance-tab';
 import { TransfersTab } from './_components/transfers-tab';
 import { CatchRecordsTab } from './_components/catch-records-tab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Quota Details',

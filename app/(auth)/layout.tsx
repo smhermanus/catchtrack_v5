@@ -1,7 +1,7 @@
-import { validateRequest } from '@/auth';
+import { validateRequest } from '../../auth';
 import { redirect } from 'next/navigation';
 import { Toaster } from 'sonner';
-
+import React from 'react';
 // Define the UserRole enum to match your schema
 enum UserRole {
   USER = 'USER',

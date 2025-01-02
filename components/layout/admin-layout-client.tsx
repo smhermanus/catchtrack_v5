@@ -2,6 +2,7 @@
 
 import { Header } from '@/components/layout/header';
 import { MainNav } from '@/components/layout/main-nav';
+import React from 'react';
 
 interface AdminLayoutClientProps {
   children: React.ReactNode;

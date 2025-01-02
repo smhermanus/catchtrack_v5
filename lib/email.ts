@@ -54,9 +54,9 @@ export async function sendQuotaAlertEmail({
     `;
 
     await resend.emails.send({
-      from: 'CatchTrack <notifications@catchtrack.com>',
+      from: 'CatchTrack <info@catchtrack.co.za>',
       to: [to],
-      subject,
+      subject: 'CatchTrack Quota Alert',
       html: message,
     });
 

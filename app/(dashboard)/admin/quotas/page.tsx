@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { validateRequest } from '../../../../auth';
 import { redirect } from 'next/navigation';
 import { DataTable } from '@/components/shared/data-table';
 import { columns } from './columns';
@@ -17,6 +16,7 @@ import { getQuotaAnalytics, getQuotaAlerts } from './actions';
 import { QuotaDetailedAnalytics } from '@/components/dashboard/quotas/quota-detailed-analytics';
 import { getQuotaTrends, exportQuotaReport } from './actions';
 import { format } from 'date-fns';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Quota Management | CatchTrack',
@@ -42,14 +42,12 @@ function TableSkeleton() {
 
 async function QuotaTable() {
   const quotas = await getQuotas();
-
   return <DataTable columns={columns} data={quotas} searchKey="vesselId" />;
 }
 
 async function QuotaAnalyticsSection() {
   const analyticsData = await getQuotaAnalytics();
   const alerts = await getQuotaAlerts();
-
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <QuotaAnalytics data={analyticsData} />
@@ -60,7 +58,6 @@ async function QuotaAnalyticsSection() {
 
 async function QuotaDetailedAnalyticsSection() {
   const trends = await getQuotaTrends();
-
   const handleExport = async () => {
     'use server';
     const csv = await exportQuotaReport();
@@ -71,14 +68,13 @@ async function QuotaDetailedAnalyticsSection() {
       },
     });
   };
-
   return <QuotaDetailedAnalytics trends={trends} onExport={handleExport} />;
 }
 
 export default async function QuotasPage() {
-  const session = await getServerSession(authOptions);
+  const { user, session } = await validateRequest();
 
-  if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
+  if (!user || !session || user.role !== 'SYSTEMADMINISTRATOR') {
     redirect('/');
   }
 

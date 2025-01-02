@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import { AdminLayoutClient } from '@/components/layout/admin-layout-client';
-import { validateRequest } from '@/auth';
+import { validateRequest } from '../../../auth';
 
 export const metadata: Metadata = {
   title: {

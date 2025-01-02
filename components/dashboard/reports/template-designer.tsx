@@ -15,171 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useRoom } from '@/hooks';
-import {
-  HeaderComponent,
-  FooterComponent,
-  TableComponent,
-  ChartComponent,
-  ImageComponent,
-  TextComponent,
-  SignatureComponent,
-  QRCodeComponent,
-  BarcodeComponent,
-  MapComponent,
-  WeatherWidget,
-  CatchSummaryComponent,
-  VesselStatsComponent,
-  QuotaProgressComponent,
-  TimelineComponent,
-  AnnotationsComponent,
-} from '@/components/dashboard/reports/template-components';
 
-interface TemplateComponent {
-  id: string;
-  type: keyof typeof templateComponents;
-  title: string;
-  config: TemplateComponentConfig;
-}
-
-interface TemplateComponentItem {
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-}
-
-const templateComponents: Record<string, TemplateComponentItem> = {
-  header: { title: 'Header', icon: HeaderComponent },
-  footer: { title: 'Footer', icon: FooterComponent },
-  table: { title: 'Table', icon: TableComponent },
-  chart: { title: 'Chart', icon: ChartComponent },
-  image: { title: 'Image', icon: ImageComponent },
-  text: { title: 'Text', icon: TextComponent },
-  signature: { title: 'Signature', icon: SignatureComponent },
-  qrCode: { title: 'QR Code', icon: QRCodeComponent },
-  barcode: { title: 'Barcode', icon: BarcodeComponent },
-  map: { title: 'Map', icon: MapComponent },
-  weatherWidget: { title: 'Weather Widget', icon: WeatherWidget },
-  catchSummary: { title: 'Catch Summary', icon: CatchSummaryComponent },
-  vesselStats: { title: 'Vessel Stats', icon: VesselStatsComponent },
-  quotaProgress: { title: 'Quota Progress', icon: QuotaProgressComponent },
-  timeline: { title: 'Timeline', icon: TimelineComponent },
-  annotations: { title: 'Annotations', icon: AnnotationsComponent },
-};
-
-type TemplateComponentConfig =
-  | ChartConfig
-  | TableConfig
-  | TextConfig
-  | ImageConfig
-  | SignatureConfig
-  | QRCodeConfig
-  | BarcodeConfig
-  | MapConfig
-  | WeatherWidgetConfig
-  | CatchSummaryConfig
-  | VesselStatsConfig
-  | QuotaProgressConfig
-  | TimelineConfig
-  | AnnotationsConfig;
-
-interface ChartConfig {
-  chartType: string;
-  dataSource: string;
-  xAxis?: string;
-  yAxis?: string;
-}
-
-interface TableConfig {
-  dataSource: string;
-  columns: string[];
-  sortBy?: string;
-}
-
-interface TextConfig {
-  content: string;
-  fontSize?: number;
-  fontColor?: string;
-}
-
-interface ImageConfig {
-  src: string;
-  alt?: string;
-  width?: number;
-  height?: number;
-}
-
-interface SignatureConfig {
-  required: boolean;
-  label?: string;
-}
-
-interface QRCodeConfig {
-  data: string;
-  size?: number;
-}
-
-interface BarcodeConfig {
-  data: string;
-  type: 'CODE128' | 'CODE39' | 'EAN13' | 'UPC';
-}
-
-interface MapConfig {
-  latitude: number;
-  longitude: number;
-  zoom?: number;
-}
-
-interface WeatherWidgetConfig {
-  location: string;
-  units?: 'metric' | 'imperial';
-}
-
-interface CatchSummaryConfig {
-  dateRange?: {
-    start: string;
-    end: string;
-  };
-}
-
-interface VesselStatsConfig {
-  vesselId: string;
-}
-
-interface QuotaProgressConfig {
-  speciesId: string;
-}
-
-interface TimelineConfig {
-  events: Array<{
-    date: string;
-    description: string;
-  }>;
-}
-
-interface AnnotationsConfig {
-  annotations: Array<{
-    text: string;
-    color?: string;
-  }>;
-}
-
-interface TemplateSettings {
-  pageSize?: 'A4' | 'Letter' | 'Legal';
-  orientation?: 'portrait' | 'landscape';
-  margins?: {
-    top: number;
-    right: number;
-    bottom: number;
-    left: number;
-  };
-  headerHeight?: number;
-  footerHeight?: number;
-  theme?: {
-    primaryColor?: string;
-    secondaryColor?: string;
-    fontFamily?: string;
-  };
-}
+import { useRoom } from '@/types/room';
+import { TemplateComponent, TemplateSettings, templateComponents } from '@/types/template-types';
 
 interface TemplateDesignerProps {
   onSave: (template: {
@@ -189,7 +27,7 @@ interface TemplateDesignerProps {
   }) => void;
 }
 
-const templateSettings: TemplateSettings = {
+const defaultSettings: TemplateSettings = {
   pageSize: 'A4',
   orientation: 'portrait',
   margins: {
@@ -208,16 +46,15 @@ const templateSettings: TemplateSettings = {
 };
 
 export function TemplateDesigner({ onSave }: TemplateDesignerProps) {
-  const { room } = useRoom();
-
+  const { room, isConnected } = useRoom();
   const [components, setComponents] = useState<TemplateComponent[]>([]);
   const [templateName, setTemplateName] = useState('');
-  const [settings, setSettings] = useState(templateSettings);
+  const [settings, setSettings] = useState<TemplateSettings>(defaultSettings);
 
-  const componentTypes = Object.keys(templateComponents).map((id) => ({
+  const componentTypes = Object.entries(templateComponents).map(([id, component]) => ({
     id,
-    icon: templateComponents[id].icon,
-    title: templateComponents[id].title,
+    icon: component.icon,
+    title: component.title,
   }));
 
   const handleDragEnd = (result: DropResult) => {
@@ -228,25 +65,41 @@ export function TemplateDesigner({ onSave }: TemplateDesignerProps) {
     items.splice(result.destination.index, 0, reorderedItem);
 
     setComponents(items);
-    room.broadcast({ type: 'COMPONENTS_UPDATE', components: items });
+    if (isConnected) {
+      room.broadcast({ type: 'COMPONENTS_UPDATE', components: items });
+    }
   };
 
-  const addComponent = (type: TemplateComponent['type']) => {
+  const addComponent = (type: keyof typeof templateComponents) => {
     const newComponent: TemplateComponent = {
       id: Math.random().toString(36).substr(2, 9),
       type,
       title: `New ${type.charAt(0).toUpperCase() + type.slice(1)}`,
-      config: {} as TemplateComponentConfig,
+      config: {},
     };
     setComponents([...components, newComponent]);
   };
 
   const updateComponent = (id: string, updates: Partial<TemplateComponent>) => {
-    setComponents(components.map((c) => (c.id === id ? { ...c, ...updates } : c)));
+    const updatedComponents = components.map((c) => (c.id === id ? { ...c, ...updates } : c));
+    setComponents(updatedComponents);
+    if (isConnected) {
+      room.broadcast({
+        type: 'COMPONENTS_UPDATE',
+        components: updatedComponents,
+      });
+    }
   };
 
   const removeComponent = (id: string) => {
-    setComponents(components.filter((c) => c.id !== id));
+    const filteredComponents = components.filter((c) => c.id !== id);
+    setComponents(filteredComponents);
+    if (isConnected) {
+      room.broadcast({
+        type: 'COMPONENTS_UPDATE',
+        components: filteredComponents,
+      });
+    }
   };
 
   const handleSave = () => {
@@ -255,6 +108,18 @@ export function TemplateDesigner({ onSave }: TemplateDesignerProps) {
       components,
       settings,
     });
+  };
+
+  const renderComponentPreview = (component: TemplateComponent) => {
+    const ComponentIcon = templateComponents[component.type].icon;
+    return (
+      <div className="p-4 border rounded-lg bg-white">
+        <div className="flex items-center gap-2">
+          <ComponentIcon className="h-5 w-5" />
+          <span>{component.title}</span>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -298,7 +163,7 @@ export function TemplateDesigner({ onSave }: TemplateDesignerProps) {
                       <SelectContent>
                         {(['portrait', 'landscape'] as const).map((orientation) => (
                           <SelectItem key={orientation} value={orientation}>
-                            {orientation}
+                            {orientation.charAt(0).toUpperCase() + orientation.slice(1)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -345,21 +210,6 @@ export function TemplateDesigner({ onSave }: TemplateDesignerProps) {
                       }
                     />
                   </div>
-
-                  <div className="flex items-center justify-between">
-                    <Label>Include Date Range</Label>
-                    <Switch
-                      checked={settings.margins !== undefined}
-                      onCheckedChange={(checked) =>
-                        setSettings({
-                          ...settings,
-                          margins: checked
-                            ? { top: 10, right: 10, bottom: 10, left: 10 }
-                            : undefined,
-                        })
-                      }
-                    />
-                  </div>
                 </div>
               </TabsContent>
 
@@ -370,7 +220,7 @@ export function TemplateDesigner({ onSave }: TemplateDesignerProps) {
                       key={id}
                       variant="outline"
                       className="h-20"
-                      onClick={() => addComponent(id as TemplateComponent['type'])}
+                      onClick={() => addComponent(id as keyof typeof templateComponents)}
                     >
                       <div className="flex flex-col items-center gap-2">
                         {Icon && <Icon className="h-6 w-6" />}
@@ -395,7 +245,7 @@ export function TemplateDesigner({ onSave }: TemplateDesignerProps) {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                className="border rounded-lg p-4"
+                                className="border rounded-lg p-4 bg-white"
                               >
                                 <div className="flex items-center justify-between">
                                   <Input
@@ -427,7 +277,11 @@ export function TemplateDesigner({ onSave }: TemplateDesignerProps) {
               </TabsContent>
 
               <TabsContent value="preview" className="min-h-[500px]">
-                {/* Add preview rendering logic */}
+                <div className="space-y-4">
+                  {components.map((component) => (
+                    <div key={component.id}>{renderComponentPreview(component)}</div>
+                  ))}
+                </div>
               </TabsContent>
             </Tabs>
           </div>

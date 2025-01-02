@@ -27,8 +27,8 @@ interface DatabaseUserAttributes {
     | 'EXPORTCONTROLLER';
   userCode: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  firstName: string | null;
+  lastName: string | null;
   rsaId: string;
   cellNumber: string;
   physicalAddress: string;
@@ -94,8 +94,8 @@ declare module 'lucia' {
       | 'EXPORTCONTROLLER';
     userCode: string;
     email: string;
-    firstName: string;
-    lastName: string;
+    firstName: string | null;
+    lastName: string | null;
     rsaId: string;
     cellNumber: string;
     physicalAddress: string;
@@ -114,6 +114,8 @@ declare module 'lucia' {
   interface DatabaseSessionAttributes {
     // Add any session-specific attributes if needed
     id?: string;
+    ipAddress: string;
+    userAgent: string;
   }
 }
 
@@ -169,3 +171,5 @@ export const hasRole = (user: User, requiredRole: DatabaseUserAttributes['role']
   ];
   return roleHierarchy.indexOf(user.role) >= roleHierarchy.indexOf(requiredRole);
 };
+
+export type { DatabaseUserAttributes };

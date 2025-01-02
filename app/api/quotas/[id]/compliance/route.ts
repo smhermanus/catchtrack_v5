@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server';
-import { validateRequest } from '@/auth';
+import { lucia, validateRequest, hasRole } from '../../../../../auth';
 import { db } from '@/lib/db';
+import type { DatabaseUserAttributes } from 'lucia';
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
-    const { user } = await validateRequest();
+    const { user, session } = await validateRequest();
 
-    if (!user) {
+    if (!user || !session) {
       return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    if (!hasRole(user, 'INSPECTOR')) {
+      return new NextResponse('Forbidden', { status: 403 });
     }
 
     const body = await request.json();
@@ -22,7 +27,6 @@ export async function POST(request: Request, { params }: { params: { id: string 
       },
     });
 
-    // Create alert for the compliance violation
     await db.quotaAlert.create({
       data: {
         quotaId: parseInt(params.id),
@@ -31,7 +35,6 @@ export async function POST(request: Request, { params }: { params: { id: string 
       },
     });
 
-    // Create audit log
     await db.auditLog.create({
       data: {
         userId: parseInt(user.id),
@@ -55,14 +58,20 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   try {
-    const { user } = await validateRequest();
+    const { user, session } = await validateRequest();
 
-    if (!user) {
+    if (!user || !session) {
       return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    if (!hasRole(user, 'INSPECTOR')) {
+      return new NextResponse('Forbidden', { status: 403 });
     }
 
     const body = await request.json();
     const { recordId, status, resolution } = body;
+
+    const resolvedByValue = ['RESOLVED', 'DISMISSED'].includes(status) ? parseInt(user.id) : null;
 
     const record = await db.complianceRecord.update({
       where: { id: parseInt(recordId) },
@@ -70,11 +79,10 @@ export async function PATCH(request: Request, { params }: { params: { id: string
         status,
         resolution,
         resolvedAt: ['RESOLVED', 'DISMISSED'].includes(status) ? new Date() : null,
-        resolvedBy: ['RESOLVED', 'DISMISSED'].includes(status) ? parseInt(user.id) : null,
+        resolvedBy: resolvedByValue,
       },
     });
 
-    // Create alert for resolution
     if (['RESOLVED', 'DISMISSED'].includes(status)) {
       await db.quotaAlert.create({
         data: {
@@ -85,7 +93,6 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       });
     }
 
-    // Create audit log
     const auditActionMap = {
       RESOLVED: 'COMPLIANCE_RESOLVED',
       DISMISSED: 'COMPLIANCE_DISMISSED',

@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import React from 'react';
 
 type TripNotificationProps = React.HTMLAttributes<HTMLDivElement>;
 

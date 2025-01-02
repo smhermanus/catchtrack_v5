@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CheckCircle2, Clock, Mail, Home } from 'lucide-react';
 import Link from 'next/link';
+import React from 'react';
 
 export default function RegisterPendingMessage() {
   return (

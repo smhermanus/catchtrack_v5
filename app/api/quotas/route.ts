@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { validateRequest } from '@/auth';
+import { validateRequest } from '../../../auth';
 import { db } from '@/lib/db';
 import { Prisma, QuotaStatus } from '@prisma/client';
 

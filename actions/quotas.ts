@@ -2,6 +2,9 @@
 
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
+import { auditLogger } from '@/lib/audit-logger';
+import { getCurrentUser } from '@/lib/auth';
+import { AuditAction } from '@prisma/client';
 
 export async function getQuotas() {
   try {
@@ -79,6 +82,8 @@ export async function createQuota({
       return { error: 'Quota with this code already exists' };
     }
 
+    const currentUser = await getCurrentUser();
+
     const quota = await db.quota.create({
       data: {
         quotaCode,
@@ -104,9 +109,32 @@ export async function createQuota({
       },
     });
 
-    revalidatePath('/admin/quotas');
+    // Log the audit event
+    await auditLogger.logCollaborationEvent(
+      AuditAction.USER_CREATED,
+      'Create Quota',
+      currentUser.id.toString(),
+      { quotaId: quota.id.toString() },
+      {
+        resourceType: 'Quota',
+        resourceId: quota.id.toString(),
+        changes: {
+          quotaCode,
+          quotaAllocation,
+          startDate,
+          endDate,
+          status,
+          season,
+          marineResources,
+          productType,
+          sectorName,
+        },
+      }
+    );
+
     return { quota };
-  } catch {
+  } catch (error) {
+    console.error('Error creating quota:', error);
     return { error: 'Failed to create quota' };
   }
 }
@@ -120,10 +148,49 @@ export async function updateQuota(
   }>
 ) {
   try {
+    // First, get the existing quota to compare changes
+    const existingQuota = await db.quota.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    const currentUser = await getCurrentUser();
+
     const quota = await db.quota.update({
       where: { id: parseInt(id) },
       data,
     });
+
+    // Log the audit event with changes
+    await auditLogger.logCollaborationEvent(
+      AuditAction.USER_UPDATED,
+      'Update Quota',
+      currentUser.id.toString(),
+      { quotaId: id },
+      {
+        resourceType: 'Quota',
+        resourceId: id,
+        changes: {
+          ...(data.quotaAllocation !== undefined && {
+            quotaAllocation: {
+              from: existingQuota?.quotaAllocation,
+              to: data.quotaAllocation,
+            },
+          }),
+          ...(data.status !== undefined && {
+            status: {
+              from: existingQuota?.status,
+              to: data.status,
+            },
+          }),
+          ...(data.endDate !== undefined && {
+            endDate: {
+              from: existingQuota?.endDate,
+              to: data.endDate,
+            },
+          }),
+        },
+      }
+    );
 
     revalidatePath('/admin/quotas');
     return { quota };
@@ -142,6 +209,8 @@ export async function allocateQuota({
   amount: number;
 }) {
   try {
+    const currentUser = await getCurrentUser();
+
     const quota = await db.quota.findUnique({
       where: { id: parseInt(quotaId) },
       include: {
@@ -170,9 +239,32 @@ export async function allocateQuota({
       },
     });
 
+    // Log the audit event
+    await auditLogger.logCollaborationEvent(
+      AuditAction.USER_CREATED,
+      'Allocate Quota',
+      currentUser.id.toString(),
+      {
+        quotaId,
+        allocationId: allocation.id.toString(),
+      },
+      {
+        resourceType: 'QuotaAllocation',
+        resourceId: allocation.id.toString(),
+        changes: {
+          vesselId,
+          amount,
+          totalQuotaAllocation: quota.quotaAllocation,
+          previouslyAllocated: totalAllocated,
+          newTotalAllocated: totalAllocated + amount,
+        },
+      }
+    );
+
     revalidatePath('/admin/quotas');
     return { allocation };
-  } catch {
+  } catch (error) {
+    console.error('Error allocating quota:', error);
     return { error: 'Failed to allocate quota' };
   }
 }

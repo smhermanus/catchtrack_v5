@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { QuotaOverview } from '@/components/dashboard/rightsholder/quota-overview';
 import { VesselManagement } from '@/components/dashboard/rightsholder/vessel-management';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Rightsholder Dashboard | CatchTrack',

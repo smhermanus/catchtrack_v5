@@ -2,9 +2,11 @@
 
 import { loginSchema, registerSchema } from '@/lib/validations/auth';
 import { db } from '@/lib/db';
-import { hash } from 'bcrypt';
+import { hash, compare } from 'bcrypt';
 import { z } from 'zod';
 import { UserRole } from '@prisma/client';
+import { lucia } from '@/lib/lucia';
+import { cookies } from 'next/headers';
 
 type LoginData = z.infer<typeof loginSchema>;
 type RegisterData = z.infer<typeof registerSchema>;
@@ -27,7 +29,35 @@ const mapRole = (role: string): UserRole => {
 export async function authenticate(credentials: LoginData) {
   try {
     await loginSchema.parseAsync(credentials);
-    return { success: true };
+
+    const user = await db.user.findUnique({
+      where: { email: credentials.email },
+    });
+
+    if (!user?.passwordHash) {
+      return { error: 'Invalid credentials' };
+    }
+
+    const isValidPassword = await compare(credentials.password, user.passwordHash);
+    if (!isValidPassword) {
+      return { error: 'Invalid credentials' };
+    }
+
+    // Create Lucia session
+    const session = await lucia.createSession(user.id.toString(), {});
+    const sessionCookie = lucia.createSessionCookie(session.id);
+    cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
+
+    return {
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      },
+    };
   } catch (error) {
     console.error('Authentication error:', error);
     if (error instanceof Error) {
@@ -40,7 +70,6 @@ export async function authenticate(credentials: LoginData) {
 export async function register(credentials: Omit<RegisterData, 'confirmPassword'>) {
   console.log('Received registration credentials:', credentials);
   try {
-    // Check for existing user
     const existingUser = await db.user.findUnique({
       where: { email: credentials.email },
     });
@@ -50,11 +79,9 @@ export async function register(credentials: Omit<RegisterData, 'confirmPassword'
       return { error: 'User already exists' };
     }
 
-    // Hash password
     const hashedPassword = await hash(credentials.password, 10);
     console.log('Password hashed successfully');
 
-    // Create user
     const userData = {
       username: credentials.username,
       email: credentials.email,
@@ -67,7 +94,14 @@ export async function register(credentials: Omit<RegisterData, 'confirmPassword'
       physicalAddress: credentials.physicalAddress,
       userCode: credentials.userCode || ' ',
       companyname: credentials.companyname || 'Default Company',
+      keys: {
+        create: {
+          id: `email:${credentials.email}`,
+          hashedPassword: hashedPassword,
+        },
+      },
     };
+
     console.log('Attempting to create user with data:', {
       ...userData,
       passwordHash: '[REDACTED]',
@@ -82,8 +116,12 @@ export async function register(credentials: Omit<RegisterData, 'confirmPassword'
       return { error: 'Failed to create user' };
     }
 
-    console.log('User created successfully:', { id: user.id, email: user.email });
+    // Create Lucia session for the new user
+    const session = await lucia.createSession(user.id.toString(), {});
+    const sessionCookie = lucia.createSessionCookie(session.id);
+    cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
 
+    console.log('User created successfully:', { id: user.id, email: user.email });
     return {
       success: true,
       user: {
@@ -99,5 +137,41 @@ export async function register(credentials: Omit<RegisterData, 'confirmPassword'
     return {
       error: error instanceof Error ? error.message : 'Something went wrong during registration',
     };
+  }
+}
+
+export async function logout() {
+  try {
+    const sessionId = cookies().get('auth_session')?.value;
+    if (sessionId) {
+      await lucia.invalidateSession(sessionId);
+      const sessionCookie = lucia.createBlankSessionCookie();
+      cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
+    }
+    return { success: true };
+  } catch (error) {
+    console.error('Logout error:', error);
+    return { error: 'An unexpected error occurred during logout' };
+  }
+}
+
+export async function getUserSession() {
+  const sessionId = cookies().get('auth_session')?.value;
+  if (!sessionId) return null;
+
+  try {
+    const { user } = await lucia.validateSession(sessionId);
+    if (!user) return null;
+
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    };
+  } catch (error) {
+    console.error('Session validation error:', error);
+    return null;
   }
 }

@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import ApplyForm from './_components/ApplyForm';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Apply for Permit | CatchTrack',

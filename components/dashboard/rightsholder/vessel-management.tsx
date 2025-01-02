@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Ship } from 'lucide-react';
+import React from 'react';
 
 type VesselManagementProps = React.HTMLAttributes<HTMLDivElement>;
 

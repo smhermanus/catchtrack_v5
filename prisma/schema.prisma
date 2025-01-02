@@ -10,7 +10,7 @@ datasource db {
 model User {
   id                 Int                @id @default(autoincrement())
   username           String             @unique
-  passwordHash       String
+  passwordHash       String?            // Made optional for Lucia
   role               UserRole
   userCode           String             @unique
   email              String             @unique
@@ -38,12 +38,12 @@ model User {
   twoFactorSecret    String?
   displayName        String?
   auditLogs          AuditLog[]
-  keys               Key[]
+  keys               Key[]              // Lucia authentication keys
   monitor            Monitor?
   createdQuotas      Quota[]            @relation("QuotaCreator")
   updatedQuotas      Quota[]            @relation("QuotaUpdater")
   rightsholder       Rightsholder?
-  sessions           Session[]
+  sessions           Session[]          // Lucia sessions
   skipper            Skipper?
   preferences        UserPreferences?
   approver           User?              @relation("UserApprovals", fields: [approvedBy], references: [id])
@@ -415,24 +415,22 @@ model UserPreferences {
   @@map("user_preferences")
 }
 
+model Key {
+  id              String  @id @unique
+  userId          Int
+  hashedPassword  String?
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("keys")
+}
+
 model Session {
-  id        String   @id
+  id        String   @id @unique
   userId    Int
   expiresAt DateTime
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
   @@map("sessions")
-}
-
-model Key {
-  id             String  @id
-  hashedPassword String?
-  userId         Int
-  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("keys")
 }
 
 model Notification {

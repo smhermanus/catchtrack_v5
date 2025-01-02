@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Vessel } from '@prisma/client';
 import { deleteVessel, updateVesselStatus } from './actions';
 import { toast } from 'sonner';
+import React from 'react';
 
 export const columns: ColumnDef<Vessel>[] = [
   {

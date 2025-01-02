@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import React from 'react';
 
 const vesselFormSchema = z.object({
   name: z

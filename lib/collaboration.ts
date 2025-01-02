@@ -70,11 +70,15 @@ export const {
 } = createRoomContext<Presence, Storage, UserMeta, RoomEvent>(client);
 
 // Custom hooks for collaboration features
-
 export function useCollaborativeEditing(quotaId: string) {
   const [myPresence, updateMyPresence] = useMyPresence();
   const others = useOthers();
-  const storage = useStorage();
+
+  // Provide a selector function
+  const storage = useStorage((root) => ({
+    quotaNotes: root.quotaNotes,
+    sharedAnnotations: root.sharedAnnotations,
+  }));
 
   const startEditing = () => {
     updateMyPresence({ isEditing: true, selectedQuotaId: quotaId });
@@ -97,20 +101,38 @@ export function useCollaborativeEditing(quotaId: string) {
 }
 
 export function useCollaborativeNotes(quotaId: string) {
-  const storage = useStorage();
-  const updateStorage = useMutation(({ storage }, note: string) => {
-    const notes = storage.get('quotaNotes').get(quotaId) || [];
-    storage.get('quotaNotes').set(quotaId, [...notes, note]);
-  }, []);
+  // Read the notes using a selector function
+  const notes = useStorage((root) => root.quotaNotes?.[quotaId] || []);
+
+  const updateStorage = useMutation(
+    ({ storage }, note: string) => {
+      // Get the current state of quotaNotes
+      const currentQuotaNotes = storage.get('quotaNotes');
+
+      // Create a new object with the updated notes
+      const updatedQuotaNotes = {
+        ...currentQuotaNotes,
+        [quotaId]: [...(currentQuotaNotes[quotaId] || []), note],
+      };
+
+      // Update the entire quotaNotes object
+      storage.set('quotaNotes', updatedQuotaNotes);
+    },
+    [quotaId]
+  );
 
   return {
-    notes: storage?.quotaNotes[quotaId] || [],
+    notes,
     addNote: updateStorage,
   };
 }
 
 export function useCollaborativeAnnotations(quotaId: string) {
-  const storage = useStorage();
+  // Provide a selector function
+  const storage = useStorage(
+    (root) => root.sharedAnnotations.filter((a) => a.quotaId === quotaId) || []
+  );
+
   const self = useSelf();
 
   const addAnnotation = useMutation(({ storage }, text: string) => {
@@ -124,16 +146,16 @@ export function useCollaborativeAnnotations(quotaId: string) {
     });
   }, []);
 
-  const annotations = storage?.sharedAnnotations.filter((a) => a.quotaId === quotaId) || [];
-
   return {
-    annotations,
+    annotations: storage,
     addAnnotation,
   };
 }
 
 export function useCollaborativeFilters() {
-  const storage = useStorage();
+  // Provide a selector function
+  const storage = useStorage((root) => root.collaborativeFilters);
+
   const updateFilters = useMutation(
     ({ storage }, updates: Partial<Storage['collaborativeFilters']>) => {
       const filters = storage.get('collaborativeFilters');
@@ -143,7 +165,7 @@ export function useCollaborativeFilters() {
   );
 
   return {
-    filters: storage?.collaborativeFilters,
+    filters: storage,
     updateFilters,
   };
 }

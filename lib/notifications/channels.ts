@@ -1,13 +1,11 @@
 import { Resend } from 'resend';
 import { Twilio } from 'twilio';
 import { WebClient } from '@slack/web-api';
-import { Telegram } from 'telegraf';
 
 // Initialize clients
 const resend = new Resend(process.env.RESEND_API_KEY);
 const twilio = new Twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 const slack = new WebClient(process.env.SLACK_BOT_TOKEN);
-const telegram = new Telegram(process.env.TELEGRAM_BOT_TOKEN!);
 
 interface NotificationContent {
   title: string;
@@ -20,7 +18,6 @@ interface NotificationTarget {
   email?: string;
   phone?: string;
   slackChannel?: string;
-  telegramChatId?: string;
 }
 
 export async function sendNotification(
@@ -36,8 +33,6 @@ export async function sendNotification(
         return sendSMSNotification(content, target.phone!);
       case 'slack':
         return sendSlackNotification(content, target.slackChannel!);
-      case 'telegram':
-        return sendTelegramNotification(content, target.telegramChatId!);
       default:
         return Promise.resolve();
     }
@@ -61,7 +56,7 @@ async function sendEmailNotification(content: NotificationContent, to: string) {
   `;
 
   await resend.emails.send({
-    from: 'CatchTrack <notifications@catchtrack.com>',
+    from: 'CatchTrack <info@catchtrack.co.za>',
     to: [to],
     subject,
     html,
@@ -111,19 +106,4 @@ async function sendSlackNotification(content: NotificationContent, channel: stri
     blocks,
     text: content.message,
   });
-}
-
-async function sendTelegramNotification(content: NotificationContent, chatId: string) {
-  const message = `*${content.type.toUpperCase()}: ${content.title}*\n\n${content.message}`;
-
-  if (content.data) {
-    const formattedData = '```\n' + JSON.stringify(content.data, null, 2) + '\n```';
-    await telegram.sendMessage(chatId, message + '\n\n' + formattedData, {
-      parse_mode: 'Markdown',
-    });
-  } else {
-    await telegram.sendMessage(chatId, message, {
-      parse_mode: 'Markdown',
-    });
-  }
 }

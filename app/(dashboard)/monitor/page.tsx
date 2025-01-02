@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { MonitoringStats } from '@/components/dashboard/monitor/monitoring-stats';
 import Monitor from '../../(monitor)/monitor/_components/MonitorPage';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Monitor Dashboard | CatchTrack',

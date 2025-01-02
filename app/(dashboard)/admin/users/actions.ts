@@ -1,11 +1,8 @@
-'use server';
-
 import { db } from '@/lib/db';
 import { hash } from 'bcrypt';
 import { revalidatePath } from 'next/cache';
 import { UserRole } from '@prisma/client';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { validateRequest } from '../../../../auth';
 
 interface CreateUserData {
   username: string;
@@ -20,7 +17,6 @@ interface CreateUserData {
 }
 
 function generateUserCode(username: string): string {
-  // Create a unique code based on username and timestamp
   const prefix = username.slice(0, 3).toUpperCase();
   const timestamp = Date.now().toString().slice(-4);
   const random = Math.floor(1000 + Math.random() * 9000);
@@ -29,9 +25,9 @@ function generateUserCode(username: string): string {
 
 export async function createUser(data: CreateUserData) {
   try {
-    const session = await getServerSession(authOptions);
+    const { user: currentUser, session } = await validateRequest();
 
-    if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
+    if (!currentUser || !session || currentUser.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
@@ -59,6 +55,16 @@ export async function createUser(data: CreateUserData) {
         cellNumber: data.cellNumber,
         physicalAddress: data.physicalAddress,
         companyname: 'Unspecified Company',
+        // Create a key for Lucia authentication
+        keys: {
+          create: {
+            id: `email:${data.email}`,
+            hashedPassword: passwordHash,
+          },
+        },
+      },
+      include: {
+        keys: true,
       },
     });
 
@@ -72,9 +78,9 @@ export async function createUser(data: CreateUserData) {
 
 export async function updateUserStatus(userId: string, status: 'ACTIVE' | 'INACTIVE') {
   try {
-    const session = await getServerSession(authOptions);
+    const { user: currentUser, session } = await validateRequest();
 
-    if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
+    if (!currentUser || !session || currentUser.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
@@ -100,9 +106,9 @@ export async function updateUserStatus(userId: string, status: 'ACTIVE' | 'INACT
 
 export async function deleteUser(userId: string) {
   try {
-    const session = await getServerSession(authOptions);
+    const { user: currentUser, session } = await validateRequest();
 
-    if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
+    if (!currentUser || !session || currentUser.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
@@ -111,6 +117,7 @@ export async function deleteUser(userId: string) {
       throw new Error('Invalid user ID');
     }
 
+    // Delete the user's sessions and keys first (Lucia will handle this cascading)
     await db.user.delete({
       where: { id: parsedUserId },
     });

@@ -1,24 +1,28 @@
 'use client';
 
-import { Sidebar } from '@/components/layout/sidebar';
+import { SidebarContainer } from '@/components/layout/sidebar-container';
 import { UserNav } from '@/components/layout/user-nav';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/hooks/use-session';
 import { redirect } from 'next/navigation';
-
+import React from 'react';
 export default function RightsholderLayout({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession();
+  const { session, user, loading } = useSession();
 
-  if (status === 'loading') {
-    return null;
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
-  if (!session || session.user.role !== 'RIGHTSHOLDER') {
+  if (!session) {
+    redirect('/login');
+  }
+
+  if (user?.role !== 'RIGHTSHOLDER') {
     redirect('/login');
   }
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
+      <SidebarContainer />
       <div className="flex-1">
         <header className="border-b">
           <div className="flex h-16 items-center px-4">

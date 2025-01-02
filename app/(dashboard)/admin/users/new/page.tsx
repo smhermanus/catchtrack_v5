@@ -1,13 +1,14 @@
 import { Metadata } from 'next';
 import { UserForm } from '@/components/dashboard/admin/user-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { validateRequest } from '@/auth';
+import { validateRequest } from '../../../../../auth';
 import { redirect } from 'next/navigation';
 import { createUser } from '../actions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { UserRole } from '@prisma/client';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Create User | CatchTrack',

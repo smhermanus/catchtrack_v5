@@ -1,209 +1,281 @@
-import { Client as TeamsClient } from '@microsoft/microsoft-graph-client';
-import { Client as DiscordClient } from 'discord.js';
-import { ZoomClient } from '@zoom/zoom-api';
-import { Client as WebexClient } from 'webex';
+import { Client } from '@microsoft/microsoft-graph-client';
+import { TokenCredentialAuthenticationProvider } from '@microsoft/microsoft-graph-client/authProviders/azureTokenCredentials';
+import { ClientSecretCredential } from '@azure/identity';
+import axios, { AxiosInstance } from 'axios';
+import jwt from 'jsonwebtoken';
 
-// Initialize enterprise clients
-const teamsClient = TeamsClient.init({
-  authProvider: (done) => {
-    done(null, process.env.TEAMS_ACCESS_TOKEN);
-  },
-});
+interface ZoomMeetingOptions {
+  topic: string;
+  startTime: Date;
+  duration: number;
+  timezone?: string;
+  agenda?: string;
+  type?: 'instant' | 'scheduled' | 'recurring';
+}
 
-const discordClient = new DiscordClient({
-  intents: ['GuildMessages', 'DirectMessages'],
-});
-discordClient.login(process.env.DISCORD_BOT_TOKEN);
+interface ZoomUserOptions {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  type?: number;
+}
 
-const zoomClient = new ZoomClient({
-  clientId: process.env.ZOOM_CLIENT_ID,
-  clientSecret: process.env.ZOOM_CLIENT_SECRET,
-});
-
-const webexClient = new WebexClient({
-  credentials: {
-    access_token: process.env.WEBEX_ACCESS_TOKEN,
-  },
-});
-
-interface EnterpriseNotification {
+interface TeamsNotificationOptions {
   title: string;
   message: string;
-  type: 'info' | 'warning' | 'critical';
   data?: Record<string, any>;
-  attachments?: {
-    name: string;
-    content: Buffer;
-    contentType: string;
-  }[];
+  attachments?: any[];
+  channelId?: string;
+  teamId?: string;
 }
 
-interface EnterpriseTarget {
-  teamsChannel?: string;
-  teamsUser?: string;
-  discordChannel?: string;
-  discordUser?: string;
-  zoomChannel?: string;
-  webexRoom?: string;
-}
+export class MicrosoftGraphIntegration {
+  private client: Client;
 
-export async function sendEnterpriseNotification(
-  notification: EnterpriseNotification,
-  target: EnterpriseTarget,
-  channels: string[]
-) {
-  const notifications = channels.map((channel) => {
-    switch (channel) {
-      case 'teams':
-        return sendTeamsNotification(notification, target);
-      case 'discord':
-        return sendDiscordNotification(notification, target);
-      case 'zoom':
-        return sendZoomNotification(notification, target);
-      case 'webex':
-        return sendWebexNotification(notification, target);
-      default:
-        return Promise.resolve();
+  constructor() {
+    const credential = new ClientSecretCredential(
+      process.env.AZURE_TENANT_ID || '',
+      process.env.AZURE_CLIENT_ID || '',
+      process.env.AZURE_CLIENT_SECRET || ''
+    );
+
+    const authProvider = new TokenCredentialAuthenticationProvider(credential, {
+      scopes: ['https://graph.microsoft.com/.default'],
+    });
+
+    this.client = Client.initWithMiddleware({
+      authProvider: authProvider,
+    });
+  }
+
+  async sendTeamsChannelMessage(options: TeamsNotificationOptions) {
+    if (!options.teamId || !options.channelId) {
+      throw new Error('Team and Channel IDs are required');
     }
-  });
+
+    try {
+      const message = {
+        body: {
+          content: `
+            <h2>${options.title}</h2>
+            <p>${options.message}</p>
+            ${
+              options.data
+                ? `<div>
+                  ${Object.entries(options.data)
+                    .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
+                    .join('<br/>')}
+                </div>`
+                : ''
+            }
+          `,
+        },
+      };
+
+      await this.client
+        .api(`/teams/${options.teamId}/channels/${options.channelId}/messages`)
+        .post(message);
+    } catch (error) {
+      console.error('Failed to send Teams message:', error);
+      throw error;
+    }
+  }
+
+  async sendTeamsDirectMessage(userId: string, options: TeamsNotificationOptions) {
+    try {
+      const chatMessage = {
+        body: {
+          content: `
+            <h2>${options.title}</h2>
+            <p>${options.message}</p>
+            ${
+              options.data
+                ? `<div>
+                  ${Object.entries(options.data)
+                    .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
+                    .join('<br/>')}
+                </div>`
+                : ''
+            }
+          `,
+        },
+      };
+
+      await this.client.api(`/users/${userId}/chats/allWithUser`).post(chatMessage);
+    } catch (error) {
+      console.error('Failed to send direct Teams message:', error);
+      throw error;
+    }
+  }
+
+  async listTeams() {
+    try {
+      const teams = await this.client.api('/teams').get();
+      return teams.value;
+    } catch (error) {
+      console.error('Failed to list teams:', error);
+      throw error;
+    }
+  }
+
+  async createTeamsChannel(teamId: string, channelName: string, description?: string) {
+    try {
+      const newChannel = {
+        displayName: channelName,
+        description: description || '',
+      };
+
+      const channel = await this.client.api(`/teams/${teamId}/channels`).post(newChannel);
+      return channel;
+    } catch (error) {
+      console.error('Failed to create Teams channel:', error);
+      throw error;
+    }
+  }
+}
+
+async function sendTeamsNotification() {
+  const graphIntegration = new MicrosoftGraphIntegration();
 
   try {
-    await Promise.all(notifications);
-    return { success: true };
+    await graphIntegration.sendTeamsChannelMessage({
+      teamId: 'your-team-id',
+      channelId: 'your-channel-id',
+      title: 'Project Update',
+      message: 'New milestone achieved!',
+      data: {
+        milestone: 'Alpha Release',
+        progress: '85%',
+      },
+    });
   } catch (error) {
-    console.error('Failed to send enterprise notifications:', error);
-    throw new Error('Failed to send enterprise notifications');
+    console.error('Notification failed');
   }
 }
 
-async function sendTeamsNotification(
-  notification: EnterpriseNotification,
-  target: EnterpriseTarget
-) {
-  const card = {
-    type: 'AdaptiveCard',
-    version: '1.4',
-    body: [
-      {
-        type: 'TextBlock',
-        size: 'Medium',
-        weight: 'Bolder',
-        text: notification.title,
-      },
-      {
-        type: 'TextBlock',
-        text: notification.message,
-        wrap: true,
-      },
-    ],
-  };
+export class ZoomIntegration {
+  private apiKey: string;
+  private apiSecret: string;
+  private baseUrl = 'https://api.zoom.us/v2';
+  private axiosInstance: AxiosInstance;
 
-  if (notification.data) {
-    card.body.push({
-      type: 'FactSet',
-      facts: Object.entries(notification.data).map(([key, value]) => ({
-        title: key,
-        value: String(value),
-      })),
-    });
-  }
+  constructor() {
+    this.apiKey = process.env.ZOOM_API_KEY || '';
+    this.apiSecret = process.env.ZOOM_API_SECRET || '';
 
-  if (target.teamsChannel) {
-    await teamsClient.api(`/teams/${target.teamsChannel}/channels`).post({
-      body: {
-        contentType: 'application/vnd.microsoft.card.adaptive',
-        content: card,
-      },
-    });
-  }
-
-  if (target.teamsUser) {
-    await teamsClient.api(`/users/${target.teamsUser}/chat/messages`).post({
-      body: {
-        contentType: 'application/vnd.microsoft.card.adaptive',
-        content: card,
-      },
-    });
-  }
-}
-
-async function sendDiscordNotification(
-  notification: EnterpriseNotification,
-  target: EnterpriseTarget
-) {
-  const embed = {
-    title: notification.title,
-    description: notification.message,
-    color:
-      notification.type === 'critical'
-        ? 0xff0000
-        : notification.type === 'warning'
-          ? 0xffa500
-          : 0x00ff00,
-    fields: notification.data
-      ? Object.entries(notification.data).map(([key, value]) => ({
-          name: key,
-          value: String(value),
-          inline: true,
-        }))
-      : [],
-    timestamp: new Date(),
-  };
-
-  if (target.discordChannel) {
-    const channel = await discordClient.channels.fetch(target.discordChannel);
-    if (channel?.isTextBased()) {
-      await channel.send({ embeds: [embed] });
+    if (!this.apiKey || !this.apiSecret) {
+      throw new Error('Zoom API credentials are missing');
     }
+
+    this.axiosInstance = axios.create({
+      baseURL: this.baseUrl,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
   }
 
-  if (target.discordUser) {
-    const user = await discordClient.users.fetch(target.discordUser);
-    await user.send({ embeds: [embed] });
-  }
-}
-
-async function sendZoomNotification(
-  notification: EnterpriseNotification,
-  target: EnterpriseTarget
-) {
-  if (target.zoomChannel) {
-    const message = {
-      message: `**${notification.title}**\n\n${notification.message}`,
-      to_channel: target.zoomChannel,
+  private generateJWT(): string {
+    const payload = {
+      iss: this.apiKey,
+      exp: Date.now() + 1000 * 60 * 60, // 1 hour expiration
     };
+    return jwt.sign(payload, this.apiSecret);
+  }
 
-    if (notification.data) {
-      message.message +=
-        '\n\n' +
-        Object.entries(notification.data)
-          .map(([key, value]) => `**${key}**: ${value}`)
-          .join('\n');
+  async createMeeting(options: ZoomMeetingOptions) {
+    try {
+      const response = await this.axiosInstance.post(
+        '/users/me/meetings',
+        {
+          topic: options.topic,
+          type: options.type || 'scheduled',
+          start_time: options.startTime.toISOString(),
+          duration: options.duration,
+          timezone: options.timezone || 'UTC',
+          agenda: options.agenda,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.generateJWT()}`,
+          },
+        }
+      );
+
+      return {
+        meetingId: response.data.id,
+        joinUrl: response.data.join_url,
+        startUrl: response.data.start_url,
+      };
+    } catch (error) {
+      console.error('Failed to create Zoom meeting:', error);
+      throw error;
     }
+  }
 
-    await zoomClient.chat.post(message);
+  async createUser(options: ZoomUserOptions) {
+    try {
+      const response = await this.axiosInstance.post(
+        '/users',
+        {
+          action: 'create',
+          user_info: {
+            email: options.email,
+            first_name: options.firstName,
+            last_name: options.lastName,
+            type: options.type || 1,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.generateJWT()}`,
+          },
+        }
+      );
+
+      return {
+        userId: response.data.id,
+        email: response.data.email,
+      };
+    } catch (error) {
+      console.error('Failed to create Zoom user:', error);
+      throw error;
+    }
+  }
+
+  async listMeetings() {
+    try {
+      const response = await this.axiosInstance.get('/users/me/meetings', {
+        headers: {
+          Authorization: `Bearer ${this.generateJWT()}`,
+        },
+        params: {
+          type: 'live',
+        },
+      });
+
+      return response.data.meetings || [];
+    } catch (error) {
+      console.error('Failed to list Zoom meetings:', error);
+      throw error;
+    }
   }
 }
 
-async function sendWebexNotification(
-  notification: EnterpriseNotification,
-  target: EnterpriseTarget
-) {
-  if (target.webexRoom) {
-    let markdown = `**${notification.title}**\n\n${notification.message}`;
+// Example usage
+async function scheduleTeamMeeting() {
+  const zoom = new ZoomIntegration();
 
-    if (notification.data) {
-      markdown +=
-        '\n\n' +
-        Object.entries(notification.data)
-          .map(([key, value]) => `**${key}**: ${value}`)
-          .join('\n');
-    }
-
-    await webexClient.messages.create({
-      roomId: target.webexRoom,
-      markdown,
-      attachments: notification.attachments,
+  try {
+    const meeting = await zoom.createMeeting({
+      topic: 'Team Sync Meeting',
+      startTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
+      duration: 60, // 1 hour
+      agenda: 'Weekly team sync and project updates',
     });
+
+    console.log('Meeting created:', meeting.joinUrl);
+  } catch (error) {
+    console.error('Meeting scheduling failed');
   }
 }

@@ -1,12 +1,13 @@
 import { Metadata } from 'next';
 import { VesselForm } from '@/components/dashboard/vessels/vessel-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { validateRequest } from '@/auth';
+import { validateRequest } from '../../../../../auth';
 import { redirect } from 'next/navigation';
 import { createVessel } from '../actions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Add Vessel | CatchTrack',

@@ -1,36 +1,32 @@
-import { createClient } from '@supabase/supabase-js';
 import { EventEmitter } from 'events';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
+import { db } from '@/lib/db';
+import { AuditAction } from '@prisma/client';
 
 interface AuditEvent {
   type: string;
-  action: string;
-  userId: string;
+  action: AuditAction;
+  actionType: string;
+  tableName: string;
+  recordId: number;
+  userId: number;
+  details: string;
+  changes: string;
+  metadata: string;
   resourceId?: string;
   resourceType?: string;
-  details: Record<string, any>;
-  metadata: {
-    ip?: string;
-    userAgent?: string;
-    timestamp: string;
-    sessionId?: string;
-  };
 }
 
-class AuditLogger extends EventEmitter {
+export class AuditLogger {
+  private events: AuditEvent[] = [];
   private static instance: AuditLogger;
-  private batchSize: number = 50;
-  private batchTimeout: number = 5000;
-  private eventQueue: AuditEvent[] = [];
-  private flushTimeout?: NodeJS.Timeout;
+  private emitter: EventEmitter;
+  private flushInterval: NodeJS.Timeout | null = null;
+  private readonly FLUSH_INTERVAL = 30000; // 30 seconds
 
   private constructor() {
-    super();
-    this.setupEventHandlers();
+    this.emitter = new EventEmitter();
+    this.setupEventListeners();
+    this.startAutoFlush();
   }
 
   public static getInstance(): AuditLogger {
@@ -40,137 +36,130 @@ class AuditLogger extends EventEmitter {
     return AuditLogger.instance;
   }
 
-  private setupEventHandlers() {
-    this.on('event', this.queueEvent.bind(this));
-    this.on('flush', this.flushEvents.bind(this));
+  private setupEventListeners() {
+    this.emitter.on('auditLogAdded', async (event: AuditEvent) => {
+      // Optional: Immediate processing or additional logging
+      console.log('Audit log added:', event);
+    });
+
+    // Error handling listener
+    this.emitter.on('error', (error: Error) => {
+      console.error('Audit Logger Error:', error);
+    });
   }
 
-  public async logCollaborationEvent(
-    type: string,
-    action: string,
+  private startAutoFlush() {
+    // Automatically flush logs at regular intervals
+    this.flushInterval = setInterval(() => {
+      this.flushEvents().catch((error) => {
+        this.emitter.emit('error', error);
+      });
+    }, this.FLUSH_INTERVAL);
+  }
+
+  addEvent(event: AuditEvent) {
+    // Validate event before adding
+    if (!event.action || !event.userId) {
+      this.emitter.emit('error', new Error('Invalid audit event'));
+      return;
+    }
+
+    this.events.push(event);
+    // Emit an event for potential additional processing
+    this.emitter.emit('auditLogAdded', event);
+
+    // Optional: Flush immediately if events exceed a certain threshold
+    if (this.events.length >= 100) {
+      this.flushEvents().catch((error) => {
+        this.emitter.emit('error', error);
+      });
+    }
+  }
+
+  async logCollaborationEvent(
+    action: AuditAction,
+    actionType: string,
     userId: string,
-    details: Record<string, any>,
-    metadata: Partial<AuditEvent['metadata']> = {}
+    context: {
+      quotaId?: string;
+      allocationId?: string;
+    },
+    eventDetails: {
+      resourceType: string;
+      resourceId: string;
+      changes: Record<string, any>;
+    }
   ) {
-    const event: AuditEvent = {
-      type,
-      action,
-      userId,
-      details,
-      metadata: {
-        timestamp: new Date().toISOString(),
-        ...metadata,
-      },
-    };
-
-    this.emit('event', event);
-  }
-
-  private queueEvent(event: AuditEvent) {
-    this.eventQueue.push(event);
-
-    if (this.eventQueue.length >= this.batchSize) {
-      this.emit('flush');
-    } else if (!this.flushTimeout) {
-      this.flushTimeout = setTimeout(() => {
-        this.emit('flush');
-      }, this.batchTimeout);
-    }
-  }
-
-  private async flushEvents() {
-    if (this.flushTimeout) {
-      clearTimeout(this.flushTimeout);
-      this.flushTimeout = undefined;
-    }
-
-    if (this.eventQueue.length === 0) return;
-
-    const events = [...this.eventQueue];
-    this.eventQueue = [];
-
     try {
-      const { data, error } = await supabase.from('audit_logs').insert(events);
+      const event: AuditEvent = {
+        type: 'COLLABORATION',
+        action,
+        actionType,
+        tableName: eventDetails.resourceType,
+        recordId: parseInt(eventDetails.resourceId),
+        userId: parseInt(userId),
+        details: JSON.stringify(context),
+        changes: JSON.stringify(eventDetails.changes),
+        metadata: JSON.stringify({
+          context,
+          resourceType: eventDetails.resourceType,
+        }),
+        resourceId: eventDetails.resourceId,
+        resourceType: eventDetails.resourceType,
+      };
 
-      if (error) {
-        console.error('Failed to store audit logs:', error);
-        // Requeue failed events
-        this.eventQueue.push(...events);
-      }
+      this.addEvent(event);
+    } catch (error) {
+      console.error('Error logging collaboration event:', error);
+      this.emitter.emit('error', error);
+    }
+  }
+
+  async flushEvents() {
+    try {
+      if (this.events.length === 0) return;
+
+      // Create many audit logs with type conversions
+      await db.auditLog.createMany({
+        data: this.events.map((event) => ({
+          type: event.type,
+          action: event.action,
+          actionType: event.actionType,
+          tableName: event.tableName,
+          recordId: event.recordId, // Keep as is, or convert if needed
+          userId: event.userId, // Ensure userId is a number
+          details: event.details,
+          changes: event.changes,
+          metadata: event.metadata,
+        })),
+      });
+
+      // Clear the events after successful flush
+      this.events = [];
     } catch (error) {
       console.error('Error flushing audit logs:', error);
-      // Requeue failed events
-      this.eventQueue.push(...events);
+      // Optionally, you might want to persist failed events or implement a retry mechanism
+      this.emitter.emit('error', error);
     }
   }
 
-  public async queryAuditLogs(filters: {
-    userId?: string;
-    type?: string;
-    action?: string;
-    startDate?: string;
-    endDate?: string;
-    limit?: number;
-    offset?: number;
-  }) {
-    let query = supabase.from('audit_logs').select('*');
-
-    if (filters.userId) {
-      query = query.eq('userId', filters.userId);
-    }
-    if (filters.type) {
-      query = query.eq('type', filters.type);
-    }
-    if (filters.action) {
-      query = query.eq('action', filters.action);
-    }
-    if (filters.startDate) {
-      query = query.gte('metadata->timestamp', filters.startDate);
-    }
-    if (filters.endDate) {
-      query = query.lte('metadata->timestamp', filters.endDate);
-    }
-
-    query = query
-      .order('metadata->timestamp', { ascending: false })
-      .limit(filters.limit || 100)
-      .offset(filters.offset || 0);
-
-    const { data, error } = await query;
-
-    if (error) {
-      throw new Error(`Failed to query audit logs: ${error.message}`);
-    }
-
-    return data;
+  // Manually trigger flush
+  triggerFlush() {
+    return this.flushEvents();
   }
 
-  public async getAuditSummary(timeframe: 'day' | 'week' | 'month') {
-    const startDate = new Date();
-    switch (timeframe) {
-      case 'day':
-        startDate.setDate(startDate.getDate() - 1);
-        break;
-      case 'week':
-        startDate.setDate(startDate.getDate() - 7);
-        break;
-      case 'month':
-        startDate.setMonth(startDate.getMonth() - 1);
-        break;
+  // Cleanup method to stop auto-flushing
+  cleanup() {
+    if (this.flushInterval) {
+      clearInterval(this.flushInterval);
     }
-
-    const { data, error } = await supabase
-      .from('audit_logs')
-      .select('type, action, count')
-      .gte('metadata->timestamp', startDate.toISOString())
-      .group('type, action');
-
-    if (error) {
-      throw new Error(`Failed to get audit summary: ${error.message}`);
-    }
-
-    return data;
   }
 }
 
+// Export a singleton instance
 export const auditLogger = AuditLogger.getInstance();
+
+// Optional: Ensure cleanup on process exit
+process.on('exit', () => {
+  auditLogger.cleanup();
+});

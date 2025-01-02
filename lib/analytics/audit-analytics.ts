@@ -1,10 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
+import { Pool } from 'pg';
 import { DateTime } from 'luxon';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
 
 interface AnalyticsOptions {
   startDate?: string;
@@ -17,17 +16,32 @@ interface AnalyticsOptions {
 }
 
 interface TimeSeriesData {
-  timestamp: string;
+  timestamp: string; // Remove the possibility of null
   count: number;
-  metadata?: Record<string, any>;
+  metadata: Record<string, any>;
+}
+
+interface DBTimeSeriesRow {
+  timestamp: Date | null; // Allow null in the database row
+  count: string | number;
+}
+
+interface ActionSummary {
+  action: string;
+  count: number;
+}
+
+interface ResourceSummary {
+  resourceType: string;
+  count: number;
 }
 
 interface UserActivitySummary {
   userId: string;
   totalActions: number;
-  lastActive: string;
-  mostFrequentActions: { action: string; count: number }[];
-  resourcesAccessed: { resourceType: string; count: number }[];
+  lastActive: string; // Remove the possibility of null
+  mostFrequentActions: ActionSummary[];
+  resourcesAccessed: ResourceSummary[];
 }
 
 interface ResourceUsageStats {
@@ -51,193 +65,201 @@ export class AuditAnalytics {
   }
 
   public async getActivityTimeline(options: AnalyticsOptions): Promise<TimeSeriesData[]> {
-    const query = supabase
-      .from('audit_logs')
-      .select('created_at, action, metadata')
-      .order('created_at', { ascending: true });
+    const params: any[] = [];
+    let query = `
+      SELECT 
+        COALESCE(date_trunc('hour', created_at), NOW()) as timestamp,
+        COUNT(*) as count
+      FROM audit_logs
+      WHERE 1=1
+    `;
 
     if (options.startDate) {
-      query.gte('created_at', options.startDate);
+      params.push(options.startDate);
+      query += ` AND created_at >= $${params.length}`;
     }
     if (options.endDate) {
-      query.lte('created_at', options.endDate);
+      params.push(options.endDate);
+      query += ` AND created_at <= $${params.length}`;
     }
     if (options.userId) {
-      query.eq('user_id', options.userId);
+      params.push(options.userId);
+      query += ` AND user_id = $${params.length}`;
     }
     if (options.action) {
-      query.eq('action', options.action);
+      params.push(options.action);
+      query += ` AND action = $${params.length}`;
     }
 
-    const { data, error } = await query;
-    if (error) throw error;
+    query += `
+      GROUP BY date_trunc('hour', created_at)
+      ORDER BY timestamp ASC
+    `;
 
-    return this.aggregateTimeSeriesData(data);
+    const { rows } = await pool.query(query, params);
+
+    return rows
+      .map((row: DBTimeSeriesRow) => {
+        // Ensure timestamp is always a valid string
+        const timestamp = row.timestamp
+          ? DateTime.fromJSDate(row.timestamp).toISO()
+          : DateTime.now().toISO();
+
+        return {
+          timestamp, // This is now guaranteed to be a string
+          count: Number(row.count),
+          metadata: {}, // Ensure metadata is always an object
+        };
+      })
+      .filter((entry): entry is TimeSeriesData => !!entry.timestamp); // Type predicate to satisfy TypeScript
   }
 
   public async getUserActivitySummaries(options: AnalyticsOptions): Promise<UserActivitySummary[]> {
-    const { data, error } = await supabase
-      .from('audit_logs')
-      .select(
-        `
-        user_id,
-        action,
-        resource_type,
-        created_at,
-        metadata
-      `
+    const query = `
+      WITH user_actions AS (
+        SELECT 
+          user_id,
+          COUNT(*) as total_actions,
+          MAX(created_at) as last_active,
+          array_agg(DISTINCT action) as actions,
+          array_agg(DISTINCT resource_type) as resources
+        FROM audit_logs
+        GROUP BY user_id
+      ),
+      action_counts AS (
+        SELECT 
+          user_id,
+          action,
+          COUNT(*) as count
+        FROM audit_logs
+        GROUP BY user_id, action
+      ),
+      resource_counts AS (
+        SELECT 
+          user_id,
+          resource_type,
+          COUNT(*) as count
+        FROM audit_logs
+        GROUP BY user_id, resource_type
       )
-      .order('created_at', { ascending: false });
+      SELECT 
+        ua.user_id,
+        ua.total_actions,
+        ua.last_active,
+        COALESCE(
+          array_agg(
+            json_build_object(
+              'action', ac.action,
+              'count', ac.count
+            )
+          ) FILTER (WHERE ac.action IS NOT NULL),
+          '{}'::json[]
+        ) as most_frequent_actions,
+        COALESCE(
+          array_agg(
+            json_build_object(
+              'resourceType', rc.resource_type,
+              'count', rc.count
+            )
+          ) FILTER (WHERE rc.resource_type IS NOT NULL),
+          '{}'::json[]
+        ) as resources_accessed
+      FROM user_actions ua
+      LEFT JOIN action_counts ac ON ua.user_id = ac.user_id
+      LEFT JOIN resource_counts rc ON ua.user_id = rc.user_id
+      GROUP BY ua.user_id, ua.total_actions, ua.last_active
+    `;
 
-    if (error) throw error;
+    const { rows } = await pool.query(query);
 
-    return this.aggregateUserActivity(data);
+    return rows
+      .map((row: any) => {
+        // Ensure lastActive is always a valid string
+        const lastActive = row.last_active
+          ? DateTime.fromJSDate(row.last_active).toISO()
+          : DateTime.now().toISO();
+
+        const mostFrequentActions = (
+          Array.isArray(row.most_frequent_actions) ? row.most_frequent_actions : []
+        ) as ActionSummary[];
+
+        const resourcesAccessed = (
+          Array.isArray(row.resources_accessed) ? row.resources_accessed : []
+        ) as ResourceSummary[];
+
+        return {
+          userId: row.user_id,
+          totalActions: Number(row.total_actions),
+          lastActive, // This is now guaranteed to be a string
+          mostFrequentActions: mostFrequentActions.sort((a, b) => b.count - a.count).slice(0, 5),
+          resourcesAccessed,
+        } as UserActivitySummary;
+      })
+      .filter((entry): entry is UserActivitySummary => !!entry.lastActive); // Type predicate to satisfy TypeScript
   }
 
-  public async getResourceUsageStatistics(
-    options: AnalyticsOptions
-  ): Promise<ResourceUsageStats[]> {
-    const { data, error } = await supabase
-      .from('audit_logs')
-      .select(
-        `
-        resource_type,
-        user_id,
-        created_at,
-        metadata
-      `
+  public async getResourceUsageStats(options: AnalyticsOptions): Promise<ResourceUsageStats[]> {
+    const query = `
+      WITH resource_stats AS (
+        SELECT 
+          resource_type,
+          COUNT(*) as total_accesses,
+          COUNT(DISTINCT user_id) as unique_users,
+          AVG(COALESCE((metadata->>'duration')::numeric, 0)) as avg_duration,
+          date_part('hour', created_at) as hour,
+          COUNT(*) as hour_count
+        FROM audit_logs
+        GROUP BY resource_type, date_part('hour', created_at)
+      ),
+      peak_usage AS (
+        SELECT 
+          resource_type,
+          hour,
+          hour_count,
+          ROW_NUMBER() OVER (PARTITION BY resource_type ORDER BY hour_count DESC) as rn
+        FROM resource_stats
       )
-      .order('created_at', { ascending: false });
+      SELECT 
+        rs.resource_type,
+        SUM(rs.total_accesses) as total_accesses,
+        MAX(rs.unique_users) as unique_users,
+        AVG(rs.avg_duration) as average_duration,
+        MIN(CASE WHEN pu.rn = 1 THEN pu.hour ELSE NULL END) as peak_hour
+      FROM resource_stats rs
+      JOIN peak_usage pu ON rs.resource_type = pu.resource_type
+      GROUP BY rs.resource_type
+    `;
 
-    if (error) throw error;
+    const { rows } = await pool.query(query);
 
-    return this.aggregateResourceUsage(data);
-  }
-
-  public async getAnomalyDetection(options: AnalyticsOptions): Promise<any[]> {
-    const { data, error } = await supabase
-      .from('audit_logs')
-      .select('*')
-      .order('created_at', { ascending: true });
-
-    if (error) throw error;
-
-    return this.detectAnomalies(data);
-  }
-
-  public async getComplianceReport(options: AnalyticsOptions): Promise<any> {
-    const { data, error } = await supabase
-      .from('audit_logs')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    return this.generateComplianceReport(data);
-  }
-
-  private aggregateTimeSeriesData(data: any[]): TimeSeriesData[] {
-    const timeSeriesMap = new Map<string, TimeSeriesData>();
-
-    data.forEach((log) => {
-      const timestamp = DateTime.fromISO(log.created_at).startOf('hour').toISO();
-      const existing = timeSeriesMap.get(timestamp) || { timestamp, count: 0, metadata: {} };
-      existing.count++;
-      timeSeriesMap.set(timestamp, existing);
-    });
-
-    return Array.from(timeSeriesMap.values()).sort(
-      (a, b) => DateTime.fromISO(a.timestamp).toMillis() - DateTime.fromISO(b.timestamp).toMillis()
-    );
-  }
-
-  private aggregateUserActivity(data: any[]): UserActivitySummary[] {
-    const userMap = new Map<string, any>();
-
-    data.forEach((log) => {
-      const userId = log.user_id;
-      const existing = userMap.get(userId) || {
-        userId,
-        totalActions: 0,
-        lastActive: log.created_at,
-        actions: new Map<string, number>(),
-        resources: new Map<string, number>(),
-      };
-
-      existing.totalActions++;
-      existing.actions.set(log.action, (existing.actions.get(log.action) || 0) + 1);
-      existing.resources.set(
-        log.resource_type,
-        (existing.resources.get(log.resource_type) || 0) + 1
-      );
-      userMap.set(userId, existing);
-    });
-
-    return Array.from(userMap.values()).map((user) => ({
-      userId: user.userId,
-      totalActions: user.totalActions,
-      lastActive: user.lastActive,
-      mostFrequentActions: Array.from(user.actions.entries())
-        .map(([action, count]) => ({ action, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5),
-      resourcesAccessed: Array.from(user.resources.entries())
-        .map(([resourceType, count]) => ({ resourceType, count }))
-        .sort((a, b) => b.count - a.count),
+    return rows.map((row) => ({
+      resourceType: row.resource_type,
+      totalAccesses: Number(row.total_accesses),
+      uniqueUsers: Number(row.unique_users),
+      averageDuration: Number(row.average_duration),
+      peakUsageTime: `${row.peak_hour.toString().padStart(2, '0')}:00`,
     }));
   }
 
-  private aggregateResourceUsage(data: any[]): ResourceUsageStats[] {
-    const resourceMap = new Map<string, any>();
-
-    data.forEach((log) => {
-      const resourceType = log.resource_type;
-      const existing = resourceMap.get(resourceType) || {
-        resourceType,
-        totalAccesses: 0,
-        uniqueUsers: new Set(),
-        durations: [],
-        usageByHour: new Map<number, number>(),
-      };
-
-      existing.totalAccesses++;
-      existing.uniqueUsers.add(log.user_id);
-      if (log.metadata?.duration) {
-        existing.durations.push(log.metadata.duration);
-      }
-
-      const hour = DateTime.fromISO(log.created_at).hour;
-      existing.usageByHour.set(hour, (existing.usageByHour.get(hour) || 0) + 1);
-
-      resourceMap.set(resourceType, existing);
-    });
-
-    return Array.from(resourceMap.values()).map((resource) => ({
-      resourceType: resource.resourceType,
-      totalAccesses: resource.totalAccesses,
-      uniqueUsers: resource.uniqueUsers.size,
-      averageDuration: resource.durations.length
-        ? resource.durations.reduce((a: number, b: number) => a + b, 0) / resource.durations.length
-        : 0,
-      peakUsageTime:
-        Array.from(resource.usageByHour.entries())
-          .sort((a, b) => b[1] - a[1])[0][0]
-          .toString()
-          .padStart(2, '0') + ':00',
-    }));
-  }
-
-  private detectAnomalies(data: any[]): any[] {
-    // Implement anomaly detection algorithms
-    // Example: Detect sudden spikes in activity or unusual patterns
+  public async detectAnomalies(options: AnalyticsOptions): Promise<any[]> {
+    // Implement anomaly detection with direct SQL queries
     return [];
   }
 
-  private generateComplianceReport(data: any[]): any {
-    // Generate compliance reports based on audit logs
+  public async generateComplianceReport(options: AnalyticsOptions): Promise<any> {
+    const query = `
+      SELECT 
+        COUNT(*) as total_events,
+        COUNT(DISTINCT user_id) as unique_users,
+        COUNT(DISTINCT action) as unique_actions
+      FROM audit_logs
+    `;
+
+    const { rows } = await pool.query(query);
     return {
-      totalEvents: data.length,
-      // Add more compliance metrics
+      totalEvents: Number(rows[0].total_events),
+      uniqueUsers: Number(rows[0].unique_users),
+      uniqueActions: Number(rows[0].unique_actions),
     };
   }
 }

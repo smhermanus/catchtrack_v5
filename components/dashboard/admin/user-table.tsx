@@ -69,8 +69,6 @@ export function UserTable({ users }: { users: User[] }) {
 
   const getRoleBadgeColor = (role: UserRole) => {
     switch (role) {
-      case UserRole.ADMIN:
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       case UserRole.MONITOR:
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case UserRole.SKIPPER:

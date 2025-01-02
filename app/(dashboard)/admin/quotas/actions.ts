@@ -1,15 +1,18 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { validateRequest } from '../../../../auth';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { sendQuotaAlertEmail } from '@/lib/email';
 import { addDays, format as formatDate, subDays } from 'date-fns';
 import { parse } from 'json2csv';
 import { generateQuotaReport } from '@/lib/reports';
-import { generateQuotaForecast } from '@/lib/forecasting';
+import { TimeSeriesPoint } from '@/lib/advanced-forecasting';
+import { holtWinters } from '@/lib/advanced-forecasting';
+import type { QuotaWithRelations, Vessel, Catch } from '@/lib/reports';
+import type { QuotaWithRelations as ReportQuota } from '@/lib/reports';
+import type { QuotaWithRelations as TypeQuota } from '@/types/quota';
 
 interface QuotaAlert {
   id: string;
@@ -33,14 +36,15 @@ export type QuotaFormData = z.infer<typeof quotaSchema>;
 
 export async function getQuotas() {
   try {
-    const session = await getServerSession(authOptions);
+    const { user, session } = await validateRequest();
 
-    if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
+    if (!user || !session || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
     const quotas = await db.quota.findMany({
       include: {
+        species: true,
         quotaAllocations: {
           include: {
             vessel: true,
@@ -62,15 +66,13 @@ export async function getQuotas() {
 
 export async function createQuota(data: QuotaFormData) {
   try {
-    const session = await getServerSession(authOptions);
+    const { user, session } = await validateRequest();
 
-    if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
+    if (!user || !session || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
     const validatedData = quotaSchema.parse(data);
-
-    // Generate a unique quota code
     const quotaCode = `Q${Date.now()}`;
 
     const quota = await db.quota.create({
@@ -84,7 +86,7 @@ export async function createQuota(data: QuotaFormData) {
         sectorName: 'COMMERCIAL',
         quotaAllocation: validatedData.amount,
         finalQuotaAllocation: validatedData.amount,
-        createdBy: parseInt(session.user.id),
+        createdBy: parseInt(user.id),
       },
     });
 
@@ -98,9 +100,9 @@ export async function createQuota(data: QuotaFormData) {
 
 export async function deleteQuota(quotaId: string) {
   try {
-    const session = await getServerSession(authOptions);
+    const { user, session } = await validateRequest();
 
-    if (!session || session.user.role !== 'SYSTEMADMINISTRATOR') {
+    if (!user || !session || user.role !== 'SYSTEMADMINISTRATOR') {
       throw new Error('Unauthorized');
     }
 
@@ -119,8 +121,15 @@ export async function deleteQuota(quotaId: string) {
 // Add these new actions for analytics and tracking
 export async function getQuotaAnalytics() {
   try {
+    const { user, session } = await validateRequest();
+
+    if (!user || !session || user.role !== 'SYSTEMADMINISTRATOR') {
+      throw new Error('Unauthorized');
+    }
+
     const quotas = await db.quota.findMany({
       include: {
+        species: true,
         catchRecords: true,
         quotaAllocations: {
           include: {
@@ -159,6 +168,7 @@ export async function getQuotaAlerts() {
   try {
     const quotas = await db.quota.findMany({
       include: {
+        species: true,
         catchRecords: true,
         quotaAllocations: {
           include: {
@@ -233,6 +243,7 @@ export async function getQuotaTrends() {
   try {
     const quotas = await db.quota.findMany({
       include: {
+        species: true,
         catchRecords: {
           orderBy: {
             landingDate: 'asc',
@@ -295,12 +306,12 @@ export async function getQuotaForecasts(quotaId: string) {
     const quota = await db.quota.findUnique({
       where: { id: parseInt(quotaId, 10) },
       include: {
-        catchRecords: true,
-        quotaAllocations: {
+        species: {
           include: {
-            vessel: true,
+            species: true,
           },
         },
+        catchRecords: true,
       },
     });
 
@@ -308,24 +319,74 @@ export async function getQuotaForecasts(quotaId: string) {
       throw new Error('Quota not found');
     }
 
-    // Get historical catch data
-    const catchData = quota.catchRecords.map((record) => ({
+    const speciesInfo = quota.species[0]?.species;
+
+    if (!speciesInfo) {
+      throw new Error('No species information found for this quota');
+    }
+
+    const allocated = parseFloat(quota.quotaAllocation.toString());
+    const used = parseFloat(quota.quotaUsed.toString());
+    const remaining = allocated - used;
+
+    // First, create the report-specific quota object
+    const reportQuota: ReportQuota = {
+      id: quotaId,
+      totalAllocation: allocated,
+      startDate: quota.startDate,
+      endDate: quota.endDate,
+      vessel: {
+        id: '1', // Replace with actual vessel ID
+        name: 'Default Vessel', // Replace with actual vessel name
+        registration: 'REG123', // Use registration instead of registrationNumber
+      },
+      catches: quota.catchRecords.map((record) => ({
+        id: record.id.toString(),
+        weight: parseFloat(record.totalCatchMass.toString()),
+        date: record.landingDate,
+        vesselId: '1', // Replace with actual vessel ID
+        quotaId: quota.id.toString(),
+      })),
+    };
+
+    const historicalData: TimeSeriesPoint[] = quota.catchRecords.map((record) => ({
       date: formatDate(record.landingDate, 'yyyy-MM-dd'),
-      amount: parseFloat(record.totalCatchMass.toString()),
+      value: parseFloat(record.totalCatchMass.toString()),
     }));
 
-    // Generate forecast using the helper function
-    const forecast = await generateQuotaForecast(catchData, {
-      historicalDays: 30, // Use last 30 days of data
-      daysToForecast: 14, // Forecast next 14 days
-      model: 'linear', // Use linear regression model
-    });
+    // Here we create a QuotaWithRelations object that matches your types/quota.ts definition
+    const typedQuota: TypeQuota = {
+      id: quotaId,
+      speciesId: speciesInfo.id.toString(),
+      vesselId: '1', // Replace with actual vessel ID
+      startDate: quota.startDate,
+      endDate: quota.endDate,
+      initialAmount: allocated,
+      remainingAmount: remaining,
+      status: 'ACTIVE',
+      species: {
+        id: speciesInfo.id.toString(),
+        name: speciesInfo.commonName,
+        scientificName: speciesInfo.scientificName,
+      },
+      vessel: {
+        id: '1', // Replace with actual vessel ID
+        name: 'Default Vessel', // Replace with actual vessel name
+        registrationNumber: 'REG123', // Use registration for both types
+      },
+    };
+
+    const forecast = holtWinters(
+      historicalData,
+      typedQuota, // Use the properly typed quota object
+      14 // days to forecast
+    );
 
     return {
       quotaId: quota.id,
-      vesselName: quota.quotaAllocations[0]?.vessel?.name || 'Unknown',
-      allocated: parseFloat(quota.quotaAllocation.toString()),
-      used: parseFloat(quota.quotaUsed.toString()),
+      vesselName: 'Default Vessel', // Replace with actual vessel name
+      allocated: allocated,
+      used: used,
       forecast,
     };
   } catch (error) {
@@ -336,8 +397,19 @@ export async function getQuotaForecasts(quotaId: string) {
 
 export async function exportQuotaReport(format: 'csv' | 'pdf' | 'excel' = 'csv') {
   try {
+    const { user, session } = await validateRequest();
+
+    if (!user || !session || user.role !== 'SYSTEMADMINISTRATOR') {
+      throw new Error('Unauthorized');
+    }
+
     const quotas = await db.quota.findMany({
       include: {
+        species: {
+          include: {
+            species: true,
+          },
+        },
         catchRecords: true,
         quotaAllocations: {
           include: {
@@ -347,44 +419,53 @@ export async function exportQuotaReport(format: 'csv' | 'pdf' | 'excel' = 'csv')
       },
     });
 
-    const reportData = quotas.map((quota) => {
-      const totalCatch = quota.catchRecords.reduce(
-        (sum, record) => sum + parseFloat(record.totalCatchMass.toString()),
-        0
-      );
-      const allocated = parseFloat(quota.quotaAllocation.toString());
-      const remaining = allocated - totalCatch;
-      const utilizationRate = (totalCatch / allocated) * 100;
+    const reportData: QuotaWithRelations[] = quotas.map((quota) => {
+      const vesselInfo = quota.quotaAllocations[0]?.vessel;
+
+      if (!vesselInfo) {
+        throw new Error(`No vessel information found for quota ${quota.id}`);
+      }
+
+      const vessel: Vessel = {
+        id: vesselInfo.id.toString(),
+        name: vesselInfo.name,
+        registration: vesselInfo.registrationNumber,
+      };
+
+      const catches: Catch[] = quota.catchRecords.map((record) => ({
+        id: record.id.toString(),
+        weight: parseFloat(record.totalCatchMass.toString()),
+        date: record.landingDate,
+        vesselId: vesselInfo.id.toString(),
+        quotaId: quota.id.toString(),
+      }));
 
       return {
-        quotaId: String(quota.id),
-        vesselName: quota.quotaAllocations[0]?.vessel?.name || 'Unknown',
-        allocated,
-        used: totalCatch,
-        remaining,
-        utilizationRate: utilizationRate.toFixed(2) + '%',
-        startDate: formatDate(quota.startDate, 'yyyy-MM-dd'),
-        endDate: formatDate(quota.endDate, 'yyyy-MM-dd'),
+        id: quota.id.toString(),
+        totalAllocation: parseFloat(quota.quotaAllocation.toString()),
+        startDate: quota.startDate,
+        endDate: quota.endDate,
+        vessel,
+        catches,
       };
     });
 
     if (format === 'csv') {
       const fields = [
-        'quotaId',
-        'vesselName',
-        'allocated',
-        'used',
-        'remaining',
-        'utilizationRate',
+        'id',
+        'totalAllocation',
         'startDate',
         'endDate',
+        'vessel.id',
+        'vessel.name',
+        'vessel.registration',
       ];
       return parse(reportData, { fields });
     } else if (format === 'pdf' || format === 'excel') {
       return generateQuotaReport(reportData, { format });
-    } else {
-      throw new Error(`Unsupported export format: ${format}`);
     }
+
+    throw new Error(`Unsupported export format: ${format}`);
   } catch (error) {
     console.error('Failed to export quota report:', error);
     throw error;
@@ -407,6 +488,7 @@ export async function checkAndSendQuotaAlerts(userEmail: string) {
 
     const quotas = await db.quota.findMany({
       include: {
+        species: true,
         catchRecords: true,
         quotaAllocations: {
           include: {

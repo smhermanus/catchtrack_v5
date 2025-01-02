@@ -16,6 +16,7 @@ import {
   Shield,
   ChevronRight,
 } from 'lucide-react';
+import React from 'react';
 
 const items = [
   {

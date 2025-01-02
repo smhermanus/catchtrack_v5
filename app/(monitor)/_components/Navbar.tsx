@@ -10,6 +10,7 @@ import { useSession } from '../SessionProvider';
 import UserButton from './UserButton';
 import SearchField from './SearchField';
 import logo from '../assets/logo.png';
+import React from 'react';
 
 const Navbar = () => {
   const session = useSession();

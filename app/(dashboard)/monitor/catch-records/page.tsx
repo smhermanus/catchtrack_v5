@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { CatchForm } from '@/components/dashboard/monitor/catch-form';
 import { DataTable } from '@/components/shared/data-table';
 import { columns } from './columns';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Catch Records | CatchTrack',

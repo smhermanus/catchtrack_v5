@@ -2,103 +2,86 @@ import { db } from '@/lib/db';
 import { sendNotification } from './notifications/channels';
 import { generateQuotaReport } from './reports';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
+import { Prisma } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
+
+// Define interfaces based on your Prisma schema
+interface QuotaWithRelations {
+  id: string;
+  totalAllocation: number;
+  startDate: Date;
+  endDate: Date;
+  vessel: {
+    id: string;
+    name: string;
+    registration: string;
+    registrationNumber: string;
+  };
+  catches: Array<{
+    id: string;
+    weight: number;
+    date: Date;
+    vesselId: string;
+    quotaId: string;
+  }>;
+}
 
 interface ScheduledTask {
   id: string;
   type: 'report' | 'alert' | 'forecast';
   schedule: 'daily' | 'weekly' | 'monthly';
-  time: string; // HH:mm format
-  weekday?: number; // 0-6 for weekly tasks
-  dayOfMonth?: number; // 1-31 for monthly tasks
+  time: string;
+  weekday?: number;
+  dayOfMonth?: number;
   recipients: {
     email?: string;
     phone?: string;
     slackChannel?: string;
-    telegramChatId?: string;
   }[];
   channels: string[];
   lastRun?: Date;
   nextRun?: Date;
 }
 
-export async function scheduleTask(task: ScheduledTask) {
-  try {
-    await db.scheduledTask.create({
-      data: {
-        id: task.id,
-        type: task.type,
-        schedule: task.schedule,
-        time: task.time,
-        weekday: task.weekday,
-        dayOfMonth: task.dayOfMonth,
-        recipients: task.recipients,
-        channels: task.channels,
-        lastRun: task.lastRun,
-        nextRun: calculateNextRun(task),
-      },
-    });
-
-    return { success: true };
-  } catch (error) {
-    console.error('Failed to schedule task:', error);
-    throw new Error('Failed to schedule task');
-  }
-}
-
-export async function executeScheduledTasks() {
-  try {
-    const now = new Date();
-    const tasks = await db.scheduledTask.findMany({
-      where: {
-        nextRun: {
-          lte: now,
+async function executeReportTask(task: ScheduledTask) {
+  const prismaQuotas = await db.quota.findMany({
+    include: {
+      quotaAllocations: {
+        include: {
+          vessel: true,
         },
       },
-    });
-
-    for (const task of tasks) {
-      try {
-        switch (task.type) {
-          case 'report':
-            await executeReportTask(task);
-            break;
-          case 'alert':
-            await executeAlertTask(task);
-            break;
-          case 'forecast':
-            await executeForecastTask(task);
-            break;
-        }
-
-        // Update task execution time
-        await db.scheduledTask.update({
-          where: { id: task.id },
-          data: {
-            lastRun: now,
-            nextRun: calculateNextRun(task),
-          },
-        });
-      } catch (error) {
-        console.error(`Failed to execute task ${task.id}:`, error);
-      }
-    }
-
-    return { success: true };
-  } catch (error) {
-    console.error('Failed to execute scheduled tasks:', error);
-    throw new Error('Failed to execute scheduled tasks');
-  }
-}
-
-async function executeReportTask(task: ScheduledTask) {
-  const quotas = await db.quota.findMany({
-    include: {
-      vessel: true,
-      catches: true,
+      catchRecords: true,
     },
   });
 
-  // Generate reports for different time periods
+  const quotas = prismaQuotas.map((prismaQuota) => {
+    const vesselAllocation = prismaQuota.quotaAllocations[0];
+    if (!vesselAllocation?.vessel) {
+      throw new Error(`No vessel found for quota ${prismaQuota.id}`);
+    }
+
+    return {
+      id: prismaQuota.quotaCode,
+      totalAllocation: Number(prismaQuota.finalQuotaAllocation),
+      startDate: prismaQuota.startDate,
+      endDate: prismaQuota.endDate,
+      vessel: {
+        id: String(vesselAllocation.vessel.id),
+        name: vesselAllocation.vessel.name,
+        registration: vesselAllocation.vessel.registrationNumber,
+        registrationNumber: vesselAllocation.vessel.registrationNumber,
+      },
+      catches: prismaQuota.catchRecords.map((c) => ({
+        id: String(c.id),
+        weight: Number(c.totalCatchMass),
+        date: c.landingDate,
+        vesselId: String(c.vesselId),
+        quotaId: String(c.quotaId),
+      })),
+    } satisfies QuotaWithRelations;
+  });
+
   const weekStart = startOfWeek(new Date());
   const weekEnd = endOfWeek(new Date());
 
@@ -108,7 +91,6 @@ async function executeReportTask(task: ScheduledTask) {
     includeTrends: true,
   });
 
-  // Send report to all recipients through configured channels
   for (const recipient of task.recipients) {
     await sendNotification(
       {
@@ -127,29 +109,37 @@ async function executeReportTask(task: ScheduledTask) {
 }
 
 async function executeAlertTask(task: ScheduledTask) {
-  const quotas = await db.quota.findMany({
+  const prismaQuotas = await db.quota.findMany({
     include: {
-      vessel: true,
-      catches: true,
+      quotaAllocations: {
+        include: {
+          vessel: true,
+        },
+      },
+      catchRecords: true,
     },
   });
 
-  // Check for quota alerts
-  for (const quota of quotas) {
-    const totalCatch = quota.catches.reduce((sum, c) => sum + c.weight, 0);
-    const remaining = quota.amount - totalCatch;
-    const utilizationRate = (totalCatch / quota.amount) * 100;
+  for (const prismaQuota of prismaQuotas) {
+    const vesselAllocation = prismaQuota.quotaAllocations[0];
+    if (!vesselAllocation?.vessel) continue;
+
+    const totalCatch = prismaQuota.catchRecords.reduce(
+      (sum, c) => sum + Number(c.totalCatchMass),
+      0
+    );
+    const utilizationRate = (totalCatch / Number(prismaQuota.finalQuotaAllocation)) * 100;
 
     if (utilizationRate >= 90) {
       for (const recipient of task.recipients) {
         await sendNotification(
           {
             title: 'Critical Quota Alert',
-            message: `Quota for vessel ${quota.vessel.name} is at ${utilizationRate.toFixed(1)}% utilization`,
+            message: `Quota for vessel ${vesselAllocation.vessel.name} is at ${utilizationRate.toFixed(1)}% utilization`,
             type: 'critical',
             data: {
-              vesselName: quota.vessel.name,
-              remaining: remaining.toFixed(2),
+              vesselName: vesselAllocation.vessel.name,
+              remaining: (Number(prismaQuota.finalQuotaAllocation) - totalCatch).toFixed(2),
               utilizationRate: utilizationRate.toFixed(1),
             },
           },
@@ -162,7 +152,7 @@ async function executeAlertTask(task: ScheduledTask) {
 }
 
 async function executeForecastTask(task: ScheduledTask) {
-  // Implement forecast task execution
+  // Implementation for forecast task
 }
 
 function calculateNextRun(task: ScheduledTask): Date {

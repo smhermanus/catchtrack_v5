@@ -1,7 +1,7 @@
 import { addDays, format } from 'date-fns';
-import { QuotaWithRelations } from '@/types/quota';
+import { QuotaWithRelations } from '@/types/quota'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-interface TimeSeriesPoint {
+export interface TimeSeriesPoint {
   date: string;
   value: number;
 }
@@ -9,12 +9,15 @@ interface TimeSeriesPoint {
 // Holt-Winters Triple Exponential Smoothing
 export function holtWinters(
   data: TimeSeriesPoint[],
+  quota: QuotaWithRelations,
   daysToForecast: number,
   alpha = 0.3,
   beta = 0.1,
   gamma = 0.1,
   period = 7
 ) {
+  // Use quota information to potentially adjust forecasting
+  const maxForecastValue = quota.remainingAmount;
   const y = data.map((d) => d.value);
   const n = y.length;
 
@@ -51,22 +54,19 @@ export function holtWinters(
     seasonals[seasonalIndex] =
       gamma * (observation / level) + (1 - gamma) * seasonals[seasonalIndex];
 
-    results.push((level + trend) * seasonals[seasonalIndex]);
+    // Calculate forecast
+    results.push(level + trend + seasonals[seasonalIndex]);
   }
 
-  // Generate forecast
-  const forecast: TimeSeriesPoint[] = [];
-  const lastDate = new Date(data[data.length - 1].date);
-
-  for (let i = 1; i <= daysToForecast; i++) {
-    const forecastDate = addDays(lastDate, i);
-    const seasonalIndex = (n + i - 1) % period;
-    const forecastValue = (level + trend * i) * seasonals[seasonalIndex];
-
-    forecast.push({
-      date: format(forecastDate, 'yyyy-MM-dd'),
-      value: Math.max(0, forecastValue),
-    });
+  // Forecast
+  const forecast: number[] = [];
+  for (let i = 0; i < daysToForecast; i++) {
+    const seasonalIndex = (n + i) % period;
+    const forecastValue = Math.min(
+      level + trend * (i + 1) + seasonals[seasonalIndex],
+      maxForecastValue // Ensure forecast doesn't exceed remaining quota
+    );
+    forecast.push(forecastValue);
   }
 
   return forecast;

@@ -5,6 +5,7 @@ import { Overview } from './_components/overview';
 import { QuotaList } from './_components/quota-list';
 import { ComplianceList } from './_components/compliance-list';
 import { TransferList } from './_components/transfer-list';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Quota Management',

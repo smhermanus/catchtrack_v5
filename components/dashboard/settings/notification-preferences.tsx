@@ -18,6 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { updateNotificationPreferences } from '@/app/(dashboard)/settings/notifications/actions';
+import React from 'react';
 
 const notificationPreferencesSchema = z.object({
   quotaWarningThreshold: z.coerce.number().min(1).max(100),
